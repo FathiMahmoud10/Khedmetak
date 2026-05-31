@@ -1,0 +1,6 @@
+@Khedmetak_HostAddress = http://localhost:5002
+
+GET {{Khedmetak_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
