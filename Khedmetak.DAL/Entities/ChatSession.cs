@@ -1,17 +1,23 @@
 ﻿// Khedmetak.Core/Entities/ChatSession.cs
 
+using Khedmetak.DAL.Entities;
+using Khedmetak.DAL.Entities.Base;
+
 namespace Khedmetak.Core.Entities;
 
-public class ChatSession
+public class ChatSession : BaseEntity
 {
-    public int Id { get; set; }
-    public string Message { get; set; } = string.Empty;
-    public string Response { get; set; } = string.Empty;
-    public DateTime SentAt { get; set; } = DateTime.UtcNow;
+    public int? UserId { get; set; }
+    
+    public DateTime StartedAt { get; set; } = DateTime.UtcNow;
+    public DateTime? EndedAt { get; set; }
 
-    public string UserId { get; set; } = string.Empty;
-    public User User { get; set; } = null!;
+    #region Relations
+    public User? User { get; set; } = null!;
+    public ICollection<ChatMessage> ChatMessages { get; set; } = new List<ChatMessage>();
+    public ICollection<Category> Categories { get; set; } = new List<Category>();
+    public Feedback? Feedback { get; set; }
 
-    public int GovernmentServiceId { get; set; }
-    public GovernmentService GovernmentService { get; set; } = null!;
+    #endregion
+
 }

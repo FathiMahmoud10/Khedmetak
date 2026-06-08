@@ -4,6 +4,7 @@ using Khedmetak.Core.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Khedmetak.DAL.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260608214841_AddEntityClasses")]
+    partial class AddEntityClasses
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -22,7 +25,7 @@ namespace Khedmetak.DAL.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("ChatSessionCategory", b =>
+            modelBuilder.Entity("CategoryChatSession", b =>
                 {
                     b.Property<int>("CategoriesId")
                         .HasColumnType("int");
@@ -34,7 +37,7 @@ namespace Khedmetak.DAL.Migrations
 
                     b.HasIndex("ChatSessionsId");
 
-                    b.ToTable("ChatSessionCategory");
+                    b.ToTable("CategoryChatSession");
                 });
 
             modelBuilder.Entity("Khedmetak.Core.Entities.ChatSession", b =>
@@ -258,7 +261,7 @@ namespace Khedmetak.DAL.Migrations
 
                     b.HasIndex("ChatSessionId");
 
-                    b.ToTable("ChatMessages");
+                    b.ToTable("ChatMessage");
                 });
 
             modelBuilder.Entity("Khedmetak.DAL.Entities.Category", b =>
@@ -275,178 +278,7 @@ namespace Khedmetak.DAL.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Categories");
-                });
-
-            modelBuilder.Entity("Khedmetak.DAL.Entities.Feedback", b =>
-                {
-                    b.Property<int>("FeedBackId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("FeedBackId"));
-
-                    b.Property<int>("ChatSessionId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Comments")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("Rating")
-                        .HasColumnType("int");
-
-                    b.HasKey("FeedBackId");
-
-                    b.HasIndex("ChatSessionId")
-                        .IsUnique();
-
-                    b.ToTable("Feedbacks");
-                });
-
-            modelBuilder.Entity("Khedmetak.DAL.Entities.GovService", b =>
-                {
-                    b.Property<int>("SrvId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("SrvId"));
-
-                    b.Property<int>("CategoryId")
-                        .HasColumnType("int");
-
-                    b.Property<decimal>("EstimatedFees")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<string>("SrvDesc")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<decimal>("SrvFees")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<string>("SrvName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("SrvTime")
-                        .HasColumnType("int");
-
-                    b.HasKey("SrvId");
-
-                    b.HasIndex("CategoryId");
-
-                    b.ToTable("GovServices");
-                });
-
-            modelBuilder.Entity("Khedmetak.DAL.Entities.KnowledgeBase", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("FilePath")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("GovServiceId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("LastUpdated")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("UploadedAt")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("GovServiceId");
-
-                    b.ToTable("KnowledgeBases");
-                });
-
-            modelBuilder.Entity("Khedmetak.DAL.Entities.RequiredDocument", b =>
-                {
-                    b.Property<int>("DocumentId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("DocumentId"));
-
-                    b.Property<string>("DocumentName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("GovServiceId")
-                        .HasColumnType("int");
-
-                    b.Property<bool>("IsMandatory")
-                        .HasColumnType("bit");
-
-                    b.HasKey("DocumentId");
-
-                    b.HasIndex("GovServiceId");
-
-                    b.ToTable("RequiredDocuments");
-                });
-
-            modelBuilder.Entity("Khedmetak.DAL.Entities.Servicestep", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("GovServiceId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("StepOrder")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("GovServiceId");
-
-                    b.ToTable("ServiceSteps");
-                });
-
-            modelBuilder.Entity("Khedmetak.DAL.Entities.UserDocument", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("FilePath")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int?>("RequiredDocumentDocumentId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("RequiredDocumentDocumentId");
-
-                    b.ToTable("UserDocuments");
+                    b.ToTable("Category");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -582,7 +414,7 @@ namespace Khedmetak.DAL.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("ChatSessionCategory", b =>
+            modelBuilder.Entity("CategoryChatSession", b =>
                 {
                     b.HasOne("Khedmetak.DAL.Entities.Category", null)
                         .WithMany()
@@ -640,68 +472,6 @@ namespace Khedmetak.DAL.Migrations
                     b.Navigation("ChatSession");
                 });
 
-            modelBuilder.Entity("Khedmetak.DAL.Entities.Feedback", b =>
-                {
-                    b.HasOne("Khedmetak.Core.Entities.ChatSession", "ChatSession")
-                        .WithOne("Feedback")
-                        .HasForeignKey("Khedmetak.DAL.Entities.Feedback", "ChatSessionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("ChatSession");
-                });
-
-            modelBuilder.Entity("Khedmetak.DAL.Entities.GovService", b =>
-                {
-                    b.HasOne("Khedmetak.DAL.Entities.Category", "Category")
-                        .WithMany()
-                        .HasForeignKey("CategoryId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Category");
-                });
-
-            modelBuilder.Entity("Khedmetak.DAL.Entities.KnowledgeBase", b =>
-                {
-                    b.HasOne("Khedmetak.DAL.Entities.GovService", "GovService")
-                        .WithMany("KnowledgeBaseEntries")
-                        .HasForeignKey("GovServiceId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("GovService");
-                });
-
-            modelBuilder.Entity("Khedmetak.DAL.Entities.RequiredDocument", b =>
-                {
-                    b.HasOne("Khedmetak.DAL.Entities.GovService", "GovService")
-                        .WithMany("RequiredDocuments")
-                        .HasForeignKey("GovServiceId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("GovService");
-                });
-
-            modelBuilder.Entity("Khedmetak.DAL.Entities.Servicestep", b =>
-                {
-                    b.HasOne("Khedmetak.DAL.Entities.GovService", "GovService")
-                        .WithMany()
-                        .HasForeignKey("GovServiceId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("GovService");
-                });
-
-            modelBuilder.Entity("Khedmetak.DAL.Entities.UserDocument", b =>
-                {
-                    b.HasOne("Khedmetak.DAL.Entities.RequiredDocument", null)
-                        .WithMany("UserDocuments")
-                        .HasForeignKey("RequiredDocumentDocumentId");
-                });
-
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
@@ -756,8 +526,6 @@ namespace Khedmetak.DAL.Migrations
             modelBuilder.Entity("Khedmetak.Core.Entities.ChatSession", b =>
                 {
                     b.Navigation("ChatMessages");
-
-                    b.Navigation("Feedback");
                 });
 
             modelBuilder.Entity("Khedmetak.Core.Entities.GovernmentService", b =>
@@ -770,18 +538,6 @@ namespace Khedmetak.DAL.Migrations
             modelBuilder.Entity("Khedmetak.Core.Entities.User", b =>
                 {
                     b.Navigation("ChatSessions");
-                });
-
-            modelBuilder.Entity("Khedmetak.DAL.Entities.GovService", b =>
-                {
-                    b.Navigation("KnowledgeBaseEntries");
-
-                    b.Navigation("RequiredDocuments");
-                });
-
-            modelBuilder.Entity("Khedmetak.DAL.Entities.RequiredDocument", b =>
-                {
-                    b.Navigation("UserDocuments");
                 });
 #pragma warning restore 612, 618
         }

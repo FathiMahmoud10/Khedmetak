@@ -9,10 +9,13 @@ public class GovernmentService
     public string Title { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
     public string Category { get; set; } = string.Empty;
-    public decimal Fees { get; set; }
-    public int EstimatedDays { get; set; }
-    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public decimal Fees { get; set; }  // مصاريف
+    public int EstimatedDays { get; set; } //الأيام المقدرة
 
+    public DateTime CreatedAt { get; set; } = DateTime.Now;
+
+    #region Relations
     public ICollection<Document> Documents { get; set; } = new List<Document>();
     public ICollection<ChatSession> ChatSessions { get; set; } = new List<ChatSession>();
+    #endregion
 }

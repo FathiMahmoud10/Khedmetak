@@ -6,10 +6,21 @@ namespace Khedmetak.Core.Entities;
 
 public class User : IdentityUser
 {
-    public string FullName { get; set; } = string.Empty;
-    public string PreferredLanguage { get; set; } = "ar";
-    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public string Name { get; set; } = string.Empty;
 
-    public ICollection<Document> Documents { get; set; } = new List<Document>();
+    public string Role { get; set; } = string.Empty;
+
+    public string Email { get; set; } = string.Empty;
+
+    public string Password { get; set; } = string.Empty;
+
+    public DateTime CreatedAt { get; set; } = DateTime.Now;
+
+    #region Relations
+
     public ICollection<ChatSession> ChatSessions { get; set; } = new List<ChatSession>();
+
+
+    #endregion
+
 }
