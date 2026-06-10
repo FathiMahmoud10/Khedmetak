@@ -26,6 +26,7 @@ builder.Services.AddScoped<IGovServiceRepository, GovServiceRepository>();
 
 
 #endregion
+
 #region Services
 #region Fathi
 builder.Services.AddScoped<ICategoryService, CategoryService>();
