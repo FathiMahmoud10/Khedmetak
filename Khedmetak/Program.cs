@@ -4,10 +4,8 @@ using Khedmetak.Core.Data;
 using Khedmetak.DAL.Repositories;
 using Khedmetak.DAL.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
-
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -16,27 +14,18 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration
         .GetConnectionString("DefaultConnection")));
 
-var app = builder.Build();
-
 #region Repositories
-#region Fathi
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<IGovServiceRepository, GovServiceRepository>();
 #endregion
 
-
-#endregion
-
 #region Services
-#region Fathi
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IGovServiceService, GovServiceService>();
 #endregion
 
-
-#endregion
-
-
+// ✅ Build() بعد كل الـ services
+var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
 {
