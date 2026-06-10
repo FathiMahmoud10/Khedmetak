@@ -1,5 +1,10 @@
-﻿using Khedmetak.BLL.Services.Abstraction;
+﻿using Khedmetak.BLL.ApiResponse;
+using Khedmetak.BLL.DTOS.Categorys;
+using Khedmetak.BLL.DTOS.GovService;
+using Khedmetak.BLL.DTOS.GovServiceDetails;
+using Khedmetak.BLL.Services.Abstraction;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 //  --Added By Fathi 
 
@@ -21,7 +26,7 @@ namespace Khedmetak.API.Controllers
         public async Task<IActionResult> GetAll()
         {
             var services = await _govServiceService.GetAllServicesAsync();
-            return Ok(services);
+            return Ok(ApiResponse<IEnumerable<GovServiceDto>>.Ok(services));
         }
         /*  عرض كل الحكومه لمحددة */
 
@@ -30,14 +35,14 @@ namespace Khedmetak.API.Controllers
         {
             var service = await _govServiceService.GetServiceDetailsAsync(id);
             if (service is null) return NotFound();
-            return Ok(service);
+            return Ok(ApiResponse<GovServiceDetailsDto>.Ok(service));
         }
         /*  عرض كل الخدمات المرتبطه ب الحكومه المحددة */
         [HttpGet("by-category/{categoryId}")]
         public async Task<IActionResult> GetByCategory(int categoryId)
         {
             var services = await _govServiceService.GetServicesByCategoryAsync(categoryId);
-            return Ok(services);
+            return Ok(ApiResponse<IEnumerable<GovServiceDto>>.Ok(services));
         }
     }
 }

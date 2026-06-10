@@ -1,4 +1,6 @@
-﻿using Khedmetak.BLL.Services.Abstraction;
+﻿using Khedmetak.BLL.ApiResponse;
+using Khedmetak.BLL.DTOS.Categorys;
+using Khedmetak.BLL.Services.Abstraction;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Khedmetak.API.Controllers
@@ -20,7 +22,13 @@ namespace Khedmetak.API.Controllers
         public async Task<IActionResult> GetAll()
         {
             var categories = await _categoryService.GetAllCategoriesAsync();
-            return Ok(categories);
+
+            /*
+             * وظيغة الجزء اللي تحت اني بوحد الريسبونس لل 
+             * API 
+             * بشكل محدد 
+             */
+            return Ok(ApiResponse<IEnumerable<CategoryDto>>.Ok(categories));
         }
     }
 }
