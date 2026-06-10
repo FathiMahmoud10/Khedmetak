@@ -35,6 +35,63 @@ public class AppDbContext : IdentityDbContext<User, IdentityRole<int>, int>
             e.Property(u => u.Role).IsRequired().HasMaxLength(50);
         });
 
+        #region SeedData
+ 
+
+        modelBuilder.Entity<Category>().HasData(
+            new Category { Id = 1, Name = "الأحوال المدنية" },
+            new Category { Id = 2, Name = "المرور" },
+            new Category { Id = 3, Name = "التعليم" },
+            new Category { Id = 4, Name = "الصحة" },
+            new Category { Id = 5, Name = "التموين" }
+        );
+
+
+        modelBuilder.Entity<GovService>().HasData(
+            new GovService
+            {
+                Id = 1,
+                SrvName = "استخراج بطاقة رقم قومي",
+                SrvDesc = "إصدار بطاقة رقم قومي لأول مرة",
+                SrvFees = 50,
+                EstimatedFees = 50,
+                SrvTime = "7 أيام",
+                CategoryId = 1
+            },
+            new GovService
+            {
+                Id = 2,
+                SrvName = "تجديد بطاقة رقم قومي",
+                SrvDesc = "تجديد بطاقة الرقم القومي المنتهية",
+                SrvFees = 50,
+                EstimatedFees = 50,
+                SrvTime = "3 أيام",
+                CategoryId = 1
+            },
+            new GovService
+            {
+                Id = 3,
+                SrvName = "تجديد رخصة سيارة",
+                SrvDesc = "تجديد رخصة المركبة",
+                SrvFees = 500,
+                EstimatedFees = 500,
+                SrvTime = "يوم واحد",
+                CategoryId = 2
+            },
+            new GovService
+            {
+                Id = 4,
+                SrvName = "استخراج بدل فاقد شهادة ميلاد",
+                SrvDesc = "إصدار شهادة ميلاد بدل فاقد",
+                SrvFees = 30,
+                EstimatedFees = 30,
+                SrvTime = "فوري",
+                CategoryId = 1
+            }
+        );
+        #endregion
+
+
         // ChatSession
         modelBuilder.Entity<ChatSession>(e =>
         {
