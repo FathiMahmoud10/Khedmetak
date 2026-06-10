@@ -7,20 +7,17 @@ using System.Threading.Tasks;
 
 namespace Khedmetak.DAL.Entities
 {
-    public class KnowledgeBase : BaseEntity
+    public class ServiceSteps : BaseEntity
     {
         public string Title { get; set; } = string.Empty;
+        public int StepOrder { get; set; }
 
-        public string FilePath { get; set; } = string.Empty;
-
-        public DateTime UploadedAt { get; set; } = DateTime.UtcNow;
-
-        public DateTime LastUpdated { get; set; } = DateTime.UtcNow;
-
-
+        #region Foreign Keys
         public int GovServiceId { get; set; }
+        #endregion
 
-
+        #region Relations
         public GovService GovService { get; set; } = null!;
+        #endregion
     }
 }

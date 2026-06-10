@@ -7,13 +7,19 @@ using System.Threading.Tasks;
 
 namespace Khedmetak.DAL.Entities
 {
-    public class Servicestep : BaseEntity
+    public class ServiceGeneralDocs : BaseEntity
     {
         public string Title { get; set; } = string.Empty;
+        public string FilePath { get; set; } = string.Empty;
+        public DateTime UploadedAt { get; set; }
+        public DateTime LastUpdated { get; set; }
 
-        public int StepOrder { get; set; }
-
+        #region Foreign Keys
         public int GovServiceId { get; set; }
+        #endregion
+
+        #region Relations
         public GovService GovService { get; set; } = null!;
+        #endregion
     }
 }

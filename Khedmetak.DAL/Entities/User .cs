@@ -1,26 +1,25 @@
-﻿// Khedmetak.Core/Entities/User.cs
-
+﻿using Khedmetak.DAL.Entities.Base;
 using Microsoft.AspNetCore.Identity;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
-namespace Khedmetak.Core.Entities;
-
-public class User : IdentityUser
+namespace Khedmetak.DAL.Entities
 {
-    public string Name { get; set; } = string.Empty;
+    public class User : IdentityUser<int>
+    {
+        public string Name { get; set; } = string.Empty;
+        public string Email { get; set; } = string.Empty;
+        public string Password { get; set; } = string.Empty;
+        public string Role { get; set; } = string.Empty;
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
-    public string Role { get; set; } = string.Empty;
-
-    public string Email { get; set; } = string.Empty;
-
-    public string Password { get; set; } = string.Empty;
-
-    public DateTime CreatedAt { get; set; } = DateTime.Now;
-
-    #region Relations
-
-    public ICollection<ChatSession> ChatSessions { get; set; } = new List<ChatSession>();
-
-
-    #endregion
-
+        #region Relations
+        public ICollection<ChatSession> ChatSessions { get; set; } = new List<ChatSession>();
+        public ICollection<UserDocument> UserDocuments { get; set; } = new List<UserDocument>();
+        public ICollection<Feedback> Feedbacks { get; set; } = new List<Feedback>();
+        #endregion
+    }
 }

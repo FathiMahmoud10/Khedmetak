@@ -1,5 +1,4 @@
-﻿using Khedmetak.Core.Entities;
-using Khedmetak.DAL.Entities.Base;
+﻿using Khedmetak.DAL.Entities.Base;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,10 +12,8 @@ namespace Khedmetak.DAL.Entities
         public string Name { get; set; } = string.Empty;
 
         #region Relations
-        //السيشن الخاصه بالمستخدم 
         public ICollection<ChatSession> ChatSessions { get; set; } = new List<ChatSession>();
-
+        public ICollection<GovService> GovServices { get; set; } = new List<GovService>();
         #endregion
-
     }
 }
