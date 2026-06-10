@@ -1,4 +1,4 @@
-﻿using Khedmetak.Core.Data;
+using Khedmetak.Core.Data;
 using Khedmetak.DAL.Entities.Base;
 using Khedmetak.DAL.Repo.shared;
 using Microsoft.EntityFrameworkCore;
@@ -14,8 +14,10 @@ namespace Khedmetak.DAL.Repositories
         public GenericRepository(AppDbContext context)
         {
             _context = context;
-            _dbSet = context.Set<T>();
+            _dbSet   = context.Set<T>();
         }
+
+        // ─── Queries ───────────────────────────────────────────────
 
         public async Task<IEnumerable<T>> GetAllAsync()
             => await _dbSet.ToListAsync();
@@ -36,12 +38,22 @@ namespace Khedmetak.DAL.Repositories
             IQueryable<T> query = _dbSet;
             foreach (var include in includes)
                 query = query.Include(include);
-
-            // ✅ بدل EF.Property استخدم e.Id مباشرة
             return await query.FirstOrDefaultAsync(e => e.Id == id);
         }
 
         public async Task<IEnumerable<T>> FindAsync(Expression<Func<T, bool>> predicate)
             => await _dbSet.Where(predicate).ToListAsync();
+
+        // ─── Commands ──────────────────────────────────────────────
+        // NOTE: Persistence is deferred; call IUnitOfWork.SaveChangesAsync() to commit.
+
+        public void Add(T entity)
+            => _dbSet.Add(entity);
+
+        public void Update(T entity)
+            => _dbSet.Update(entity);
+
+        public void Delete(T entity)
+            => _dbSet.Remove(entity);
     }
 }

@@ -1,8 +1,8 @@
+using Khedmetak.BLL.MappingProfile;
 using Khedmetak.BLL.Services.Abstraction;
 using Khedmetak.BLL.Services.Implementation;
 using Khedmetak.Core.Data;
-using Khedmetak.DAL.Repositories;
-using Khedmetak.DAL.Repositories.Interfaces;
+using Khedmetak.DAL.UnitOfWork;
 using Microsoft.EntityFrameworkCore;
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,10 +13,12 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration
         .GetConnectionString("DefaultConnection")));
+#region AutoMapper
+builder.Services.AddAutoMapper(typeof(KhedmetakProfile));
+#endregion
 
-#region Repositories
-builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
-builder.Services.AddScoped<IGovServiceRepository, GovServiceRepository>();
+#region Unit of Work
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 #endregion
 
 #region Services
