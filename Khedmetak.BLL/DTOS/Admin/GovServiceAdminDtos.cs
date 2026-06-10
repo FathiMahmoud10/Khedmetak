@@ -2,9 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Khedmetak.BLL.DTOS.Admin
 {
-    /// <summary>
-    /// DTO used by the Admin to CREATE a new government service.
-    /// </summary>
+   
     public class CreateGovServiceDto
     {
         [Required, MaxLength(200)]
@@ -26,9 +24,7 @@ namespace Khedmetak.BLL.DTOS.Admin
         public int CategoryId { get; set; }
     }
 
-    /// <summary>
-    /// DTO used by the Admin to UPDATE an existing government service.
-    /// </summary>
+ 
     public class UpdateGovServiceDto
     {
         [Required, MaxLength(200)]

@@ -1,14 +1,14 @@
 using Khedmetak.Core.Data;
+using Khedmetak.DAL.Repo.Abstraction.UnitOfWork;
 using Khedmetak.DAL.Repositories;
 using Khedmetak.DAL.Repositories.Interfaces;
 
-namespace Khedmetak.DAL.UnitOfWork
+namespace Khedmetak.DAL.Repo.Implementation.UnitOfWork
 {
     public class UnitOfWork : IUnitOfWork
     {
         private readonly AppDbContext _context;
 
-        // Lazy-initialized repositories
         private IGovServiceRepository? _govServices;
         private ICategoryRepository? _categories;
 

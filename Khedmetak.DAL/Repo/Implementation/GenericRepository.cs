@@ -17,7 +17,6 @@ namespace Khedmetak.DAL.Repositories
             _dbSet   = context.Set<T>();
         }
 
-        // ─── Queries ───────────────────────────────────────────────
 
         public async Task<IEnumerable<T>> GetAllAsync()
             => await _dbSet.ToListAsync();
@@ -44,8 +43,7 @@ namespace Khedmetak.DAL.Repositories
         public async Task<IEnumerable<T>> FindAsync(Expression<Func<T, bool>> predicate)
             => await _dbSet.Where(predicate).ToListAsync();
 
-        // ─── Commands ──────────────────────────────────────────────
-        // NOTE: Persistence is deferred; call IUnitOfWork.SaveChangesAsync() to commit.
+       
 
         public void Add(T entity)
             => _dbSet.Add(entity);

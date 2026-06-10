@@ -11,15 +11,12 @@ namespace Khedmetak.BLL.MappingProfile
     {
         public KhedmetakProfile()
         {
-            // ─── Category: Entity → DTO ────────────────────────────
             CreateMap<Category, CategoryDto>()
                 .ForMember(dest => dest.ServicesCount, opt => opt.MapFrom(src => src.GovServices.Count));
 
-            // ─── Category: Admin DTOs → Entity ────────────────────
             CreateMap<CreateCategoryDto, Category>();
             CreateMap<UpdateCategoryDto, Category>();
 
-            // ─── GovService: Entity → DTO ──────────────────────────
             CreateMap<GovService, GovServiceDto>()
                 .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.Category.Name));
 
@@ -30,11 +27,9 @@ namespace Khedmetak.BLL.MappingProfile
                 .ForMember(dest => dest.Options,           opt => opt.MapFrom(src => src.ServiceOptions))
                 .ForMember(dest => dest.GeneralDocs,       opt => opt.MapFrom(src => src.ServiceGeneralDocs));
 
-            // ─── GovService: Admin DTOs → Entity ──────────────────
             CreateMap<CreateGovServiceDto, GovService>();
             CreateMap<UpdateGovServiceDto, GovService>();
 
-            // ─── GovService children ───────────────────────────────
             CreateMap<ServiceSteps,         ServiceStepDto>();
             CreateMap<RequiredDocument,     RequiredDocumentDto>();
             CreateMap<ServiceGeneralDocs,   ServiceGeneralDocDto>();

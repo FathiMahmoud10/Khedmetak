@@ -4,7 +4,7 @@ using Khedmetak.BLL.DTOS.GovService;
 using Khedmetak.BLL.DTOS.GovServiceDetails;
 using Khedmetak.BLL.Services.Abstraction;
 using Khedmetak.DAL.Entities;
-using Khedmetak.DAL.UnitOfWork;
+using Khedmetak.DAL.Repo.Abstraction.UnitOfWork;
 
 namespace Khedmetak.BLL.Services.Implementation
 {
@@ -19,7 +19,6 @@ namespace Khedmetak.BLL.Services.Implementation
             _mapper = mapper;
         }
 
-        // ─── Public (read-only) ────────────────────────────────────
 
         public async Task<IEnumerable<GovServiceDto>> GetAllServicesAsync()
         {
@@ -40,7 +39,6 @@ namespace Khedmetak.BLL.Services.Implementation
             return _mapper.Map<GovServiceDetailsDto>(service);
         }
 
-        // ─── Admin (CRUD) ──────────────────────────────────────────
 
         public async Task<GovServiceDto> CreateServiceAsync(CreateGovServiceDto dto)
         {
@@ -48,7 +46,6 @@ namespace Khedmetak.BLL.Services.Implementation
             _unitOfWork.GovServices.Add(entity);
             await _unitOfWork.SaveChangesAsync();
 
-            // Re-fetch to include Category navigation property for the response DTO
             var created = await _unitOfWork.GovServices.GetServiceWithDetailsAsync(entity.Id);
             return _mapper.Map<GovServiceDto>(created);
         }

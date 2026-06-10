@@ -3,7 +3,7 @@ using Khedmetak.BLL.DTOS.Admin;
 using Khedmetak.BLL.DTOS.Categorys;
 using Khedmetak.BLL.Services.Abstraction;
 using Khedmetak.DAL.Entities;
-using Khedmetak.DAL.UnitOfWork;
+using Khedmetak.DAL.Repo.Abstraction.UnitOfWork;
 
 namespace Khedmetak.BLL.Services.Implementation
 {
@@ -18,7 +18,6 @@ namespace Khedmetak.BLL.Services.Implementation
             _mapper = mapper;
         }
 
-        // ─── Public (read-only) ────────────────────────────────────
 
         public async Task<IEnumerable<CategoryDto>> GetAllCategoriesAsync()
         {
@@ -26,7 +25,6 @@ namespace Khedmetak.BLL.Services.Implementation
             return _mapper.Map<IEnumerable<CategoryDto>>(categories);
         }
 
-        // ─── Admin (CRUD) ──────────────────────────────────────────
 
         public async Task<CategoryDto> CreateCategoryAsync(CreateCategoryDto dto)
         {

@@ -1,6 +1,6 @@
 using Khedmetak.DAL.Repositories.Interfaces;
 
-namespace Khedmetak.DAL.UnitOfWork
+namespace Khedmetak.DAL.Repo.Abstraction.UnitOfWork
 {
     public interface IUnitOfWork : IDisposable
     {

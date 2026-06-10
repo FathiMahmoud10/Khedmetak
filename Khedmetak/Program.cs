@@ -2,7 +2,8 @@ using Khedmetak.BLL.MappingProfile;
 using Khedmetak.BLL.Services.Abstraction;
 using Khedmetak.BLL.Services.Implementation;
 using Khedmetak.Core.Data;
-using Khedmetak.DAL.UnitOfWork;
+using Khedmetak.DAL.Repo.Abstraction.UnitOfWork;
+using Khedmetak.DAL.Repo.Implementation.UnitOfWork;
 using Microsoft.EntityFrameworkCore;
 var builder = WebApplication.CreateBuilder(args);
 
@@ -26,7 +27,6 @@ builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IGovServiceService, GovServiceService>();
 #endregion
 
-// ✅ Build() بعد كل الـ services
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
