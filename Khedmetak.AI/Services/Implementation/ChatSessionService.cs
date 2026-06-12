@@ -1,4 +1,5 @@
-﻿using Khedmetak.AI.DTOs.ChatSessionDTO;
+﻿using Khedmetak.AI.DTOs;
+using Khedmetak.AI.DTOs.ChatSessionDTO;
 using Khedmetak.AI.Services.Abstraction;
 using Khedmetak.DAL.Entities;
 using Khedmetak.DAL.Repo.Abstraction;
@@ -23,42 +24,39 @@ namespace Khedmetak.AI.Services.Implementation
             this.unitOfWork = unitOfWork;
         }
 
-
-        public async Task<ChatSessionDTO> AddNewSession()
+        //               =========== Add New Session ===========
+        public async Task<int> AddNewSession()
         {
             var session = new ChatSession();
 
-            sessionRepo.Add(session); // sync
-            await unitOfWork.SaveChangesAsync(); // async DB call
+            sessionRepo.Add(session); 
+            await unitOfWork.SaveChangesAsync(); 
 
-
-            return new ChatSessionDTO()
-            {
-                SessionId = session.Id,
-                SessionChatHistory = new List<ChatSessionMessageDTO>()
-            };
+            return session.Id;
 
         }
 
-        public Task<ChatSession?> GetSessionById(int id)
-        {
-           return sessionRepo.GetByIdAsync(id);
-        }
 
-        // الحصول على كل الرسابل الخاصة ب chatSession معينة
+        //      ===================  الحصول على كل الرسابل الخاصة ب chatSession معينة =================
         public async Task<ChatSessionDTO?> GetSessionAllMessages(int sessionId)
         {
             var chatSession = await sessionRepo.GetByIdAsync(sessionId, x => x.ChatMessages);
 
+            //  ------------ if session doesn't Exist
             if (chatSession == null )
                 return null;
-            if(chatSession.ChatMessages == null)
+
+            // --------------  if session Exist but not has messages yet
+            // -------------- then return new empty list of ChatSessionMessageDTO
+            if (chatSession.ChatMessages == null)
                 return new ChatSessionDTO()
                 {
                     SessionId = sessionId,
                     SessionChatHistory = new List<ChatSessionMessageDTO>()
                 };
 
+            // --------------- session exist and has messages
+            // ----- then return new ChatSessionMessageDTO that has session ID and all Messages of it
             var chatHistory = new List<ChatSessionMessageDTO>();
 
             foreach (var message in chatSession.ChatMessages)
@@ -77,7 +75,8 @@ namespace Khedmetak.AI.Services.Implementation
             };
         }
 
-       
+        
+
 
     }
 }

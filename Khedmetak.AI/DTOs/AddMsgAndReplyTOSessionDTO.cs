@@ -6,10 +6,9 @@ using System.Threading.Tasks;
 
 namespace Khedmetak.AI.DTOs
 {
-    public class ChatResponseDTO
+    public class AddMsgAndReplyTOSessionDTO
     {
-        public int SessionId { get; set; }
-        public string Message { get; set; }
-        
+        public string UserMessage { get; set; }
+        public string AIResponse { get; set; }
     }
 }

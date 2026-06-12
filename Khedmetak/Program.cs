@@ -15,6 +15,11 @@ using Khedmetak.DAL.Repo.shared;
 using Khedmetak.DAL.Repositories;
 using Khedmetak.DAL.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using Khedmetak.DAL.Entities;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -161,13 +166,20 @@ builder.Services.AddHttpClient<IAIChatService, AIChatService>(client =>
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<IGovServiceRepository, GovServiceRepository>();
 builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
+
+
 #endregion
 
 #region Services
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IGovServiceService, GovServiceService>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+builder.Services.AddScoped<IDocumentService, DocumentService>();
+builder.Services.AddScoped<JwtService>();
+//-------- AI Services-----------------------------------
 builder.Services.AddScoped<IChatSessionService, ChatSessionService>();
+builder.Services.AddScoped<IChatMessageService, ChatMessageService>();
+//-------------------------------------------------------------
 #endregion
 
 var app = builder.Build();
