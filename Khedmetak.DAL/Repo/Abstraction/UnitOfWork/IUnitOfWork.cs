@@ -6,6 +6,7 @@ namespace Khedmetak.DAL.Repo.Abstraction.UnitOfWork
     {
         IGovServiceRepository GovServices { get; }
         ICategoryRepository Categories { get; }
+        IUserDocumentRepository UserDocuments { get; }   
 
         Task<int> SaveChangesAsync();
     }

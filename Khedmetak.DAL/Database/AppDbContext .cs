@@ -1,4 +1,4 @@
-﻿using Khedmetak.DAL.Entities;
+using Khedmetak.DAL.Entities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -36,7 +36,88 @@ public class AppDbContext : IdentityDbContext<User, IdentityRole<int>, int>
         });
 
         #region SeedData
- 
+        // Seed Roles
+        var roleId = 1;
+        modelBuilder.Entity<IdentityRole<int>>().HasData(
+            new IdentityRole<int> { Id = roleId, Name = "User", NormalizedName = "USER" }
+        );
+
+        // Seed Users
+        var hasher = new PasswordHasher<User>();
+        
+        var fathi = new User
+        {
+            Id = 1,
+            UserName = "Fathi",
+            NormalizedUserName = "FATHI",
+            Email = "fathi@khedmetak.com",
+            NormalizedEmail = "FATHI@KHEDMETAK.COM",
+            EmailConfirmed = true,
+            Name = "Fathi",
+            Role = "User",
+            Password = "12345678",
+            SecurityStamp = "f4fb76b8-2ea9-42b7-876a-39fbcf9e6cf4",
+            ConcurrencyStamp = "e7492cfa-e160-49b8-a6d1-817abcf992bf"
+        };
+        fathi.PasswordHash = hasher.HashPassword(fathi, "12345678");
+
+        var aya = new User
+        {
+            Id = 2,
+            UserName = "Aya",
+            NormalizedUserName = "AYA",
+            Email = "aya@khedmetak.com",
+            NormalizedEmail = "AYA@KHEDMETAK.COM",
+            EmailConfirmed = true,
+            Name = "Aya",
+            Role = "User",
+            Password = "12345678",
+            SecurityStamp = "bc521d96-c167-4277-a859-00ef1295beea",
+            ConcurrencyStamp = "df768913-9118-4a9f-a496-e26bbbc23eef"
+        };
+        aya.PasswordHash = hasher.HashPassword(aya, "12345678");
+
+        var naglaa = new User
+        {
+            Id = 3,
+            UserName = "Naglaa",
+            NormalizedUserName = "NAGLAA",
+            Email = "naglaa@khedmetak.com",
+            NormalizedEmail = "NAGLAA@KHEDMETAK.COM",
+            EmailConfirmed = true,
+            Name = "Naglaa",
+            Role = "User",
+            Password = "12345678",
+            SecurityStamp = "cbe62da6-dbdb-4fbc-bdf8-18e388ffc811",
+            ConcurrencyStamp = "b1f5fe6b-67a4-44b7-bdc6-2c93d9fb34d0"
+        };
+        naglaa.PasswordHash = hasher.HashPassword(naglaa, "12345678");
+
+        var rahma = new User
+        {
+            Id = 4,
+            UserName = "Rahma",
+            NormalizedUserName = "RAHMA",
+            Email = "rahma@khedmetak.com",
+            NormalizedEmail = "RAHMA@KHEDMETAK.COM",
+            EmailConfirmed = true,
+            Name = "Rahma",
+            Role = "User",
+            Password = "12345678",
+            SecurityStamp = "d7d91e6b-e53b-4861-a53d-82c5f1fa6d03",
+            ConcurrencyStamp = "5c5fbef1-cb69-42b7-99e2-348f6cfef7e9"
+        };
+        rahma.PasswordHash = hasher.HashPassword(rahma, "12345678");
+
+        modelBuilder.Entity<User>().HasData(fathi, aya, naglaa, rahma);
+
+        // Seed User Roles
+        modelBuilder.Entity<IdentityUserRole<int>>().HasData(
+            new IdentityUserRole<int> { UserId = 1, RoleId = roleId },
+            new IdentityUserRole<int> { UserId = 2, RoleId = roleId },
+            new IdentityUserRole<int> { UserId = 3, RoleId = roleId },
+            new IdentityUserRole<int> { UserId = 4, RoleId = roleId }
+        );
 
         modelBuilder.Entity<Category>().HasData(
             new Category { Id = 1, Name = "الأحوال المدنية" },
