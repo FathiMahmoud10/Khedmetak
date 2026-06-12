@@ -1,4 +1,5 @@
 using Khedmetak.Core.Data;
+using Khedmetak.DAL.Repo.Abstraction;
 using Khedmetak.DAL.Repo.Abstraction.UnitOfWork;
 using Khedmetak.DAL.Repositories;
 using Khedmetak.DAL.Repositories.Interfaces;
@@ -11,6 +12,7 @@ namespace Khedmetak.DAL.Repo.Implementation.UnitOfWork
 
         private IGovServiceRepository? _govServices;
         private ICategoryRepository? _categories;
+        private IUserDocumentRepository? _userDocuments; 
 
         public UnitOfWork(AppDbContext context)
         {
@@ -22,6 +24,9 @@ namespace Khedmetak.DAL.Repo.Implementation.UnitOfWork
 
         public ICategoryRepository Categories
             => _categories ??= new CategoryRepository(_context);
+
+        public IUserDocumentRepository UserDocuments                    
+            => _userDocuments ??= new UserDocumentRepository(_context); 
 
         public async Task<int> SaveChangesAsync()
             => await _context.SaveChangesAsync();

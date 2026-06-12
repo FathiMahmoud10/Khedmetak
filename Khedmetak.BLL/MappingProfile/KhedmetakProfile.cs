@@ -1,6 +1,7 @@
 using AutoMapper;
 using Khedmetak.BLL.DTOS.Admin;
 using Khedmetak.BLL.DTOS.Categorys;
+using Khedmetak.BLL.DTOS.Documents;
 using Khedmetak.BLL.DTOS.GovService;
 using Khedmetak.BLL.DTOS.GovServiceDetails;
 using Khedmetak.DAL.Entities;
@@ -29,6 +30,7 @@ namespace Khedmetak.BLL.MappingProfile
 
             CreateMap<CreateGovServiceDto, GovService>();
             CreateMap<UpdateGovServiceDto, GovService>();
+            CreateMap<UserDocument, UserDocumentDto>();
 
             CreateMap<ServiceSteps,         ServiceStepDto>();
             CreateMap<RequiredDocument,     RequiredDocumentDto>();
