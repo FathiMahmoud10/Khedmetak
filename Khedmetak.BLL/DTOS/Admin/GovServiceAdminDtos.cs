@@ -45,4 +45,10 @@ namespace Khedmetak.BLL.DTOS.Admin
         [Required]
         public int CategoryId { get; set; }
     }
+
+    public class UpdateFeesDto
+    {
+        public decimal SrvFees { get; set; }
+        public decimal EstimatedFees { get; set; }
+    }
 }

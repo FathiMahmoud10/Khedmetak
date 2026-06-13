@@ -1,23 +1,24 @@
 using Khedmetak.AI.Configuration;
 using Khedmetak.AI.Services.Abstraction;
 using Khedmetak.AI.Services.Implementation;
-using Khedmetak.BLL.MappingProfile;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc.Authorization;
 using Khedmetak.API.Middlewares;
+using Khedmetak.BLL.MappingProfile;
 using Khedmetak.BLL.Services.Abstraction;
 using Khedmetak.BLL.Services.Implementation;
 using Khedmetak.Core.Data;
+using Khedmetak.DAL.Entities;
 //using Khedmetak.DAL.UnitOfWork;
 using Khedmetak.DAL.Repo.Abstraction.UnitOfWork;
+using Khedmetak.DAL.Repo.Implementation;
 using Khedmetak.DAL.Repo.Implementation.UnitOfWork;
 using Khedmetak.DAL.Repo.shared;
 using Khedmetak.DAL.Repositories;
 using Khedmetak.DAL.Repositories.Interfaces;
-using Microsoft.EntityFrameworkCore;
-using Khedmetak.DAL.Entities;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc.Authorization;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 
@@ -166,13 +167,16 @@ builder.Services.AddHttpClient<IAIChatService, AIChatService>(client =>
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<IGovServiceRepository, GovServiceRepository>();
 builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
-
+builder.Services.AddScoped<IServiceStepRepository, ServiceStepRepository>();
+builder.Services.AddScoped<IRequiredDocumentRepository, RequiredDocumentRepository>();
 
 #endregion
 
 #region Services
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IGovServiceService, GovServiceService>();
+builder.Services.AddScoped<IGovServiceAdminService, GovServiceAdminService>();
+
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<IDocumentService, DocumentService>();
 builder.Services.AddScoped<JwtService>();

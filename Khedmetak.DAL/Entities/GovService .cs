@@ -25,6 +25,7 @@ namespace Khedmetak.DAL.Entities
         public ICollection<ServiceGeneralDocs> ServiceGeneralDocs { get; set; } = new List<ServiceGeneralDocs>();
         public ICollection<RequiredDocument> RequiredDocuments { get; set; } = new List<RequiredDocument>();
         public ICollection<ServiceOption> ServiceOptions { get; set; } = new List<ServiceOption>();
+
         #endregion
     }
 }

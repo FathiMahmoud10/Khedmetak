@@ -38,6 +38,18 @@ namespace Khedmetak.BLL.MappingProfile
             CreateMap<ServiceOptionChoices, ServiceOptionChoiceDto>();
             CreateMap<ServiceOption,        ServiceOptionDto>()
                 .ForMember(dest => dest.Choices, opt => opt.MapFrom(src => src.ServiceOptionChoices));
+
+
+
+            CreateMap<CreateGovServiceDto, GovService>();
+            CreateMap<UpdateGovServiceDto, GovService>();
+            CreateMap<CreateServiceStepDto, ServiceSteps>();
+            CreateMap<UpdateServiceStepDto, ServiceSteps>();
+            CreateMap<CreateRequiredDocumentDto, RequiredDocument>();
+            CreateMap<UpdateRequiredDocumentDto, RequiredDocument>();
+
+            CreateMap<ServiceSteps, ServiceStepAdminDto>();
+            CreateMap<RequiredDocument, RequiredDocumentAdminDto>();
         }
     }
 }

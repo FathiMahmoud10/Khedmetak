@@ -1,9 +1,11 @@
 ﻿using Khedmetak.DAL.Entities.Base;
+using Khedmetak.DAL.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 
 namespace Khedmetak.DAL.Entities
 {
@@ -11,6 +13,7 @@ namespace Khedmetak.DAL.Entities
     {
         public string DocumentName { get; set; } = string.Empty;
         public bool IsMandatory { get; set; }
+        public DocumentType DocumentType { get; set; } = DocumentType.Any;
 
         #region Foreign Keys
         public int GovServiceId { get; set; }

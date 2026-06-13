@@ -297,5 +297,8 @@ public class AppDbContext : IdentityDbContext<User, IdentityRole<int>, int>
                 .HasForeignKey(c => c.ServiceOptionId)
                 .OnDelete(DeleteBehavior.Cascade);
         });
-    }
+
+
+
+}
 }
