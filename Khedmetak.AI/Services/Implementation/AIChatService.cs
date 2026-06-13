@@ -85,9 +85,9 @@ namespace Khedmetak.AI.Services.Implementation
             var inputMessages = new List<object>();
 
             // 1. Add previous messages from session
-            if (chatSessionDto?.SessionChatHistory != null)
+            if (chatSessionDto?.ChatSession_ChatHistory != null)
             {
-                foreach (var msg in chatSessionDto.SessionChatHistory)
+                foreach (var msg in chatSessionDto.ChatSession_ChatHistory)
                 {
                     inputMessages.Add(new
                     {

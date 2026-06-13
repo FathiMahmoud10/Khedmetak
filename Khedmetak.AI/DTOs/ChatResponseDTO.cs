@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace Khedmetak.AI.DTOs
 {
+    // to send Reply from AI to a specefic session
     public class ChatResponseDTO
     {
         public int SessionId { get; set; }

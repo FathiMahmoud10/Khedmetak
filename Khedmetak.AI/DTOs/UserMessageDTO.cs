@@ -6,9 +6,11 @@ using System.Threading.Tasks;
 
 namespace Khedmetak.AI.DTOs
 {
+    // to receive the user message for a specefic session 
     public class UserMessageDTO
     {
         public string Message { get; set; }
-        public int sessionId { get; set; } = -1;
+        public int SessionId { get; set; } 
+        
     }
 }

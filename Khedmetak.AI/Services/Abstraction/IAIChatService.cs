@@ -11,9 +11,8 @@ namespace Khedmetak.AI.Services.Abstraction
 {
     public interface IAIChatService
     {
-        //public Task<string> AskAsync(string newUserMessage,ChatSessionDTO chatSessionMessages);
-
-        public  Task<string> AskAsync(string newUserMessage);
+        
+        //public  Task<string> AskAsync(string newUserMessage);
         public  Task<string> AskAsync(string newUserMessage, ChatSessionDTO chatSessionDto);
 
     }

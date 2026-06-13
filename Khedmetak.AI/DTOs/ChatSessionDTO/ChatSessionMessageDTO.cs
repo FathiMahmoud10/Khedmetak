@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace Khedmetak.AI.DTOs.ChatSessionDTO
 {
+    //      ----- to get message in session 
     public class ChatSessionMessageDTO
     {
         public int Id { get; set; }

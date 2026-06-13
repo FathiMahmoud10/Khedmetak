@@ -21,7 +21,7 @@ namespace Khedmetak.AI.Services.Implementation
             this.unitOfWork = unitOfWork;
         }
         //       ========= Add and Save "User and Response" Messages to database ============
-        public async Task<bool> AddMessageAsync(int sessionId,AddMsgAndReplyTOSessionDTO msgAndReply)
+        public async Task<bool> AddUserMessageAndResponseAsync(AddMsgAndReplyTOSessionDTO msgAndReply)
         {
             try
             {
@@ -32,7 +32,7 @@ namespace Khedmetak.AI.Services.Implementation
 
                 var userMsg = new ChatMessage
                 {
-                    ChatSessionId = sessionId,
+                    ChatSessionId = msgAndReply.SessionId,
                     Content = msgAndReply.UserMessage,
                     Role = "user",
                     StartedAt = now,
@@ -41,7 +41,7 @@ namespace Khedmetak.AI.Services.Implementation
 
                 var responseMsg = new ChatMessage
                 {
-                    ChatSessionId = sessionId,
+                    ChatSessionId = msgAndReply.SessionId,
                     Content = msgAndReply.AIResponse,
                     Role = "assistant",
                     StartedAt = now,

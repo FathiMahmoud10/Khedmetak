@@ -25,9 +25,17 @@ namespace Khedmetak.AI.Services.Implementation
         }
 
         //               =========== Add New Session ===========
-        public async Task<int> AddNewSession()
+        public async Task<int> AddNewSession(NewSessionDTO newSessionDTO)
         {
-            var session = new ChatSession();
+           var systemPrompt = new ChatMessage() { Role = "system", Content="You are an Egyptian Government assistant that help Citizen with their government services, speak in Egyptian Arabic" };
+
+            var session = new ChatSession()
+            {
+                StartedAt = newSessionDTO.CreatedAt,
+                UserId = newSessionDTO.UserId,
+                
+            };
+            session.ChatMessages.Add(systemPrompt);
 
             sessionRepo.Add(session); 
             await unitOfWork.SaveChangesAsync(); 
@@ -52,10 +60,10 @@ namespace Khedmetak.AI.Services.Implementation
                 return new ChatSessionDTO()
                 {
                     SessionId = sessionId,
-                    SessionChatHistory = new List<ChatSessionMessageDTO>()
+                    ChatSession_ChatHistory = new List<ChatSessionMessageDTO>()
                 };
 
-            // --------------- session exist and has messages
+            // --------------- if session exist and has messages
             // ----- then return new ChatSessionMessageDTO that has session ID and all Messages of it
             var chatHistory = new List<ChatSessionMessageDTO>();
 
@@ -71,7 +79,7 @@ namespace Khedmetak.AI.Services.Implementation
             return new ChatSessionDTO()
             {
                 SessionId = sessionId,
-                SessionChatHistory = chatHistory
+                ChatSession_ChatHistory = chatHistory
             };
         }
 

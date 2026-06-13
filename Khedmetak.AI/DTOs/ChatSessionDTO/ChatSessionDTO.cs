@@ -6,9 +6,10 @@ using System.Threading.Tasks;
 
 namespace Khedmetak.AI.DTOs.ChatSessionDTO
 {
-    public class ChatSessionDTO
+    // to get all messages in a specific Session
+    public class ChatSessionDTO 
     {
         public int SessionId { get; set; }
-        public List<ChatSessionMessageDTO>? SessionChatHistory { get; set; }
+        public List<ChatSessionMessageDTO>? ChatSession_ChatHistory { get; set; }
     }
 }

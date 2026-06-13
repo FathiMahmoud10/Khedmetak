@@ -12,7 +12,7 @@ namespace Khedmetak.AI.Services.Abstraction
     public interface IChatSessionService
     {
 
-        public Task<int> AddNewSession();
+        public Task<int> AddNewSession(NewSessionDTO newSessionDTO);
      
         public Task<ChatSessionDTO?> GetSessionAllMessages(int sessionId);
 

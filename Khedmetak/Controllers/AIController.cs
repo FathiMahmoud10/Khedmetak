@@ -4,12 +4,14 @@ using Khedmetak.AI.DTOs.ChatSessionDTO;
 using Khedmetak.AI.Services.Abstraction;
 using Khedmetak.BLL.ApiResponse;
 using Khedmetak.BLL.DTOS.Categorys;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Khedmetak.Controllers
 {
     [Route("api/[controller]")]
+    [Authorize]
     [ApiController]
     public class AIController : ControllerBase
     {
@@ -24,14 +26,16 @@ namespace Khedmetak.Controllers
             this.messageService = messageService;
         }
 
+        //           ================= Start new session =================
 
         [HttpPost("newSession")]
-        public async Task<IActionResult> NewSession()
+        public async Task<IActionResult> NewSession(NewSessionDTO dto)
         {
-           var sessionId = await sessionService.AddNewSession();
+           var sessionId = await sessionService.AddNewSession(dto);
             return Ok(ApiResponse<int>.Ok(sessionId));
         }
 
+        //             ========================= Get Session Messages by Session Id ==========================
         
         [HttpPost("SessionMsgs")]
         public async Task<IActionResult> SessionMsgs([FromBody] int sessionId)
@@ -45,10 +49,12 @@ namespace Khedmetak.Controllers
 
             return Ok(
                 ApiResponse<List<ChatSessionMessageDTO>>.Ok(
-                    msgs.SessionChatHistory ?? new List<ChatSessionMessageDTO>()
+                    msgs.ChatSession_ChatHistory ?? new List<ChatSessionMessageDTO>()
                 )
             );
         }
+
+        //                       ============= Just for insure that model is work ===============
 
         //[HttpPost("chat1")]
         //public async Task<IActionResult> Chat1([FromBody] string message)
@@ -65,41 +71,54 @@ namespace Khedmetak.Controllers
         //}
 
 
-        [HttpPost("chat2")]
-        public async Task<IActionResult> Chat2([FromBody] UserMessageDTO userMessageDTO)
+        //           =============== To Send new message from user to AI model and return the Response from AI ===================
+
+        [HttpPost("chat")]
+        public async Task<IActionResult> Chat([FromBody] UserMessageDTO userMessageDTO)
         {
+            //          --------- if user not write anything in the message 
             if (userMessageDTO == null || string.IsNullOrWhiteSpace(userMessageDTO.Message))
             {
                 return BadRequest(ApiResponse<string>.Fail("Message is required."));
             }
 
-            if (userMessageDTO.sessionId == null || userMessageDTO.sessionId == -1)
+            //          ----------- if the sessionId is null 
+
+            if (userMessageDTO.SessionId == null )
             {
                 return BadRequest(ApiResponse<string>.Fail("Not Available to send message without sessionId"));
 
             }
-           
-                
-               var sessionDTO = await sessionService.GetSessionAllMessages(userMessageDTO.sessionId);
-
-                if (sessionDTO == null)
-                {
-                    return NotFound(ApiResponse<string>.Fail("Invalid SessionId"));
-                }
             
+            //      ------------ (1) get all messages of session by session id ----------
+            var sessionDTO = await sessionService.GetSessionAllMessages(userMessageDTO.SessionId);
+
+            //              --------- if session is not exist ----> return not found
+
+            if (sessionDTO == null)
+            {
+                return NotFound(ApiResponse<string>.Fail("Invalid SessionId"));
+            }
+            //              ---------  session exist and message exist 
+            //          ----------- (2) then send the message to AI and wait for response
 
             var aiResponse = await aiService.AskAsync(userMessageDTO.Message, sessionDTO);
-            ChatResponseDTO response = new ChatResponseDTO()
-            {
-                Message = aiResponse,
-                SessionId = userMessageDTO.sessionId
-            };
+
+                //  ------- (3) save user message and AI response to database
             AddMsgAndReplyTOSessionDTO msgAndReply = new()
             {
+                SessionId = userMessageDTO.SessionId,
                 UserMessage = userMessageDTO.Message,
                 AIResponse = aiResponse
             };
-            await messageService.AddMessageAsync(userMessageDTO.sessionId,msgAndReply);
+            await messageService.AddUserMessageAndResponseAsync(msgAndReply);
+
+            // ----------- (4) send AI response to the session of user
+            ChatResponseDTO response = new ChatResponseDTO()
+            {
+                Message = aiResponse,
+                SessionId = userMessageDTO.SessionId
+            };
             return Ok(ApiResponse<ChatResponseDTO>.Ok(response));
         }
     }

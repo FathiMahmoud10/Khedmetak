@@ -10,6 +10,6 @@ namespace Khedmetak.AI.Services.Abstraction
 {
     public interface IChatMessageService
     {
-        public Task<bool> AddMessageAsync(int sessionId, AddMsgAndReplyTOSessionDTO msgAndReply);
+        public Task<bool> AddUserMessageAndResponseAsync(AddMsgAndReplyTOSessionDTO msgAndReply);
     }
 }
