@@ -26,34 +26,6 @@ namespace Khedmetak.Controllers
             this.messageService = messageService;
         }
 
-        //           ================= Start new session =================
-
-        [HttpPost("newSession")]
-        public async Task<IActionResult> NewSession(NewSessionDTO dto)
-        {
-           var sessionId = await sessionService.AddNewSession(dto);
-            return Ok(ApiResponse<int>.Ok(sessionId));
-        }
-
-        //             ========================= Get Session Messages by Session Id ==========================
-        
-        [HttpPost("SessionMsgs")]
-        public async Task<IActionResult> SessionMsgs([FromBody] int sessionId)
-        {
-            var msgs = await sessionService.GetSessionAllMessages(sessionId);
-
-            if (msgs == null)
-            {
-                return Ok(ApiResponse<List<ChatSessionMessageDTO>>.Fail("Session not found"));
-            }
-
-            return Ok(
-                ApiResponse<List<ChatSessionMessageDTO>>.Ok(
-                    msgs.ChatSession_ChatHistory ?? new List<ChatSessionMessageDTO>()
-                )
-            );
-        }
-
         //                       ============= Just for insure that model is work ===============
 
         //[HttpPost("chat1")]
@@ -82,16 +54,16 @@ namespace Khedmetak.Controllers
                 return BadRequest(ApiResponse<string>.Fail("Message is required."));
             }
 
-            //          ----------- if the sessionId is null 
+            //          ----------- if the sessionGuidId is null 
 
-            if (userMessageDTO.SessionId == null )
+            if (userMessageDTO.SessionGuidId == null )
             {
                 return BadRequest(ApiResponse<string>.Fail("Not Available to send message without sessionId"));
 
             }
             
-            //      ------------ (1) get all messages of session by session id ----------
-            var sessionDTO = await sessionService.GetSessionAllMessages(userMessageDTO.SessionId);
+            //      ------------ (1) get all messages of session by session Guid id ----------
+            var sessionDTO = await sessionService.GetSessionAllMessages(userMessageDTO.SessionGuidId);
 
             //              --------- if session is not exist ----> return not found
 
@@ -107,7 +79,7 @@ namespace Khedmetak.Controllers
                 //  ------- (3) save user message and AI response to database
             AddMsgAndReplyTOSessionDTO msgAndReply = new()
             {
-                SessionId = userMessageDTO.SessionId,
+                SessionGuidId = userMessageDTO.SessionGuidId,
                 UserMessage = userMessageDTO.Message,
                 AIResponse = aiResponse
             };
@@ -117,7 +89,7 @@ namespace Khedmetak.Controllers
             ChatResponseDTO response = new ChatResponseDTO()
             {
                 Message = aiResponse,
-                SessionId = userMessageDTO.SessionId
+                SessionGuidId = userMessageDTO.SessionGuidId
             };
             return Ok(ApiResponse<ChatResponseDTO>.Ok(response));
         }
