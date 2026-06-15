@@ -16,5 +16,11 @@ namespace Khedmetak.DAL.Repo.shared
         void Add(T entity);
         void Update(T entity);
         void Delete(T entity);
+
+        //---------
+        public Task<T?> FindOneAsync(Expression<Func<T, bool>> predicate);
+        public Task<T?> FindOneAsync(Expression<Func<T, bool>> predicate, params Expression<Func<T, object>>[] includes);
+
+
     }
 }

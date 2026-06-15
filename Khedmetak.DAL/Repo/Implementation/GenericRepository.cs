@@ -53,5 +53,23 @@ namespace Khedmetak.DAL.Repositories
 
         public void Delete(T entity)
             => _dbSet.Remove(entity);
+
+        //-----------------
+        public async Task<T?> FindOneAsync(Expression<Func<T, bool>> predicate)
+        {
+            return await _dbSet.FirstOrDefaultAsync(predicate);
+        }
+
+        public async Task<T?> FindOneAsync(Expression<Func<T, bool>> predicate,params Expression<Func<T, object>>[] includes)
+        {
+            IQueryable<T> query = _dbSet;
+
+            foreach (var include in includes)
+            {
+                query = query.Include(include);
+            }
+
+            return await query.FirstOrDefaultAsync(predicate);
+        }
     }
 }

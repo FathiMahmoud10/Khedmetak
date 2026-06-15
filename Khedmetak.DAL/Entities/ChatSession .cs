@@ -11,6 +11,7 @@ namespace Khedmetak.DAL.Entities
     {
         public DateTime StartedAt { get; set; } = DateTime.Now; // add initial date to it
         public DateTime? EndedAt { get; set; }
+        public Guid SessionGuid { get; set; } = Guid.NewGuid();
 
         #region Foreign Keys
         public int? UserId { get; set; } // make it nullable
