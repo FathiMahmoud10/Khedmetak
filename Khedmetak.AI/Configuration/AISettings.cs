@@ -10,8 +10,8 @@ namespace Khedmetak.AI.Configuration
     {
         public string Provider { get; set; } = "OpenRouter";
         public string Model { get; set; } = "meta-llama/llama-3.3-70b-instruct";
-        public string ApiKey { get; set; }=string.Empty;
-
+        public string ApiKey { get; set; } = string.Empty;
+        public int MaxToken { get; set; } = 200;
 
     }
 }
