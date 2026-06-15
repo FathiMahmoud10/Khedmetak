@@ -9,7 +9,7 @@ namespace Khedmetak.AI.DTOs.ChatSessionDTO
     //      ----- to get message in session 
     public class ChatSessionMessageDTO
     {
-        public int Id { get; set; }
+        public int MessageId { get; set; }
         public string Role { get; set; }
         public string Content { get; set; }
     }

@@ -19,18 +19,6 @@ namespace Khedmetak.AI.Services.Implementation
 {
     public class AIChatService : IAIChatService
     {
-        //private OpenAIClient _client;
-
-        //private ChatClient chatClient;
-        ////private IGenericRepository<ChatSession> chatSession;
-        //private readonly IGenericRepository<ChatSession> chatSession;
-        //private readonly IUnitOfWork unitOfWork;
-        //public ChatService(OpenAIClient openAIClient, IOptions<AISettings> settings  ) {
-        //    chatClient = openAIClient.GetChatClient(settings.Value.Model);
-        //    unitOfWork.SaveChangesAsync();
-
-        //}
-
 
         private readonly HttpClient _httpClient;
         private readonly AISettings _settings;
@@ -108,7 +96,8 @@ namespace Khedmetak.AI.Services.Implementation
             var requestBody = new
             {
                 model = _settings.Model,
-                input = inputMessages
+                input = inputMessages,
+                max_output_tokens = _settings.MaxToken
             };
 
             using var request = new HttpRequestMessage(
@@ -147,45 +136,6 @@ namespace Khedmetak.AI.Services.Implementation
 
 
 
-        //    public async Task<string> AskAsync(string message)
-        //    {
-        //        var requestBody = new
-        //        {
-        //            model = _settings.Model,
-        //            input = message
-        //        };
-
-        //        var request = new HttpRequestMessage(
-        //            HttpMethod.Post,
-        //            "https://api.openai.com/v1/responses");
-
-        //        request.Headers.Authorization =
-        //            new AuthenticationHeaderValue(
-        //                "Bearer",
-        //                _settings.ApiKey);
-
-        //        request.Content = new StringContent(
-        //            JsonSerializer.Serialize(requestBody),
-        //            Encoding.UTF8,
-        //            "application/json");
-
-        //        var response = await _httpClient.SendAsync(request);
-
-        //        response.EnsureSuccessStatusCode();
-
-        //        var json =
-        //            await response.Content.ReadAsStringAsync();
-
-        //        using var document = JsonDocument.Parse(json);
-
-        //        return document.RootElement
-        //            .GetProperty("output")[0]
-        //            .GetProperty("content")[0]
-        //            .GetProperty("text")
-        //            .GetString() ?? string.Empty;
-        //    }
-        //
-        //
     }
     
 }

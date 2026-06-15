@@ -9,7 +9,7 @@ namespace Khedmetak.AI.DTOs.ChatSessionDTO
 
     public class NewSessionDTO
     {
-        public int? UserId {  get; set; }
+        public string? UserEmail {  get; set; }
         public DateTime CreatedAt { get; set; }
     }
 }

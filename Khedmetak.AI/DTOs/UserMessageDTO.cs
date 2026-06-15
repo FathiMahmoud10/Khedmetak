@@ -10,7 +10,7 @@ namespace Khedmetak.AI.DTOs
     public class UserMessageDTO
     {
         public string Message { get; set; }
-        public int SessionId { get; set; } 
+        public Guid SessionGuidId { get; set; } 
         
     }
 }

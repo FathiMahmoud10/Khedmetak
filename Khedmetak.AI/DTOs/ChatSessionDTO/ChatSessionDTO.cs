@@ -9,7 +9,7 @@ namespace Khedmetak.AI.DTOs.ChatSessionDTO
     // to get all messages in a specific Session
     public class ChatSessionDTO 
     {
-        public int SessionId { get; set; }
+        public Guid SessionGuidId { get; set; }
         public List<ChatSessionMessageDTO>? ChatSession_ChatHistory { get; set; }
     }
 }

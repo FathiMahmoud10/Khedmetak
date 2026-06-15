@@ -17,38 +17,44 @@ namespace Khedmetak.AI.Services.Implementation
     public class ChatSessionService : IChatSessionService
     {
         private readonly IGenericRepository<ChatSession> sessionRepo;
+        //private readonly IGenericRepository<User> userRepo;
         private readonly IUnitOfWork unitOfWork;
 
-        public ChatSessionService(IGenericRepository<ChatSession> repo,IUnitOfWork unitOfWork) {
+        public ChatSessionService(IGenericRepository<ChatSession> repo,IUnitOfWork unitOfWork)//,IGenericRepository<User> userRepo)
+        {
             sessionRepo = repo;
             this.unitOfWork = unitOfWork;
+            //this.userRepo = userRepo;
         }
 
         //               =========== Add New Session ===========
-        public async Task<int> AddNewSession(NewSessionDTO newSessionDTO)
+        public async Task<Guid> AddNewSession(NewSessionDTO newSessionDTO)
         {
-           var systemPrompt = new ChatMessage() { Role = "system", Content="You are an Egyptian Government assistant that help Citizen with their government services, speak in Egyptian Arabic" };
+           var systemPrompt = new ChatMessage() { Role = "system", Content="You are an Egyptian Government assistant that help Citizen with their government services, speak in Egyptian Arabic. don't answer to another topic." };
+            //User ? user = await userRepo.FindOneAsync(u => u.Email == newSessionDTO.UserEmail);
+            //var userId = user.Id;
+            int? userId = null;
 
             var session = new ChatSession()
             {
                 StartedAt = newSessionDTO.CreatedAt,
-                UserId = newSessionDTO.UserId,
-                
+                UserId = userId
+
             };
             session.ChatMessages.Add(systemPrompt);
 
             sessionRepo.Add(session); 
             await unitOfWork.SaveChangesAsync(); 
 
-            return session.Id;
+            return session.SessionGuid;
 
         }
 
 
         //      ===================  الحصول على كل الرسابل الخاصة ب chatSession معينة =================
-        public async Task<ChatSessionDTO?> GetSessionAllMessages(int sessionId)
+        public async Task<ChatSessionDTO?> GetSessionAllMessages(Guid sessionGuidId)
         {
-            var chatSession = await sessionRepo.GetByIdAsync(sessionId, x => x.ChatMessages);
+            var chatSession = await sessionRepo.FindOneAsync(s => s.SessionGuid == sessionGuidId, s => s.ChatMessages);
 
             //  ------------ if session doesn't Exist
             if (chatSession == null )
@@ -59,10 +65,11 @@ namespace Khedmetak.AI.Services.Implementation
             if (chatSession.ChatMessages == null)
                 return new ChatSessionDTO()
                 {
-                    SessionId = sessionId,
+                    SessionGuidId = sessionGuidId,
                     ChatSession_ChatHistory = new List<ChatSessionMessageDTO>()
                 };
 
+            //var chatsessionWithMessages = await()
             // --------------- if session exist and has messages
             // ----- then return new ChatSessionMessageDTO that has session ID and all Messages of it
             var chatHistory = new List<ChatSessionMessageDTO>();
@@ -70,7 +77,7 @@ namespace Khedmetak.AI.Services.Implementation
             foreach (var message in chatSession.ChatMessages)
             {
                 chatHistory.Add(new ChatSessionMessageDTO
-                {   Id= message.Id,
+                {   MessageId= message.Id,
                     Content = message.Content,
                     Role = message.Role,
                 });
@@ -78,7 +85,7 @@ namespace Khedmetak.AI.Services.Implementation
 
             return new ChatSessionDTO()
             {
-                SessionId = sessionId,
+                SessionGuidId = sessionGuidId,
                 ChatSession_ChatHistory = chatHistory
             };
         }

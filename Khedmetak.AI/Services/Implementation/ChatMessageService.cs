@@ -14,11 +14,14 @@ namespace Khedmetak.AI.Services.Implementation
     public class ChatMessageService: IChatMessageService
     {
         private readonly IGenericRepository<ChatMessage> msgRepo;
+        private readonly IGenericRepository<ChatSession> sessionRepo;
+
         private readonly IUnitOfWork unitOfWork;
-        public ChatMessageService(IGenericRepository<ChatMessage> repo, IUnitOfWork unitOfWork)
+        public ChatMessageService(IGenericRepository<ChatMessage> repo, IGenericRepository<ChatSession> sessionRepo,IUnitOfWork unitOfWork)
         {
             this.msgRepo = repo;
             this.unitOfWork = unitOfWork;
+            this.sessionRepo = sessionRepo;
         }
         //       ========= Add and Save "User and Response" Messages to database ============
         public async Task<bool> AddUserMessageAndResponseAsync(AddMsgAndReplyTOSessionDTO msgAndReply)
@@ -30,30 +33,36 @@ namespace Khedmetak.AI.Services.Implementation
 
                 var now = DateTime.UtcNow;
 
-                var userMsg = new ChatMessage
+                var session = await sessionRepo.FindOneAsync(s => s.SessionGuid == msgAndReply.SessionGuidId);
+                if (session!=null)
                 {
-                    ChatSessionId = msgAndReply.SessionId,
-                    Content = msgAndReply.UserMessage,
-                    Role = "user",
-                    StartedAt = now,
-                    SentAt = now
-                };
+                    var userMsg = new ChatMessage
+                    {
+                        ChatSessionId = session.Id,
+                        Content = msgAndReply.UserMessage,
+                        Role = "user",
+                        StartedAt = now,
+                        SentAt = now
+                    };
 
-                var responseMsg = new ChatMessage
-                {
-                    ChatSessionId = msgAndReply.SessionId,
-                    Content = msgAndReply.AIResponse,
-                    Role = "assistant",
-                    StartedAt = now,
-                    SentAt = now
-                };
+                    var responseMsg = new ChatMessage
+                    {
+                        ChatSessionId = session.Id,
+                        Content = msgAndReply.AIResponse,
+                        Role = "assistant",
+                        StartedAt = now,
+                        SentAt = now
+                    };
 
-                msgRepo.Add(userMsg);
-                msgRepo.Add(responseMsg);
+                    msgRepo.Add(userMsg);
+                    msgRepo.Add(responseMsg);
 
-                await unitOfWork.SaveChangesAsync();
+                    await unitOfWork.SaveChangesAsync();
 
-                return true;
+                    return true;
+                }
+
+                return false;
             }
             catch (Exception ex)
             {
