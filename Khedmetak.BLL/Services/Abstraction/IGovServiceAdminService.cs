@@ -5,6 +5,9 @@ namespace Khedmetak.BLL.Services.Abstraction
 {
     public interface IGovServiceAdminService
     {
+
+        Task<ImportServicesResultDto> ImportServicesFromExcelAsync(Stream excelFileStream);
+
         Task<GovServiceDto> CreateServiceAsync(CreateGovServiceDto dto);
         Task<GovServiceDto?> UpdateServiceAsync(int id, UpdateGovServiceDto dto);
         Task<bool> DeleteServiceAsync(int id);

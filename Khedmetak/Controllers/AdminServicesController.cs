@@ -2,6 +2,7 @@ using Khedmetak.BLL.ApiResponse;
 using Khedmetak.BLL.DTOS.Admin;
 using Khedmetak.BLL.Services.Abstraction;
 using Microsoft.AspNetCore.Mvc;
+using System.IO;
 
 namespace Khedmetak.API.Controllers
 {
@@ -12,7 +13,7 @@ namespace Khedmetak.API.Controllers
     public class AdminServicesController : ControllerBase
     {
         private readonly IGovServiceAdminService _adminService;
-        private readonly IGovServiceService _govServiceService; 
+        private readonly IGovServiceService _govServiceService;
 
         public AdminServicesController(
             IGovServiceAdminService adminService,
@@ -21,6 +22,34 @@ namespace Khedmetak.API.Controllers
             _adminService = adminService;
             _govServiceService = govServiceService;
         }
+        /*   استيراد خدمات + خطوات  من ملف اكسيل  */
+        [HttpPost("import-excel")]
+        public async Task<IActionResult> ImportFromExcel(IFormFile file)
+        {
+            if (file is null || file.Length == 0)
+                return BadRequest(ApiResponse<object>.Fail("الرجاء اختيار ملف Excel صحيح."));
+
+            var extension = Path.GetExtension(file.FileName).ToLowerInvariant();
+            if (extension != ".xlsx" && extension != ".xls")
+                return BadRequest(ApiResponse<object>.Fail("نوع الملف غير مدعوم، الرجاء رفع ملف .xlsx أو .xls."));
+
+            try
+            {
+                await using var stream = file.OpenReadStream();
+                var result = await _adminService.ImportServicesFromExcelAsync(stream);
+
+                var message = result.Errors.Count == 0
+                    ? "تم استيراد البيانات بنجاح."
+                    : $"تم الاستيراد مع وجود {result.Errors.Count} صف به أخطاء.";
+
+                return Ok(ApiResponse<object>.Ok(result, message));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ApiResponse<object>.Fail($"تعذّر قراءة ملف الإكسل: {ex.Message}"));
+            }
+        }
+
         /*  عرض تفاصيل خدمة كاملة (الرسوم + الخطوات + المستندات + الخيارات) */
         [HttpGet("{id:int}")]
         public async Task<IActionResult> GetById(int id)
@@ -73,6 +102,6 @@ namespace Khedmetak.API.Controllers
             return Ok(ApiResponse<object>.Ok(null!, "Service deleted successfully."));
         }
 
-       
+
     }
 }
