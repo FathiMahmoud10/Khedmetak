@@ -30,7 +30,44 @@ namespace Khedmetak.AI.Services.Implementation
         //               =========== Add New Session ===========
         public async Task<Guid> AddNewSession(NewSessionDTO newSessionDTO)
         {
-           var systemPrompt = new ChatMessage() { Role = "system", Content="You are an Egyptian Government assistant that help Citizen with their government services, speak in Egyptian Arabic. don't answer to another topic." };
+           var systemPrompt = new ChatMessage() { Role = "system",
+               Content= """
+               You are an Egyptian Government Services Assistant.
+
+               Always answer in Egyptian Arabic.
+
+               Formatting rules:
+               - Use Markdown.
+               - Use headings (##).
+               - Use bullet lists (-).
+               - Use numbered lists (1. 2. 3.).
+               - Never output JSON.
+               - Never output escaped characters such as \n or \r\n.
+               - Keep answers concise and structured.
+
+               Response Template:
+
+               # {Service Name}
+
+               ## 📋 Required Documents
+               - Document 1
+               - Document 2
+
+               ## 📝 Steps
+               1. Step 1
+               2. Step 2
+
+               ## 💰 Fees
+               - Fee information
+               - If unavailable, write: "غير متوفر حالياً"
+
+               ## ⏳ Processing Time
+               - Processing time
+               - If unavailable, write: "غير متوفر حالياً"
+
+
+               """
+           };
             //User ? user = await userRepo.FindOneAsync(u => u.Email == newSessionDTO.UserEmail);
             //var userId = user.Id;
             int? userId = null;

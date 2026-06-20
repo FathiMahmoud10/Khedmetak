@@ -20,7 +20,10 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using OpenAI;
+using System.ClientModel;
 using System.Text;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -143,10 +146,21 @@ builder.Services.AddAutoMapper(typeof(KhedmetakProfile));
 builder.Services.Configure<AISettings>(
     builder.Configuration.GetSection("AI"));
 
-builder.Services.AddHttpClient<IAIChatService, AIChatService>(client =>
-{
-    client.BaseAddress = new Uri("https://openrouter.ai/api/v1/responses");
-});
+// ----------------- Response API -----------------
+//builder.Services.AddHttpClient<IAIChatService, AIChatService>(client =>
+//{
+//    client.BaseAddress = new Uri("https://openrouter.ai/api/v1/responses");
+//});
+
+// --------------- Chat completion -------------------
+var openAIClient = new OpenAIClient(
+        new ApiKeyCredential(builder.Configuration.GetSection("AI")["ApiKey"]),
+          new OpenAIClientOptions
+          {
+              Endpoint = new Uri("https://models.github.ai/inference"),
+          });
+
+builder.Services.AddSingleton(openAIClient);
 
 // configure the header of request to AI Model that should contain APIKey, and URL of AI  Model Provider
 //var openAiClient = new OpenAIClient(
@@ -183,7 +197,13 @@ builder.Services.AddScoped<JwtService>();
 //-------- AI Services-----------------------------------
 builder.Services.AddScoped<IChatSessionService, ChatSessionService>();
 builder.Services.AddScoped<IChatMessageService, ChatMessageService>();
+builder.Services.AddScoped<IAIChatService, AIChatService>();
+builder.Services.AddScoped<IEmbeddingService, EmbeddingService>();
+builder.Services.AddScoped<IChunkService, ChunkService>();
+
 //-------------------------------------------------------------
+builder.Services.AddScoped<IQdrantService, QdrantService>();
+builder.Services.AddScoped<IVectorIndexingService, VectorIndexingService>();
 #endregion
 
 var app = builder.Build();
