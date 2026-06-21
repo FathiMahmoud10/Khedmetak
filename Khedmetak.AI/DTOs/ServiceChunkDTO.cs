@@ -14,10 +14,13 @@ namespace Khedmetak.AI.DTOs
     {
         public string ChunkId { get; set; } = string.Empty;
         public int ServiceId { get; set; }
+        public string ServiceName { get; set; }
+        public string? CategoryName { get; set; }
+        public int CategoryId { get; set; }
         public string ChunkType { get; set; } = string.Empty;
         public string Content { get; set; } = string.Empty;
 
         // Metadata
-        public Dictionary<string, object> Metadata { get; set; } = new();
+        //public Dictionary<string, object> Metadata { get; set; } = new();
     }
 }

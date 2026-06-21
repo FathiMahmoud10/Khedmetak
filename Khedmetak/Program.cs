@@ -18,8 +18,10 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using OpenAI;
+using Qdrant.Client;
 using System.ClientModel;
 using System.Text;
 
@@ -167,6 +169,23 @@ builder.Services.AddSingleton(openAIClient);
 
 #endregion
 
+#region Qdrant VectorDatabase Configrations
+builder.Services.Configure<QdrantDBSettings>(
+    builder.Configuration.GetSection("QdrantVectorDB"));
+builder.Services.AddSingleton<QdrantClient>(sp =>
+{
+    var settings = sp.GetRequiredService<IOptions<QdrantDBSettings>>().Value;
+
+    return new QdrantClient(
+        host: settings.QdrantEndpoint,
+        port: 6334,
+        https: true,
+        apiKey: settings.QdrantApiKey
+    );
+});
+#endregion
+
+
 #region Repositories
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<IGovServiceRepository, GovServiceRepository>();
@@ -192,7 +211,7 @@ builder.Services.AddScoped<IEmbeddingService, EmbeddingService>();
 builder.Services.AddScoped<IChunkService, ChunkService>();
 
 builder.Services.AddScoped<IQdrantService, QdrantService>();
-builder.Services.AddScoped<IVectorIndexingService, VectorIndexingService>();
+builder.Services.AddScoped<IVectorDBOperationsService, VectorDBOperationsService>();
 #endregion
 
 var app = builder.Build();

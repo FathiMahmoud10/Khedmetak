@@ -1,16 +1,12 @@
-﻿using Grpc.Net.Client;
+﻿using Khedmetak.AI.Configuration;
 using Khedmetak.AI.DTOs;
 using Khedmetak.AI.Services.Abstraction;
-using Khedmetak.DAL.Entities;
+using Microsoft.Extensions.Options;
 using Qdrant.Client;
 using Qdrant.Client.Grpc;
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
-using System.Threading.Tasks;
+
 
 namespace Khedmetak.AI.Services.Implementation
 {
@@ -20,29 +16,24 @@ namespace Khedmetak.AI.Services.Implementation
     {
         
 
-        private const string CollectionName = "testCollection";
+        private  string CollectionName;
         private readonly QdrantClient _client;
 
-        public QdrantService()
+        public QdrantService(QdrantClient client, IOptions<QdrantDBSettings> options)
         {
-            _client = new QdrantClient(
-                host: "f38256f1-5c7e-4ad7-9948-59b0d47c0aed.sa-east-1-0.aws.cloud.qdrant.io",
-                port: 6334,
-                https: true,
-                apiKey: ""
-            );
-        }
+           
+            CollectionName = options.Value.QdrantCollection;
 
+            _client = client;
+        }
+        
         // =========================
         // UPSERT CHUNKS
         // =========================
 
-
-        public async Task UpsertServiceChunksAsync(
-            GovService service,
-            List<ServiceChunkDTO> chunks,
-            Func<string, Task<float[]>> embedFunc)
-            {
+        // ================ Add Service chunks to vectorDatabase and make  embedding for each chunk content ===================
+        public async Task UpsertServiceChunksAsync( List<ServiceChunkDTO> chunks,Func<string, Task<float[]>> embedFunc)
+        {
                 var points = new List<PointStruct>();
 
                 foreach (var chunk in chunks)
@@ -60,10 +51,10 @@ namespace Khedmetak.AI.Services.Implementation
 
                         Payload =
                     {
-                        ["ServiceId"] = service.Id,
-                        ["ServiceName"] = service.SrvName,
-                        ["CategoryId"] = service.CategoryId,
-                        ["CategoryName"] = service.Category?.Name ?? "",
+                        ["ServiceId"] = chunk.ServiceId,
+                        ["ServiceName"] = chunk.ServiceName,
+                        ["CategoryId"] = chunk.CategoryId,
+                        ["CategoryName"] = chunk.CategoryName ?? "",
 
                         ["ChunckId"] = chunk.ChunkId,
                         ["ChunckType"] = chunk.ChunkType,
@@ -82,6 +73,36 @@ namespace Khedmetak.AI.Services.Implementation
                 );
         }
 
+
+        // =========================
+        //DELETE ALL CHUNKS OF SERVICE
+        //(for updates)
+        //=========================
+        public async Task DeleteServiceChunksAsync(int serviceId)
+        {
+            await _client.DeleteAsync(
+                collectionName: CollectionName,
+                filter: new Filter
+                {
+                    Must =
+                    {
+                        new Condition
+                        {
+                            Field = new FieldCondition
+                            {
+                                Key = "ServiceId",
+                                Match = new Match
+                                {
+                                    Integer = serviceId
+                                }
+                            }
+                        }
+                    }
+            });
+        }
+
+        
+        // =========== to Generate the Point Id when add chunk to  Vector Database  ==========
         private static string CreateDeterministicGuid(string value)
         {
             using var md5 = MD5.Create();
@@ -92,24 +113,5 @@ namespace Khedmetak.AI.Services.Implementation
 
             return new Guid(hash).ToString();
         }
-        // =========================
-        // DELETE ALL CHUNKS OF SERVICE
-        // (for updates)
-        // =========================
-        //    public async Task DeleteServiceChunksAsync(int serviceId)
-        //    {
-        //        await _client.DeleteAsync(CollectionName,
-        //            filter: new Filter
-        //            {
-        //                Must =
-        //                {
-        //                new Condition
-        //                {
-        //                    Field = "serviceId",
-        //                    Match = new MatchValue { Value = serviceId }
-        //                }
-        //                }
-        //            });
-        //    }
     }
 }

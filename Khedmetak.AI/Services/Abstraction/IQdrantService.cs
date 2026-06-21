@@ -10,9 +10,9 @@ namespace Khedmetak.AI.Services.Abstraction
 {
     public interface IQdrantService
     {
-        public  Task UpsertServiceChunksAsync(
-           GovService service,
-           List<ServiceChunkDTO> chunks,
-           Func<string, Task<float[]>> embedFunc);
+        public Task UpsertServiceChunksAsync(List<ServiceChunkDTO> chunks, Func<string, Task<float[]>> embedFunc);
+
+        public Task DeleteServiceChunksAsync(int serviceId);
+
     }
 }

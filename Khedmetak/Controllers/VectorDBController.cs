@@ -9,24 +9,37 @@ namespace Khedmetak.Controllers
     public class VectorDBController : ControllerBase
     {
        
-            private readonly IVectorIndexingService _vectorIndexingService;
+            private readonly IVectorDBOperationsService _vectorIndexingService;
 
             public VectorDBController(
-                IVectorIndexingService vectorIndexingService)
+                IVectorDBOperationsService vectorIndexingService)
             {
                 _vectorIndexingService = vectorIndexingService;
             }
 
-            [HttpPost("index-service/{serviceId:int}")]
+            [HttpPost("Add-service/{serviceId:int}")]
             public async Task<IActionResult> IndexService(int serviceId)
             {
-                await _vectorIndexingService.IndexServiceAsync(serviceId);
+                await _vectorIndexingService.AddGovServiceToVectorDBAsync(serviceId);
 
                 return Ok(new
                 {
                     Message = $"Service {serviceId} indexed successfully."
                 });
             }
+
+            [HttpPost("Delete-service/{serviceId:int}")]
+            public async Task<IActionResult> DeleteService(int serviceId)
+            {
+                await _vectorIndexingService.DeleteGovServiceFromVectorDBAsync(serviceId);
+
+                return Ok(new
+                {
+                    Message = $"Service {serviceId} deleted successfully."
+                });
+            }
+
+       
     }
 }
 

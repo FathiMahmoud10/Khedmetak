@@ -20,7 +20,7 @@ namespace Khedmetak.AI.Services.Implementation
             serviceRepository = repo;
         }
 
-
+        // ====================== Split Service To Chunks ======================
         public async Task<List<ServiceChunkDTO>> GenerateChunksAsync(int serviceId)
         {
             GovService? govService = await serviceRepository.GetByIdAsync(
@@ -66,7 +66,10 @@ namespace Khedmetak.AI.Services.Implementation
                 ServiceId = govService.Id,
                 ChunkType = ChunkType.Overview.ToString(),
                 Content = overview,
-                Metadata = BuildMetadata(govService, ChunkType.Overview.ToString(),overview)
+                CategoryId = govService.CategoryId,
+                CategoryName = govService.Category.Name,
+                ServiceName = govService.SrvName
+                //Metadata = BuildMetadata(govService, ChunkType.Overview.ToString(),overview)
             });
 
             // =========================
@@ -86,7 +89,10 @@ namespace Khedmetak.AI.Services.Implementation
                     ServiceId = govService.Id,
                     ChunkType = ChunkType.RequiredDocuments.ToString(),
                     Content =  documents,
-                    Metadata = BuildMetadata(govService, ChunkType.RequiredDocuments.ToString(),documents)
+                    CategoryId = govService.CategoryId,
+                    CategoryName = govService.Category.Name,
+                    ServiceName = govService.SrvName
+                    //Metadata = BuildMetadata(govService, ChunkType.RequiredDocuments.ToString(),documents)
                 });
             }
 
@@ -108,7 +114,10 @@ namespace Khedmetak.AI.Services.Implementation
                     ServiceId = govService.Id,
                     ChunkType = ChunkType.Steps.ToString(),
                     Content =  steps,
-                    Metadata = BuildMetadata(govService, ChunkType.Steps.ToString(),steps)
+                    CategoryId = govService.CategoryId,
+                    CategoryName = govService.Category.Name,
+                    ServiceName = govService.SrvName
+                    //Metadata = BuildMetadata(govService, ChunkType.Steps.ToString(),steps)
                 });
             }
 
@@ -126,24 +135,29 @@ namespace Khedmetak.AI.Services.Implementation
                 ServiceId = govService.Id,
                 ChunkType = ChunkType.Fees.ToString(),
                 Content = fees,
-                Metadata = BuildMetadata(govService, ChunkType.Fees.ToString(),fees)
+                CategoryId = govService.CategoryId,
+                CategoryName = govService.Category.Name,
+                ServiceName = govService.SrvName
+                //Metadata = BuildMetadata(govService, ChunkType.Fees.ToString(),fees)
             });
 
             return chunks;
         }
-        private static Dictionary<string, object> BuildMetadata( GovService service,string chunkType,string content )
-        {
-            return new Dictionary<string, object>
-            {
-                ["ChunckId"] = $"{service.Id}_{chunkType}",
-                ["ServiceId"] = service.Id,
-                ["ServiceName"] = service.SrvName,
-                ["CategoryId"] = service.CategoryId,
-                ["CategoryName"] = service.Category?.Name ?? "",
-                ["ChunckType"] = chunkType,
-                ["Content"] = content,
-                ["Language"] = "ar"
-            };
-        }
+       
+        
+        //private static Dictionary<string, object> BuildMetadata( GovService service,string chunkType,string content )
+        //{
+        //    return new Dictionary<string, object>
+        //    {
+        //        ["ChunckId"] = $"{service.Id}_{chunkType}",
+        //        ["ServiceId"] = service.Id,
+        //        ["ServiceName"] = service.SrvName,
+        //        ["CategoryId"] = service.CategoryId,
+        //        ["CategoryName"] = service.Category?.Name ?? "",
+        //        ["ChunckType"] = chunkType,
+        //        ["Content"] = content,
+        //        ["Language"] = "ar"
+        //    };
+        //}
     }
 }
