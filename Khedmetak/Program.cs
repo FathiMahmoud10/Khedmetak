@@ -7,7 +7,6 @@ using Khedmetak.BLL.Services.Abstraction;
 using Khedmetak.BLL.Services.Implementation;
 using Khedmetak.Core.Data;
 using Khedmetak.DAL.Entities;
-//using Khedmetak.DAL.UnitOfWork;
 using Khedmetak.DAL.Repo.Abstraction.UnitOfWork;
 using Khedmetak.DAL.Repo.Implementation;
 using Khedmetak.DAL.Repo.Implementation.UnitOfWork;
@@ -38,7 +37,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
     options.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo { Title = "Khedmetak API", Version = "v1" });
-    
+
     options.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
     {
         Name = "Authorization",
@@ -140,19 +139,23 @@ builder.Services.AddAuthentication(options =>
 builder.Services.AddAutoMapper(typeof(KhedmetakProfile));
 #endregion
 
+#region CORS
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll", policy =>
+    {
+        policy.AllowAnyOrigin()
+              .AllowAnyMethod()
+              .AllowAnyHeader();
+    });
+});
+#endregion
 
 #region AIConfiguration
 
 builder.Services.Configure<AISettings>(
     builder.Configuration.GetSection("AI"));
 
-// ----------------- Response API -----------------
-//builder.Services.AddHttpClient<IAIChatService, AIChatService>(client =>
-//{
-//    client.BaseAddress = new Uri("https://openrouter.ai/api/v1/responses");
-//});
-
-// --------------- Chat completion -------------------
 var openAIClient = new OpenAIClient(
         new ApiKeyCredential(builder.Configuration.GetSection("AI")["ApiKey"]),
           new OpenAIClientOptions
@@ -162,19 +165,6 @@ var openAIClient = new OpenAIClient(
 
 builder.Services.AddSingleton(openAIClient);
 
-// configure the header of request to AI Model that should contain APIKey, and URL of AI  Model Provider
-//var openAiClient = new OpenAIClient(
-//          new ApiKeyCredential(builder.Configuration.GetSection("AI")["ApiKey"]),
-//          new OpenAIClientOptions
-//          {
-//              Endpoint = new Uri("https://openrouter.ai/api/v1/responses"),
-//          });
-
-//builder.Services.AddSingleton<IChatClient>(sp =>
-//new ChatClientBuilder(openAiClient.GetChatClient(builder.Configuration["AI:Model"]).AsIChatClient()).UseFunctionInvocation().Build());
-
-//builder.Services.AddSingleton(openAiClient);
-
 #endregion
 
 #region Repositories
@@ -183,7 +173,6 @@ builder.Services.AddScoped<IGovServiceRepository, GovServiceRepository>();
 builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 builder.Services.AddScoped<IServiceStepRepository, ServiceStepRepository>();
 builder.Services.AddScoped<IRequiredDocumentRepository, RequiredDocumentRepository>();
-
 #endregion
 
 #region Services
@@ -194,14 +183,14 @@ builder.Services.AddScoped<IGovServiceAdminService, GovServiceAdminService>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<IDocumentService, DocumentService>();
 builder.Services.AddScoped<JwtService>();
-//-------- AI Services-----------------------------------
+
+//-------- AI Services -----------------------------------
 builder.Services.AddScoped<IChatSessionService, ChatSessionService>();
 builder.Services.AddScoped<IChatMessageService, ChatMessageService>();
 builder.Services.AddScoped<IAIChatService, AIChatService>();
 builder.Services.AddScoped<IEmbeddingService, EmbeddingService>();
 builder.Services.AddScoped<IChunkService, ChunkService>();
 
-//-------------------------------------------------------------
 builder.Services.AddScoped<IQdrantService, QdrantService>();
 builder.Services.AddScoped<IVectorIndexingService, VectorIndexingService>();
 #endregion
@@ -210,15 +199,15 @@ var app = builder.Build();
 
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 
-
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+app.UseSwagger();
+app.UseSwaggerUI();
 
 app.UseHttpsRedirection();
-app.UseAuthentication();  
-app.UseAuthorization();   
+
+app.UseCors("AllowAll"); // ← لازم يكون قبل Authentication و Authorization
+
+app.UseAuthentication();
+app.UseAuthorization();
+
 app.MapControllers();
 app.Run();
