@@ -71,8 +71,7 @@ builder.Services.AddSwaggerGen(options =>
 
 #region DbContext
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlServer(builder.Configuration
-        .GetConnectionString("DefaultConnection")));
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 #endregion
 
 #region Identity
@@ -149,24 +148,28 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", policy =>
     {
-        policy.AllowAnyOrigin()
+        policy.SetIsOriginAllowed(_ => true)
               .AllowAnyMethod()
-              .AllowAnyHeader();
+              .AllowAnyHeader()
+              .AllowCredentials();
     });
 });
 #endregion
 
 #region AIConfiguration
-
 builder.Services.Configure<AISettings>(
     builder.Configuration.GetSection("AI"));
 
-var openAIClient = new OpenAIClient(
-        new ApiKeyCredential(builder.Configuration.GetSection("AI")["ApiKey"]),
-          new OpenAIClientOptions
-          {
-              Endpoint = new Uri("https://models.github.ai/inference"),
-          });
+var apiKey = builder.Configuration.GetSection("AI")["ApiKey"];
+
+if (!string.IsNullOrWhiteSpace(apiKey))
+{
+    var openAIClient = new OpenAIClient(
+        new ApiKeyCredential(apiKey),
+        new OpenAIClientOptions
+        {
+            Endpoint = new Uri("https://models.github.ai/inference"),
+        });
 
 
 builder.Services.AddKeyedSingleton<OpenAIClient>("github", openAIClient);
@@ -183,9 +186,10 @@ builder.Services.AddHttpClient("jina", client =>
 
 #endregion
 
-#region Qdrant VectorDatabase Configrations
+#region Qdrant VectorDatabase Configurations
 builder.Services.Configure<QdrantDBSettings>(
     builder.Configuration.GetSection("QdrantVectorDB"));
+
 builder.Services.AddSingleton<QdrantClient>(sp =>
 {
     var settings = sp.GetRequiredService<IOptions<QdrantDBSettings>>().Value;
@@ -194,11 +198,10 @@ builder.Services.AddSingleton<QdrantClient>(sp =>
         host: settings.QdrantEndpoint,
         port: 6334,
         https: true,
-        apiKey: settings.QdrantApiKey
+        apiKey: string.IsNullOrWhiteSpace(settings.QdrantApiKey) ? "placeholder" : settings.QdrantApiKey
     );
 });
 #endregion
-
 
 #region Repositories
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
@@ -220,7 +223,7 @@ builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<IDocumentService, DocumentService>();
 builder.Services.AddScoped<JwtService>();
 
-//-------- AI Services -----------------------------------
+// AI Services
 builder.Services.AddScoped<IChatSessionService, ChatSessionService>();
 builder.Services.AddScoped<IChatMessageService, ChatMessageService>();
 builder.Services.AddScoped<IAIChatService, AIChatService>();
@@ -243,7 +246,7 @@ app.UseSwaggerUI();
 
 app.UseHttpsRedirection();
 
-app.UseCors("AllowAll"); // ← لازم يكون قبل Authentication و Authorization
+app.UseCors("AllowAll");
 
 app.UseAuthentication();
 app.UseAuthorization();
