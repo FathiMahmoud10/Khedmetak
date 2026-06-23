@@ -9,6 +9,10 @@ on:
 env:
   IMAGE_NAME: khedmetak-api
 
+permissions:
+  contents: read
+  packages: write
+
 jobs:
   build-and-push:
     name: Build Docker Image
