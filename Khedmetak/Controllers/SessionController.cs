@@ -1,4 +1,4 @@
-﻿using Khedmetak.AI.DTOs.ChatSessionDTO;
+using Khedmetak.AI.DTOs.ChatSessionDTO;
 using Khedmetak.AI.Services.Abstraction;
 using Khedmetak.BLL.ApiResponse;
 using Microsoft.AspNetCore.Authorization;
@@ -8,8 +8,8 @@ using Microsoft.AspNetCore.Mvc;
 namespace Khedmetak.Controllers
 {
     [Route("api/[controller]")]
-    [Authorize]
     [ApiController]
+    [AllowAnonymous]
     public class SessionController : ControllerBase
     {
        
@@ -21,7 +21,7 @@ namespace Khedmetak.Controllers
             this.sessionService = sessionService;
         }
 
-        //           ================= Start new session =================
+        //================= Start new session =================
 
         [HttpPost("newSession")]
         public async Task<IActionResult> NewSession(NewSessionDTO dto)
@@ -32,8 +32,8 @@ namespace Khedmetak.Controllers
 
         //             ========================= Get Session Messages by Session Id ==========================
 
-        [HttpPost("SessionMsgs")]
-        public async Task<IActionResult> SessionMsgs([FromBody] Guid sessionGuidId)
+        [HttpGet("SessionMsgs/{sessionGuidId}")]
+        public async Task<IActionResult> SessionMsgs(Guid sessionGuidId)
         {
             var msgs = await sessionService.GetSessionAllMessages(sessionGuidId);
 
