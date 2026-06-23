@@ -28,8 +28,8 @@ jobs:
       - name: Build Docker image
         run: |
           IMAGE=ghcr.io/${{ github.repository_owner }}/${{ env.IMAGE_NAME }}
-          docker build -t ${IMAGE,,}:latest .
-          docker build -t ${IMAGE,,}:${{ github.sha }} .
+          docker build -f Khedmetak/Dockerfile -t ${IMAGE,,}:latest .
+          docker build -f Khedmetak/Dockerfile -t ${IMAGE,,}:${{ github.sha }} .
 
       - name: Push Docker image
         run: |
