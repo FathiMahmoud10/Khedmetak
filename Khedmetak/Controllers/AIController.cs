@@ -12,7 +12,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace Khedmetak.Controllers
 {
     [Route("api/[controller]")]
-    [Authorize]
+    //[Authorize]
     [ApiController]
     public class AIController : ControllerBase
     {
