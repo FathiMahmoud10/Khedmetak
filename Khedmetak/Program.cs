@@ -1,4 +1,5 @@
 using Khedmetak.AI.Configuration;
+using Khedmetak.AI.RAG;
 using Khedmetak.AI.Services.Abstraction;
 using Khedmetak.AI.Services.Implementation;
 using Khedmetak.API.Middlewares;
@@ -7,6 +8,7 @@ using Khedmetak.BLL.Services.Abstraction;
 using Khedmetak.BLL.Services.Implementation;
 using Khedmetak.Core.Data;
 using Khedmetak.DAL.Entities;
+using Khedmetak.DAL.Repo.Abstraction;
 using Khedmetak.DAL.Repo.Abstraction.UnitOfWork;
 using Khedmetak.DAL.Repo.Implementation;
 using Khedmetak.DAL.Repo.Implementation.UnitOfWork;
@@ -18,13 +20,14 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using OpenAI;
 using Qdrant.Client;
 using System.ClientModel;
+using System.Net.Http.Headers;
 using System.Text;
-
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -165,7 +168,18 @@ var openAIClient = new OpenAIClient(
               Endpoint = new Uri("https://models.github.ai/inference"),
           });
 
-builder.Services.AddSingleton(openAIClient);
+
+builder.Services.AddKeyedSingleton<OpenAIClient>("github", openAIClient);
+
+builder.Services.AddHttpClient("jina", client =>
+{
+    client.BaseAddress = new Uri("https://api.jina.ai");
+    client.DefaultRequestHeaders.Authorization =
+        new AuthenticationHeaderValue(
+            "Bearer",
+            builder.Configuration["AI:EmbeddingAPIKey"]);
+});
+
 
 #endregion
 
@@ -192,6 +206,9 @@ builder.Services.AddScoped<IGovServiceRepository, GovServiceRepository>();
 builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 builder.Services.AddScoped<IServiceStepRepository, ServiceStepRepository>();
 builder.Services.AddScoped<IRequiredDocumentRepository, RequiredDocumentRepository>();
+//---------------
+builder.Services.AddScoped<IChatSessionRepository, ChatSessionRepository>();
+
 #endregion
 
 #region Services
@@ -211,7 +228,10 @@ builder.Services.AddScoped<IEmbeddingService, EmbeddingService>();
 builder.Services.AddScoped<IChunkService, ChunkService>();
 
 builder.Services.AddScoped<IQdrantService, QdrantService>();
+builder.Services.AddScoped<QdrantService>();
 builder.Services.AddScoped<IVectorDBOperationsService, VectorDBOperationsService>();
+builder.Services.AddScoped<IRagService, RagService>();
+
 #endregion
 
 var app = builder.Build();

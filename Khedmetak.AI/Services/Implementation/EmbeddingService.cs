@@ -1,40 +1,52 @@
-﻿using DocumentFormat.OpenXml.Office2010.ExcelAc;
-using Khedmetak.AI.Configuration;
-using Khedmetak.AI.DTOs;
+﻿using Khedmetak.AI.Configuration;
+using Khedmetak.AI.DTOs.EmbeddingDTOs;
 using Khedmetak.AI.Services.Abstraction;
-using Khedmetak.DAL.Entities;
 using Microsoft.Extensions.Options;
-using OpenAI;
-using OpenAI.Embeddings;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
+using System.Net.Http.Json;
+using System.Text.Json;
+using System.Net.Http;
 namespace Khedmetak.AI.Services.Implementation
 {
-    public class EmbeddingService :IEmbeddingService
+    public class EmbeddingService : IEmbeddingService
     {
-        private readonly EmbeddingClient _embeddingClient;
+        private readonly IHttpClientFactory _httpClientFactory;
+        private readonly AISettings _settings;
 
-        public EmbeddingService(OpenAIClient openAIClient, IOptions<AISettings> settings)
+        public EmbeddingService(
+            IHttpClientFactory httpClientFactory,
+            IOptions<AISettings> settings)
         {
-            _embeddingClient = openAIClient.GetEmbeddingClient(settings.Value.EmbeddingModel);
-
+            _httpClientFactory = httpClientFactory;
+            _settings = settings.Value;
         }
 
         public async Task<float[]> GenerateEmbeddingAsync(string text)
         {
-            EmbeddingGenerationOptions options = new()
+            var client = _httpClientFactory.CreateClient("jina");
+
+            var request = new JinaEmbeddingRequest
             {
-                Dimensions = 768 // 1536 full size
+                Model = _settings.EmbeddingModel,
+                Input = text,
+                Dimensions = 768
             };
-            OpenAIEmbedding embedding = await _embeddingClient.GenerateEmbeddingAsync(text,options);
 
-            return embedding.ToFloats().ToArray();
+            var response = await client.PostAsJsonAsync(
+                "/v1/embeddings",
+                request);
+
+            response.EnsureSuccessStatusCode();
+
+            var result = await response.Content.ReadFromJsonAsync<JinaEmbeddingResponse>();
+
+            if (result == null ||
+                result.Data == null ||
+                result.Data.Count == 0)
+            {
+                throw new Exception("No embedding returned from Jina.");
+            }
+
+            return result.Data[0].Embedding.ToArray();
         }
-
-    
     }
 }

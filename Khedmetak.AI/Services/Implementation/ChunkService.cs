@@ -53,11 +53,11 @@ namespace Khedmetak.AI.Services.Implementation
             // Overview Chunk
             // =========================
             var overview = BuildBlock(
-                ("اسم الخدمة", govService.SrvName),
-                ("الوصف", govService.SrvDesc),
-                ("الفئة", govService.Category?.Name ?? "غير محدد"),
-                ("مدة التنفيذ", govService.SrvTime),
-                ("الرسوم", govService.SrvFees.ToString())
+                (" اسم الخدمة", govService.SrvName),
+                (" الوصف", govService.SrvDesc),
+                (" الفئة", govService.Category?.Name ?? "غير محدد"),
+                (" مدة التنفيذ", govService.SrvTime),
+                (" الرسوم", govService.SrvFees.ToString())
             );
 
             chunks.Add(new ServiceChunkDTO
@@ -77,7 +77,7 @@ namespace Khedmetak.AI.Services.Implementation
             // =========================
             if (govService.RequiredDocuments.Any())
             {
-                var documents = "المستندات المطلوبة:\n" +
+                var documents = $"{govService.SrvName} المستندات المطلوبة ل :\n" +
                     string.Join("\n",
                         govService.RequiredDocuments.Select((d, i) =>
                             $"{i + 1}. {d.DocumentName}")
@@ -101,7 +101,7 @@ namespace Khedmetak.AI.Services.Implementation
             // =========================
             if (govService.ServiceSteps.Any())
             {
-                var steps = "خطوات الخدمة:\n" +
+                var steps = $" {govService.SrvName} خطوات التقديم على   :\n" +
                     string.Join("\n",
                         govService.ServiceSteps
                             .OrderBy(x => x.StepOrder)
@@ -125,6 +125,7 @@ namespace Khedmetak.AI.Services.Implementation
             // Fees Chunk
             // =========================
             var fees = BuildBlock(
+                ("اسم الخدمة ",govService.SrvName),
                 ("الرسوم الأساسية", govService.SrvFees.ToString()),
                 ("مدة التنفيذ", govService.SrvTime)
             );

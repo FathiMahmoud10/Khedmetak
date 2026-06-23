@@ -9,13 +9,13 @@
   <ItemGroup>
     <Folder Include="AI\" />
     <Folder Include="Data\" />
-    <Folder Include="RAG\" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Markdig" Version="1.3.2" />
     <PackageReference Include="Microsoft.Extensions.AI" Version="10.7.0" />
     <PackageReference Include="Microsoft.Extensions.AI.OpenAI" Version="10.7.0" />
+    <PackageReference Include="Microsoft.Extensions.Http" Version="10.0.9" />
     <PackageReference Include="OpenAI" Version="2.11.0" />
     <PackageReference Include="Qdrant.Client" Version="1.18.1" />
   </ItemGroup>

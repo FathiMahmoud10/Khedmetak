@@ -1,6 +1,7 @@
 ﻿
 using Khedmetak.AI.DTOs;
 using Khedmetak.AI.DTOs.ChatSessionDTO;
+using Khedmetak.AI.RAG;
 using Khedmetak.AI.Services.Abstraction;
 using Khedmetak.AI.Services.Implementation;
 using Khedmetak.BLL.ApiResponse;
@@ -8,6 +9,7 @@ using Khedmetak.BLL.DTOS.Categorys;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Qdrant.Client.Grpc;
 
 namespace Khedmetak.Controllers
 {
@@ -21,15 +23,17 @@ namespace Khedmetak.Controllers
         private readonly IChatMessageService messageService;
         private readonly IEmbeddingService embeddingService;
         private readonly IChunkService _serviceChunkService;
+        private readonly IRagService ragService;
 
         public AIController(IAIChatService aiService, IChatSessionService sessionService, IChatMessageService messageService,IEmbeddingService embeddingService,
-            IChunkService serviceChunk)
+            IChunkService serviceChunk,IRagService rag)
         {
             this.aiService = aiService;
             this.sessionService = sessionService;
             this.messageService = messageService;
             this.embeddingService = embeddingService;
             _serviceChunkService = serviceChunk;
+            ragService = rag;
         }
 
         //                       ============= Just for insure that model is work ===============
@@ -119,6 +123,56 @@ namespace Khedmetak.Controllers
 
             return Ok(chunks);
         }
+
+        [HttpPost("rag")]
+        public async Task<IActionResult> Rag([FromBody] UserMessageDTO userMessageDTO)
+        {
+            //          --------- if user not write anything in the message 
+            if (userMessageDTO == null || string.IsNullOrWhiteSpace(userMessageDTO.Message))
+            {
+                return BadRequest(ApiResponse<string>.Fail("Message is required."));
+            }
+
+            //          ----------- if the sessionGuidId is null 
+
+            if (userMessageDTO.SessionGuidId == null)
+            {
+                return BadRequest(ApiResponse<string>.Fail("Not Available to send message without sessionId"));
+
+            }
+
+            //      ------------ (1) get all messages of session by session Guid id ----------
+            var sessionDTO = await sessionService.GetSessionLast15Messages(userMessageDTO.SessionGuidId);
+
+            //              --------- if session is not exist ----> return not found
+
+            if (sessionDTO == null)
+            {
+                return NotFound(ApiResponse<string>.Fail("Invalid SessionId"));
+            }
+            //              ---------  session exist and message exist 
+            //          ----------- (2) then send the message to AI and wait for response
+            var context = await ragService.RagPipeline(userMessageDTO.Message);
+            var aiResponse = await aiService.AskWithContextAsync(userMessageDTO.Message, context,sessionDTO);
+
+            //  ------- (3) save user message and AI response to database
+            AddMsgAndReplyTOSessionDTO msgAndReply = new()
+            {
+                SessionGuidId = userMessageDTO.SessionGuidId,
+                UserMessage = userMessageDTO.Message,
+                AIResponse = aiResponse
+            };
+            await messageService.AddUserMessageAndResponseAsync(msgAndReply);
+
+            // ----------- (4) send AI response to the session of user
+            ChatResponseDTO response = new ChatResponseDTO()
+            {
+                Message = aiResponse,
+                SessionGuidId = userMessageDTO.SessionGuidId
+            };
+            return Ok(ApiResponse<ChatResponseDTO>.Ok(response));
+        }
+
 
     }
 }
