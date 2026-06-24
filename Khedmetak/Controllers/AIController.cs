@@ -14,7 +14,7 @@ using Qdrant.Client.Grpc;
 namespace Khedmetak.Controllers
 {
     [Route("api/[controller]")]
-    [Authorize]
+    //[Authorize]
     [ApiController]
     public class AIController : ControllerBase
     {
