@@ -1,4 +1,5 @@
 ﻿using Khedmetak.DAL.Entities.Base;
+using Khedmetak.DAL.Entities.Khedmetak.DAL.Entities;
 using Microsoft.AspNetCore.Identity;
 using System;
 using System.Collections.Generic;
@@ -20,6 +21,7 @@ namespace Khedmetak.DAL.Entities
         public ICollection<ChatSession> ChatSessions { get; set; } = new List<ChatSession>();
         public ICollection<UserDocument> UserDocuments { get; set; } = new List<UserDocument>();
         public ICollection<Feedback> Feedbacks { get; set; } = new List<Feedback>();
+        public CitizenProfile? CitizenProfile { get; set; }
         #endregion
     }
 }

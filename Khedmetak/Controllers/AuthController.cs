@@ -3,10 +3,10 @@ using Khedmetak.BLL.ApiResponse;
 using Khedmetak.BLL.DTOS.Auth;
 using Khedmetak.BLL.Services.Implementation;
 using Khedmetak.DAL.Entities;
+using Khedmetak.DAL.Entities.Khedmetak.DAL.Entities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-
-using Microsoft.AspNetCore.Authorization;
 
 namespace Khedmetak.API.Controllers
 {
@@ -54,6 +54,57 @@ namespace Khedmetak.API.Controllers
             var roles = await _userManager.GetRolesAsync(user);
 
             //  اعمل التوكن
+            var token = _jwtService.GenerateToken(user, roles);
+
+            var response = new AuthResponseDto
+            {
+                Token = token,
+                Email = user.Email!,
+                Roles = roles,
+                ExpiresAt = DateTime.UtcNow.AddDays(7)
+            };
+
+            return Ok(ApiResponse<AuthResponseDto>.Ok(response));
+        }
+        // Khedmetak.API/Controllers/AuthController.cs - أضف الـ endpoint ده جوه الـ class
+        [HttpPost("register")]
+        public async Task<IActionResult> Register([FromBody] RegisterDto dto)
+        {
+            // تحقق إن الإيميل مش موجود
+            var existingUser = await _userManager.FindByEmailAsync(dto.Email);
+            if (existingUser != null)
+                return BadRequest(ApiResponse<string>.Fail("الإيميل ده مسجل بالفعل"));
+
+            // عمل اليوزر
+            var user = new User
+            {
+                UserName = dto.Email,
+                Email = dto.Email,
+                Name = dto.Name,
+                CitizenProfile = new CitizenProfile
+                {
+                    FullName = dto.FullName,
+                    DateOfBirth = dto.DateOfBirth,
+                    City = dto.City,
+                    District = dto.District,
+                    Street = dto.Street,
+                    BuildingNumber = dto.BuildingNumber,
+                    FloorNumber = dto.FloorNumber,
+                    ApartmentNumber = dto.ApartmentNumber,
+                    PostalCode = dto.PostalCode,
+                }
+            };
+
+            var result = await _userManager.CreateAsync(user, dto.Password);
+            if (!result.Succeeded)
+            {
+                var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+                return BadRequest(ApiResponse<string>.Fail(errors));
+            }
+
+            await _userManager.AddToRoleAsync(user, "User");
+
+            var roles = await _userManager.GetRolesAsync(user);
             var token = _jwtService.GenerateToken(user, roles);
 
             var response = new AuthResponseDto
