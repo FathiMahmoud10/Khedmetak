@@ -1,5 +1,4 @@
-﻿// Khedmetak.DAL/Repositories/UserDocumentRepository.cs
-using Khedmetak.Core.Data;
+﻿using Khedmetak.Core.Data;
 using Khedmetak.DAL.Entities;
 using Khedmetak.DAL.Repo.Abstraction;
 using Khedmetak.DAL.Repositories.Interfaces;
@@ -14,6 +13,7 @@ namespace Khedmetak.DAL.Repositories
         public async Task<IEnumerable<UserDocument>> GetByUserIdAsync(int userId)
             => await _dbSet
                 .Where(d => d.UserId == userId)
+                .OrderByDescending(d => d.UploadedAt)
                 .ToListAsync();
     }
 }

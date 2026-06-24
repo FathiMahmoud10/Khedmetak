@@ -1,4 +1,5 @@
 using Khedmetak.DAL.Entities;
+using Khedmetak.DAL.Repo.shared;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;

@@ -210,7 +210,7 @@ builder.Services.AddScoped<IRequiredDocumentRepository, RequiredDocumentReposito
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IGovServiceService, GovServiceService>();
 builder.Services.AddScoped<IGovServiceAdminService, GovServiceAdminService>();
-
+builder.Services.AddScoped<IUserDocumentService, UserDocumentService>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<IDocumentService, DocumentService>();
 builder.Services.AddScoped<JwtService>();

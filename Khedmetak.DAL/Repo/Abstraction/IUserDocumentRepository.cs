@@ -1,12 +1,7 @@
 ﻿using Khedmetak.DAL.Entities;
 using Khedmetak.DAL.Repo.shared;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace Khedmetak.DAL.Repo.Abstraction
+namespace Khedmetak.DAL.Repositories.Interfaces
 {
     public interface IUserDocumentRepository : IGenericRepository<UserDocument>
     {
