@@ -230,6 +230,9 @@ if (!string.IsNullOrWhiteSpace(apiKey))
     builder.Services.AddScoped<IAIChatService, AIChatService>();
     builder.Services.AddScoped<IEmbeddingService, EmbeddingService>();
     builder.Services.AddScoped<IChunkService, ChunkService>();
+    builder.Services.AddScoped<IUserDocumentService, UserDocumentService>();
+    builder.Services.AddScoped<IStatisticsService, StatisticsService>();
+    builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
     builder.Services.AddScoped<IQdrantService, QdrantService>();
     builder.Services.AddScoped<QdrantService>();

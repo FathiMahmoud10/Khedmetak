@@ -16,6 +16,7 @@ namespace Khedmetak.Controllers
     [Route("api/[controller]")]
     //[Authorize]
     [ApiController]
+    [AllowAnonymous]
     public class AIController : ControllerBase
     {
         private readonly IAIChatService aiService;

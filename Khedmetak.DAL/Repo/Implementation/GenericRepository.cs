@@ -1,4 +1,5 @@
 using Khedmetak.Core.Data;
+using Khedmetak.DAL.Entities;
 using Khedmetak.DAL.Entities.Base;
 using Khedmetak.DAL.Repo.shared;
 using Microsoft.EntityFrameworkCore;
@@ -70,6 +71,11 @@ namespace Khedmetak.DAL.Repositories
             }
 
             return await query.FirstOrDefaultAsync(predicate);
+        }
+
+        public Task<IEnumerable<UserDocument>> FindAsync(Expression<Func<UserDocument, bool>> predicate)
+        {
+            throw new NotImplementedException();
         }
     }
 }
