@@ -15,6 +15,8 @@ namespace Khedmetak.AI.Services.Abstraction
         public Task<Guid> AddNewSession(NewSessionDTO newSessionDTO);
      
         public Task<ChatSessionDTO?> GetSessionAllMessages(Guid sessionGuidId);
+        public Task<ChatSessionDTO?> GetSessionLast15Messages(Guid sessionGuidId);
+
 
 
         //public Task<ChatSession?> GetSessionById(int id);

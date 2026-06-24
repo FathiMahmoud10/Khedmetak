@@ -10,7 +10,7 @@ namespace Khedmetak.AI.Configuration
     {
         public string Provider { get; set; } = "GitHubModels";
         public string Model { get; set; } =  "meta/Llama-3.3-70B-Instruct";
-        public string EmbeddingModel { get; set; } = "openai/text-embedding-3-small";
+        public string EmbeddingModel { get; set; } = "jina-embeddings-v5-text-small";
         public string ApiKey { get; set; } = string.Empty;
         public int MaxToken { get; set; } = 500;
        

@@ -16,11 +16,11 @@ namespace Khedmetak.AI.Services.Implementation
 {
     public class ChatSessionService : IChatSessionService
     {
-        private readonly IGenericRepository<ChatSession> sessionRepo;
+        private readonly IChatSessionRepository sessionRepo;
         //private readonly IGenericRepository<User> userRepo;
         private readonly IUnitOfWork unitOfWork;
 
-        public ChatSessionService(IGenericRepository<ChatSession> repo,IUnitOfWork unitOfWork)//,IGenericRepository<User> userRepo)
+        public ChatSessionService(IChatSessionRepository repo,IUnitOfWork unitOfWork)//,IGenericRepository<User> userRepo)
         {
             sessionRepo = repo;
             this.unitOfWork = unitOfWork;
@@ -30,44 +30,44 @@ namespace Khedmetak.AI.Services.Implementation
         //               =========== Add New Session ===========
         public async Task<Guid> AddNewSession(NewSessionDTO newSessionDTO)
         {
-           var systemPrompt = new ChatMessage() { Role = "system",
-               Content= """
-               You are an Egyptian Government Services Assistant.
+           //var systemPrompt = new ChatMessage() { Role = "system",
+           //    Content= """
+           //    You are an Egyptian Government Services Assistant.
 
-               Always answer in Egyptian Arabic.
+           //    Always answer in Egyptian Arabic.
 
-               Formatting rules:
-               - Use Markdown.
-               - Use headings (##).
-               - Use bullet lists (-).
-               - Use numbered lists (1. 2. 3.).
-               - Never output JSON.
-               - Never output escaped characters such as \n or \r\n.
-               - Keep answers concise and structured.
+           //    Formatting rules:
+           //    - Use Markdown.
+           //    - Use headings (##).
+           //    - Use bullet lists (-).
+           //    - Use numbered lists (1. 2. 3.).
+           //    - Never output JSON.
+           //    - Never output escaped characters such as \n or \r\n.
+           //    - Keep answers concise and structured.
 
-               Response Template:
+           //    Response Template:
 
-               # {Service Name}
+           //    # {Service Name}
 
-               ## 📋 Required Documents
-               - Document 1
-               - Document 2
+           //    ## 📋 Required Documents
+           //    - Document 1
+           //    - Document 2
 
-               ## 📝 Steps
-               1. Step 1
-               2. Step 2
+           //    ## 📝 Steps
+           //    1. Step 1
+           //    2. Step 2
 
-               ## 💰 Fees
-               - Fee information
-               - If unavailable, write: "غير متوفر حالياً"
+           //    ## 💰 Fees
+           //    - Fee information
+           //    - If unavailable, write: "غير متوفر حالياً"
 
-               ## ⏳ Processing Time
-               - Processing time
-               - If unavailable, write: "غير متوفر حالياً"
+           //    ## ⏳ Processing Time
+           //    - Processing time
+           //    - If unavailable, write: "غير متوفر حالياً"
 
 
-               """
-           };
+           //    """
+           //};
             //User ? user = await userRepo.FindOneAsync(u => u.Email == newSessionDTO.UserEmail);
             //var userId = user.Id;
             int? userId = null;
@@ -78,9 +78,9 @@ namespace Khedmetak.AI.Services.Implementation
                 UserId = userId
 
             };
-            session.ChatMessages.Add(systemPrompt);
+            //session.ChatMessages.Add(systemPrompt);
 
-            sessionRepo.Add(session); 
+            sessionRepo.Add(session);
             await unitOfWork.SaveChangesAsync(); 
 
             return session.SessionGuid;
@@ -106,7 +106,7 @@ namespace Khedmetak.AI.Services.Implementation
                     ChatSession_ChatHistory = new List<ChatSessionMessageDTO>()
                 };
 
-            //var chatsessionWithMessages = await()
+            
             // --------------- if session exist and has messages
             // ----- then return new ChatSessionMessageDTO that has session ID and all Messages of it
             var chatHistory = new List<ChatSessionMessageDTO>();
@@ -127,7 +127,46 @@ namespace Khedmetak.AI.Services.Implementation
             };
         }
 
-        
+        public async Task<ChatSessionDTO?> GetSessionLast15Messages(Guid sessionGuidId)
+        {
+            var chatSession = await sessionRepo.FindOneAsync(s => s.SessionGuid == sessionGuidId);
+
+            //  ------------ if session doesn't Exist
+            if (chatSession == null)
+                return null;
+            var chatSessionLastMessages = await sessionRepo.GetLastMessagesAsync(sessionGuidId, 15);
+            // --------------  if session Exist but not has messages yet
+            // -------------- then return new empty list of ChatSessionMessageDTO
+            if (chatSessionLastMessages == null || chatSessionLastMessages.Count ==0)
+                return new ChatSessionDTO()
+                {
+                    SessionGuidId = sessionGuidId,
+                    ChatSession_ChatHistory = new List<ChatSessionMessageDTO>()
+                };
+
+
+            // --------------- if session exist and has messages
+            // ----- then return new ChatSessionMessageDTO that has session ID and all Messages of it
+            var chatHistory = new List<ChatSessionMessageDTO>();
+
+            foreach (var message in chatSession.ChatMessages)
+            {
+                chatHistory.Add(new ChatSessionMessageDTO
+                {
+                    MessageId = message.Id,
+                    Content = message.Content,
+                    Role = message.Role,
+                });
+            }
+
+            return new ChatSessionDTO()
+            {
+                SessionGuidId = sessionGuidId,
+                ChatSession_ChatHistory = chatHistory
+            };
+        }
+
+
 
 
     }

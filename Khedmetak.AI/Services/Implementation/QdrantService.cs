@@ -6,50 +6,53 @@ using Qdrant.Client;
 using Qdrant.Client.Grpc;
 using System.Security.Cryptography;
 using System.Text;
+using  Qdrant.Client;
 
 
 namespace Khedmetak.AI.Services.Implementation
 {
-    
 
-    public class QdrantService: IQdrantService
+
+    public class QdrantService : IQdrantService
     {
-        
 
-        private  string CollectionName;
+
+        private string CollectionName;
         private readonly QdrantClient _client;
 
         public QdrantService(QdrantClient client, IOptions<QdrantDBSettings> options)
         {
-           
+
             CollectionName = options.Value.QdrantCollection;
 
             _client = client;
         }
-        
+
         // =========================
         // UPSERT CHUNKS
         // =========================
 
         // ================ Add Service chunks to vectorDatabase and make  embedding for each chunk content ===================
-        public async Task UpsertServiceChunksAsync( List<ServiceChunkDTO> chunks,Func<string, Task<float[]>> embedFunc)
+        public async Task UpsertServiceChunksAsync(List<ServiceChunkDTO> chunks, Func<string, Task<float[]>> embedFunc)
         {
-                var points = new List<PointStruct>();
+            var points = new List<PointStruct>();
 
-                foreach (var chunk in chunks)
+            foreach (var chunk in chunks)
+            {
+                float[] vector = await embedFunc(chunk.Content);
+
+                var point = new PointStruct
                 {
-                    float[] vector = await embedFunc(chunk.Content);
-
-                    var point = new PointStruct
+                    Id = new PointId
                     {
-                        Id = new PointId
-                        {
-                            Uuid = CreateDeterministicGuid(chunk.ChunkId)
-                        },
+                        Uuid = CreateDeterministicGuid(chunk.ChunkId)
+                    },
+                    Vectors = new Dictionary<string, Vector>
+                    {
+                        ["dense"] = vector
+                    },
 
-                        Vectors = vector,
-
-                        Payload =
+                    Payload =
                     {
                         ["ServiceId"] = chunk.ServiceId,
                         ["ServiceName"] = chunk.ServiceName,
@@ -62,16 +65,18 @@ namespace Khedmetak.AI.Services.Implementation
                         ["Content"] = chunk.Content,
                         ["Language"] = "ar"
                     }
-                    };
+                };
 
-                    points.Add(point);
-                }
+                points.Add(point);
+            }
 
-                await _client.UpsertAsync(
-                    collectionName: CollectionName,
-                    points: points
-                );
+            await _client.UpsertAsync(
+                collectionName: CollectionName,
+                points: points
+            );
         }
+
+
 
 
         // =========================
@@ -98,10 +103,20 @@ namespace Khedmetak.AI.Services.Implementation
                             }
                         }
                     }
-            });
+                });
         }
 
-        
+        public async Task<IReadOnlyList<ScoredPoint>> SearchQudrant(float[] userQuestionEmbedding)
+        {
+             var results = await _client.QueryAsync(
+               collectionName: CollectionName,
+               query: userQuestionEmbedding,   // float[] / ReadOnlyMemory<float> etc.
+               usingVector: "dense",           // name of the named vector
+               limit: 10
+           );
+            return results;
+        }
+
         // =========== to Generate the Point Id when add chunk to  Vector Database  ==========
         private static string CreateDeterministicGuid(string value)
         {
