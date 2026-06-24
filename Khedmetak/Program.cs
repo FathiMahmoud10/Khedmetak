@@ -222,6 +222,7 @@ if (!string.IsNullOrWhiteSpace(apiKey))
     builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
     builder.Services.AddScoped<IDocumentService, DocumentService>();
     builder.Services.AddScoped<JwtService>();
+    builder.Services.AddScoped<IUserDashboardService, UserDashboardService>();
 
     // AI Services
     builder.Services.AddScoped<IChatSessionService, ChatSessionService>();
