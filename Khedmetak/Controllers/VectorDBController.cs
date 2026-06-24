@@ -44,17 +44,17 @@ namespace Khedmetak.Controllers
             }
 
 
-        //[HttpGet("search")]
-        //public async Task<IActionResult> Search([FromQuery] string question)
-        //{
-        //    if (string.IsNullOrWhiteSpace(question))
-        //        return BadRequest("Question is required.");
+        [HttpGet("search")]
+        public async Task<IActionResult> Search([FromQuery] string question)
+        {
+            if (string.IsNullOrWhiteSpace(question))
+                return BadRequest("Question is required.");
 
-        //    IReadOnlyList<ScoredPoint> results =
-        //        await _ragService.RagPipeline(question);
+            string results =
+                await _ragService.RagPipeline(question);
 
-        //    return Ok(results);
-        //}
+            return Ok(results);
+        }
     }
 }
 

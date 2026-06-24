@@ -61,14 +61,14 @@ namespace Khedmetak.Controllers
             //          --------- if user not write anything in the message 
             if (userMessageDTO == null || string.IsNullOrWhiteSpace(userMessageDTO.Message))
             {
-                return BadRequest(ApiResponse<string>.Fail("Message is required."));
+                return BadRequest("Message is required.");
             }
 
             //          ----------- if the sessionGuidId is null 
 
             if (userMessageDTO.SessionGuidId == null)
             {
-                return BadRequest(ApiResponse<string>.Fail("Not Available to send message without sessionId"));
+                return BadRequest("Not Available to send message without sessionId");
 
             }
 
@@ -79,7 +79,7 @@ namespace Khedmetak.Controllers
 
             if (sessionDTO == null)
             {
-                return NotFound(ApiResponse<string>.Fail("Invalid SessionId"));
+                return NotFound("Invalid SessionId");
             }
             //              ---------  session exist and message exist 
             //          ----------- (2) then send the message to AI and wait for response
@@ -101,7 +101,7 @@ namespace Khedmetak.Controllers
                 Message = aiResponse,
                 SessionGuidId = userMessageDTO.SessionGuidId
             };
-            return Ok(ApiResponse<ChatResponseDTO>.Ok(response));
+            return Ok(response.Message);
         }
 
             // ================= Embedding Controller ================
@@ -170,7 +170,7 @@ namespace Khedmetak.Controllers
                 Message = aiResponse,
                 SessionGuidId = userMessageDTO.SessionGuidId
             };
-            return Ok(ApiResponse<ChatResponseDTO>.Ok(response));
+            return Ok(response.Message);
         }
 
 

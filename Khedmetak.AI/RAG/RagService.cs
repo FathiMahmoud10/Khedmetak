@@ -32,7 +32,7 @@ namespace Khedmetak.AI.RAG
 
             // 5. Extract Chunks and build context
 
-            var chunks = results.Where(x => x.Score > 0.60)
+            var chunks = results.Where(x => x.Score > 0.30)
                 .Select(x =>
                     x.Payload["Content"].StringValue)
                 .ToList();
