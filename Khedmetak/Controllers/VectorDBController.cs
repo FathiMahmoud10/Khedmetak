@@ -12,10 +12,9 @@ namespace Khedmetak.Controllers
     {
        
             private readonly IVectorDBOperationsService _vectorIndexingService;
-        private readonly IRagService _ragService;
+        private readonly IRagContextService _ragService;
 
-        public VectorDBController(
-                IVectorDBOperationsService vectorIndexingService,IRagService ragService)
+        public VectorDBController(IVectorDBOperationsService vectorIndexingService,IRagContextService ragService)
             {
                 _vectorIndexingService = vectorIndexingService;
                 _ragService = ragService;
@@ -24,7 +23,7 @@ namespace Khedmetak.Controllers
             [HttpPost("Add-service/{serviceId:int}")]
             public async Task<IActionResult> IndexService(int serviceId)
             {
-                await _vectorIndexingService.AddGovServiceToVectorDBAsync(serviceId);
+                await _vectorIndexingService.AddOrUpdateGovServiceToVectorDBAsync(serviceId);
 
                 return Ok(new
                 {
@@ -51,7 +50,7 @@ namespace Khedmetak.Controllers
                 return BadRequest("Question is required.");
 
             string results =
-                await _ragService.RagPipeline(question);
+                await _ragService.GenerateContextFromQuestionAsync(question);
 
             return Ok(results);
         }

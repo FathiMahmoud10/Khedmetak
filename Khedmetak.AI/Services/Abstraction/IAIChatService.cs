@@ -13,10 +13,10 @@ namespace Khedmetak.AI.Services.Abstraction
     {
         
         //public  Task<string> AskAsync(string newUserMessage);
-        public  Task<string> AskAsync(string newUserMessage, ChatSessionDTO chatSessionDto);
+        public  Task<string> AskAsync(string newUserMessage);
         //public  Task<string> AskWithContextAsync(string userQuestion,string context);
         public  Task<string> RewriteQuestionAsync(string userQuestion,ChatSessionDTO? chatSessionDto);
-        public Task<string> AskWithContextAsync(string userQuestion, string context, ChatSessionDTO? chatSessionDto);
+        public Task<string> AskWithContextAsync(string userQuestion, string context);
 
     }
 }

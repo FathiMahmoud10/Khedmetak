@@ -18,108 +18,84 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using ChatMessage = OpenAI.Chat.ChatMessage;
+using Microsoft.Extensions.AI;
 
 namespace Khedmetak.AI.Services.Implementation
 {
     public class AIChatService : IAIChatService
     {
         private readonly ChatClient chat;
+        private readonly IChatClient ch;
 
         public AIChatService([FromKeyedServices("github")] OpenAIClient githubClient, IOptions<AISettings> settings)
         {
+          
             chat = githubClient.GetChatClient(settings.Value.Model);
-
+            
         }
 
         public async Task<string> AskAsync(string newUserMessage)
         {
+
             ChatCompletion completion = await chat.CompleteChatAsync(
                 newUserMessage);
 
             return completion.Content[0].Text;
         }
 
-        public async Task<string> AskAsync( string newUserMessage, ChatSessionDTO chatSessionDto)
-        {
-            // chatmessage builtin Open AI not our Entity database
-            List<ChatMessage> messages = new();
+        //public async Task<string> AskAsync( string newUserMessage)
+        //{
+        //    // chatmessage builtin Open AI not our Entity database
+        //    List<ChatMessage> messages = new();
 
-            messages.Add(ChatMessage.CreateSystemMessage(
-                """
-                You are an Egyptian Government Services Assistant.
+        //    messages.Add(ChatMessage.CreateSystemMessage(
+        //        """
+        //        You are an Egyptian Government Services General Assistant .
 
-                Always answer in Egyptian Arabic.
-
-                Formatting rules:
-                - Use Markdown.
-                - Use headings (##).
-                - Use bullet lists (-).
-                - Use numbered lists (1. 2. 3.).
-                - Never output JSON.
-                - Never output escaped characters such as \n or \r\n.
-                - Keep answers concise and structured.
-
-                Response Template:
-
-                # {Service Name}
-
-                ## 📋 Required Documents
-                - Document 1
-                - Document 2
-
-                ## 📝 Steps
-                1. Step 1
-                2. Step 2
-
-                ## 💰 Fees
-                - Fee information
-                - If unavailable, write: "غير متوفر حالياً"
-
-                ## ⏳ Processing Time
-                - Processing time
-                - If unavailable, write: "غير متوفر حالياً"
-
-
-                """)
-            );
+        //        Always answer in Egyptian Arabic.
+        //        Don't reply to Another Topic.
+        //        Don't reply about any GovService question that need data from database
+ 
+        //        """)
+        //    );
          
 
-            // Previous messages
-            if (chatSessionDto?.ChatSession_ChatHistory != null)
-            {
-                foreach (var msg in chatSessionDto.ChatSession_ChatHistory)
-                {
-                    if (msg.Role.Equals("user", StringComparison.OrdinalIgnoreCase))
-                    {
-                        messages.Add(
-                            ChatMessage.CreateUserMessage(msg.Content));
-                    }
-                    else if (msg.Role.Equals("assistant", StringComparison.OrdinalIgnoreCase))
-                    {
-                        messages.Add(
-                            ChatMessage.CreateAssistantMessage(msg.Content));
-                    }
-                    else
-                    {
-                        messages.Add(
-                            ChatMessage.CreateSystemMessage(msg.Content));
-                    }
-                }
-            }
+        //    //// Previous messages
+        //    //if (chatSessionDto?.ChatSession_ChatHistory != null)
+        //    //{
+        //    //    foreach (var msg in chatSessionDto.ChatSession_ChatHistory)
+        //    //    {
+        //    //        if (msg.Role.Equals("user", StringComparison.OrdinalIgnoreCase))
+        //    //        {
+        //    //            messages.Add(
+        //    //                ChatMessage.CreateUserMessage(msg.Content));
+        //    //        }
+        //    //        else if (msg.Role.Equals("assistant", StringComparison.OrdinalIgnoreCase))
+        //    //        {
+        //    //            messages.Add(
+        //    //                ChatMessage.CreateAssistantMessage(msg.Content));
+        //    //        }
+        //    //        else
+        //    //        {
+        //    //            messages.Add(
+        //    //                ChatMessage.CreateSystemMessage(msg.Content));
+        //    //        }
+        //    //    }
+        //    //}
 
-            // Current user message
-            messages.Add(
-                ChatMessage.CreateUserMessage(newUserMessage));
+        //    // Current user message
+        //    messages.Add(
+        //        ChatMessage.CreateUserMessage(newUserMessage));
 
-            // send request to aI model and wait to response
-            ChatCompletion completion = await chat.CompleteChatAsync(messages);
+        //    // send request to aI model and wait to response
+        //    ChatCompletion completion = await chat.CompleteChatAsync(messages);
 
-            return completion.Content[0].Text;
-        }
+        //    return completion.Content[0].Text;
+        //}
 
 
 
-    public async Task<string> AskWithContextAsync(string userQuestion,string context,ChatSessionDTO? chatSessionDto)
+    public async Task<string> AskWithContextAsync(string userQuestion,string context)
     {
         List<ChatMessage> messages = new();
 
@@ -147,20 +123,20 @@ namespace Khedmetak.AI.Services.Implementation
              """
         ));
 
-            if (chatSessionDto?.ChatSession_ChatHistory != null)
-            {
-                foreach (var msg in chatSessionDto.ChatSession_ChatHistory.TakeLast(10))
-                {
-                    if (msg.Role.Equals("user", StringComparison.OrdinalIgnoreCase))
-                    {
-                        messages.Add(ChatMessage.CreateUserMessage(msg.Content));
-                    }
-                    else if (msg.Role.Equals("assistant", StringComparison.OrdinalIgnoreCase))
-                    {
-                        messages.Add(ChatMessage.CreateAssistantMessage(msg.Content));
-                    }
-                }
-            }
+            //if (chatSessionDto?.ChatSession_ChatHistory != null)
+            //{
+            //    foreach (var msg in chatSessionDto.ChatSession_ChatHistory.TakeLast(10))
+            //    {
+            //        if (msg.Role.Equals("user", StringComparison.OrdinalIgnoreCase))
+            //        {
+            //            messages.Add(ChatMessage.CreateUserMessage(msg.Content));
+            //        }
+            //        else if (msg.Role.Equals("assistant", StringComparison.OrdinalIgnoreCase))
+            //        {
+            //            messages.Add(ChatMessage.CreateAssistantMessage(msg.Content));
+            //        }
+            //    }
+            //}
 
             messages.Add(ChatMessage.CreateUserMessage(userQuestion));
 

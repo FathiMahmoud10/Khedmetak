@@ -6,16 +6,14 @@ using Qdrant.Client;
 using Qdrant.Client.Grpc;
 using System.Security.Cryptography;
 using System.Text;
-using  Qdrant.Client;
+
 
 
 namespace Khedmetak.AI.Services.Implementation
 {
 
-
-    public class QdrantService : IQdrantService
+    public class QdrantService : IVectorDB
     {
-
 
         private string CollectionName;
         private readonly QdrantClient _client;
@@ -28,11 +26,8 @@ namespace Khedmetak.AI.Services.Implementation
             _client = client;
         }
 
-        // =========================
-        // UPSERT CHUNKS
-        // =========================
-
-        // ================ Add Service chunks to vectorDatabase and make  embedding for each chunk content ===================
+        // ========================= UPSERT CHUNKS =========================
+        // ================ Add Service chunks and their embedding content of each chunk to vectorDatabase ===================
         public async Task UpsertServiceChunksAsync(List<ServiceChunkDTO> chunks, Func<string, Task<float[]>> embedFunc)
         {
             var points = new List<PointStruct>();
@@ -77,12 +72,7 @@ namespace Khedmetak.AI.Services.Implementation
         }
 
 
-
-
-        // =========================
-        //DELETE ALL CHUNKS OF SERVICE
-        //(for updates)
-        //=========================
+        // ========================= DELETE ALL CHUNKS OF SERVICE =========================
         public async Task DeleteServiceChunksAsync(int serviceId)
         {
             await _client.DeleteAsync(
@@ -106,7 +96,9 @@ namespace Khedmetak.AI.Services.Implementation
                 });
         }
 
-        public async Task<IReadOnlyList<ScoredPoint>> SearchQudrant(float[] userQuestionEmbedding)
+        // ========================= Search About Relevant Chunks to embedding of user question  in Vector DB =========================
+
+        public async Task<IReadOnlyList<ScoredPoint>> SearchInVectorDBAsync(float[] userQuestionEmbedding)
         {
              var results = await _client.QueryAsync(
                collectionName: CollectionName,

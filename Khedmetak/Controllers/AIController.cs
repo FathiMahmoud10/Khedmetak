@@ -19,22 +19,17 @@ namespace Khedmetak.Controllers
     [AllowAnonymous]
     public class AIController : ControllerBase
     {
-        private readonly IAIChatService aiService;
+        private readonly IChatOrchestrator chatOrchestrator;
+        //private readonly IAIChatService _aIChatService;
         private readonly IChatSessionService sessionService;
         private readonly IChatMessageService messageService;
-        private readonly IEmbeddingService embeddingService;
-        private readonly IChunkService _serviceChunkService;
-        private readonly IRagService ragService;
 
-        public AIController(IAIChatService aiService, IChatSessionService sessionService, IChatMessageService messageService,IEmbeddingService embeddingService,
-            IChunkService serviceChunk,IRagService rag)
+        public AIController(IChatOrchestrator Orchestrator, IChatSessionService sessionService, IChatMessageService messageService)
         {
-            this.aiService = aiService;
             this.sessionService = sessionService;
             this.messageService = messageService;
-            this.embeddingService = embeddingService;
-            _serviceChunkService = serviceChunk;
-            ragService = rag;
+            this.chatOrchestrator = Orchestrator;
+            //_aIChatService = aIChatService;
         }
 
         //                       ============= Just for insure that model is work ===============
@@ -48,7 +43,7 @@ namespace Khedmetak.Controllers
         //    }
 
 
-        //    var aiResponse = await aiService.AskAsync(message);
+        //    var aiResponse = await _aIChatService.AskAsync(message);
 
         //    return Ok(aiResponse);
         //}
@@ -85,7 +80,7 @@ namespace Khedmetak.Controllers
             //              ---------  session exist and message exist 
             //          ----------- (2) then send the message to AI and wait for response
 
-            var aiResponse = await aiService.AskAsync(userMessageDTO.Message, sessionDTO);
+            var aiResponse = await chatOrchestrator.AskAsync(userMessageDTO.Message, sessionDTO);
 
             //  ------- (3) save user message and AI response to database
             AddMsgAndReplyTOSessionDTO msgAndReply = new()
@@ -97,82 +92,82 @@ namespace Khedmetak.Controllers
             await messageService.AddUserMessageAndResponseAsync(msgAndReply);
 
             // ----------- (4) send AI response to the session of user
-            ChatResponseDTO response = new ChatResponseDTO()
-            {
-                Message = aiResponse,
-                SessionGuidId = userMessageDTO.SessionGuidId
-            };
-            return Ok(response.Message);
+            //ChatResponseDTO response = new ChatResponseDTO()
+            //{
+            //    Message = aiResponse,
+            //    SessionGuidId = userMessageDTO.SessionGuidId
+            //};
+            return Ok(aiResponse);
         }
 
             // ================= Embedding Controller ================
-            [HttpPost("embedding")]
-            public async Task<IActionResult> GenerateEmbedding([FromBody]string text)
-            {
-                var vector = await embeddingService.GenerateEmbeddingAsync(text);
+            //[HttpPost("embedding")]
+            //public async Task<IActionResult> GenerateEmbedding([FromBody]string text)
+            //{
+            //    var vector = await embeddingService.GenerateEmbeddingAsync(text);
 
-                return Ok(vector);
-            }
+            //    return Ok(vector);
+            //}
 
-        [HttpGet("ServiceChunks/{serviceId}")]
-        public async Task<ActionResult<List<ServiceChunkDTO>>> GetServiceChunks(int serviceId)
-        {
-            var chunks = await _serviceChunkService.GenerateChunksAsync(serviceId);
+        //[HttpGet("ServiceChunks/{serviceId}")]
+        //public async Task<ActionResult<List<ServiceChunkDTO>>> GetServiceChunks(int serviceId)
+        //{
+        //    var chunks = await _serviceChunkService.GenerateChunksAsync(serviceId);
 
-            if (chunks == null || !chunks.Any())
-                return NotFound($"Service with id {serviceId} was not found.");
+        //    if (chunks == null || !chunks.Any())
+        //        return NotFound($"Service with id {serviceId} was not found.");
 
-            return Ok(chunks);
-        }
+        //    return Ok(chunks);
+        //}
 
-        [HttpPost("rag")]
-        public async Task<IActionResult> Rag([FromBody] UserMessageDTO userMessageDTO)
-        {
-            //          --------- if user not write anything in the message 
-            if (userMessageDTO == null || string.IsNullOrWhiteSpace(userMessageDTO.Message))
-            {
-                return BadRequest(ApiResponse<string>.Fail("Message is required."));
-            }
+        //[HttpPost("rag")]
+        //public async Task<IActionResult> Rag([FromBody] UserMessageDTO userMessageDTO)
+        //{
+        //    //          --------- if user not write anything in the message 
+        //    if (userMessageDTO == null || string.IsNullOrWhiteSpace(userMessageDTO.Message))
+        //    {
+        //        return BadRequest(ApiResponse<string>.Fail("Message is required."));
+        //    }
 
-            //          ----------- if the sessionGuidId is null 
+        //    //          ----------- if the sessionGuidId is null 
 
-            if (userMessageDTO.SessionGuidId == null)
-            {
-                return BadRequest(ApiResponse<string>.Fail("Not Available to send message without sessionId"));
+        //    if (userMessageDTO.SessionGuidId == null)
+        //    {
+        //        return BadRequest(ApiResponse<string>.Fail("Not Available to send message without sessionId"));
 
-            }
+        //    }
 
-            //      ------------ (1) get all messages of session by session Guid id ----------
-            var sessionDTO = await sessionService.GetSessionLast15Messages(userMessageDTO.SessionGuidId);
+        //    //      ------------ (1) get all messages of session by session Guid id ----------
+        //    var sessionDTO = await sessionService.GetSessionLast15Messages(userMessageDTO.SessionGuidId);
 
-            //              --------- if session is not exist ----> return not found
+        //    //              --------- if session is not exist ----> return not found
 
-            if (sessionDTO == null)
-            {
-                return NotFound(ApiResponse<string>.Fail("Invalid SessionId"));
-            }
-            //              ---------  session exist and message exist 
-            //          ----------- (2) then send the message to AI and wait for response
-            var context = await ragService.RagPipeline(userMessageDTO.Message);
-            var aiResponse = await aiService.AskWithContextAsync(userMessageDTO.Message, context,sessionDTO);
+        //    if (sessionDTO == null)
+        //    {
+        //        return NotFound(ApiResponse<string>.Fail("Invalid SessionId"));
+        //    }
+        //    //              ---------  session exist and message exist 
+        //    //          ----------- (2) then send the message to AI and wait for response
+        //    var context = await ragService.GenerateContextFromQuestionAsync(userMessageDTO.Message);
+        //    var aiResponse = await aiService.AskWithContextAsync(userMessageDTO.Message, context,sessionDTO);
 
-            //  ------- (3) save user message and AI response to database
-            AddMsgAndReplyTOSessionDTO msgAndReply = new()
-            {
-                SessionGuidId = userMessageDTO.SessionGuidId,
-                UserMessage = userMessageDTO.Message,
-                AIResponse = aiResponse
-            };
-            await messageService.AddUserMessageAndResponseAsync(msgAndReply);
+        //    //  ------- (3) save user message and AI response to database
+        //    AddMsgAndReplyTOSessionDTO msgAndReply = new()
+        //    {
+        //        SessionGuidId = userMessageDTO.SessionGuidId,
+        //        UserMessage = userMessageDTO.Message,
+        //        AIResponse = aiResponse
+        //    };
+        //    await messageService.AddUserMessageAndResponseAsync(msgAndReply);
 
-            // ----------- (4) send AI response to the session of user
-            ChatResponseDTO response = new ChatResponseDTO()
-            {
-                Message = aiResponse,
-                SessionGuidId = userMessageDTO.SessionGuidId
-            };
-            return Ok(response.Message);
-        }
+        //    // ----------- (4) send AI response to the session of user
+        //    ChatResponseDTO response = new ChatResponseDTO()
+        //    {
+        //        Message = aiResponse,
+        //        SessionGuidId = userMessageDTO.SessionGuidId
+        //    };
+        //    return Ok(response.Message);
+        //}
 
 
     }

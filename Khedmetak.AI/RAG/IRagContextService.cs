@@ -8,9 +8,9 @@ using System.Threading.Tasks;
 
 namespace Khedmetak.AI.RAG
 {
-    public interface IRagService
+    public interface IRagContextService
     {
-        public  Task<string> RagPipeline(string userQuestion);
+        public  Task<string> GenerateContextFromQuestionAsync(string userQuestion);
 
 
        // Task<string> AskAsync(

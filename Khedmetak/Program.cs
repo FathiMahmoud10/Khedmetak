@@ -1,3 +1,5 @@
+using Khedmetak.AI.Agents.Abstraction;
+using Khedmetak.AI.Agents.Implementaion;
 using Khedmetak.AI.Configuration;
 using Khedmetak.AI.RAG;
 using Khedmetak.AI.Services.Abstraction;
@@ -233,10 +235,18 @@ if (!string.IsNullOrWhiteSpace(apiKey))
     builder.Services.AddScoped<IStatisticsService, StatisticsService>();
     builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
-    builder.Services.AddScoped<IQdrantService, QdrantService>();
-    builder.Services.AddScoped<QdrantService>();
+    builder.Services.AddScoped<IVectorDB, QdrantService>();
+
+    //builder.Services.AddScoped<QdrantService>();
     builder.Services.AddScoped<IVectorDBOperationsService, VectorDBOperationsService>();
-    builder.Services.AddScoped<IRagService, RagService>();
+    builder.Services.AddScoped<IRagContextService, RagContextService>();
+    builder.Services.AddScoped<IServiceIntentAgent,ServiceIntentAgent>();
+    builder.Services.AddScoped<IRewriteUserQuestionAgent, RewriteUserQuestionAgent>();
+    builder.Services.AddScoped<IServiceIntentAgent, ServiceIntentAgent>();
+
+
+    builder.Services.AddScoped<IChatOrchestrator, ChatOrchestrator>();
+
 
     #endregion
 
