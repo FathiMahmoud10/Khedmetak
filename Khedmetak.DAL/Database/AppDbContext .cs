@@ -45,7 +45,7 @@ public class AppDbContext : IdentityDbContext<User, IdentityRole<int>, int>
 
         // Seed Users
         var hasher = new PasswordHasher<User>();
-        
+
         var fathi = new User
         {
             Id = 1,
@@ -186,6 +186,15 @@ public class AppDbContext : IdentityDbContext<User, IdentityRole<int>, int>
                 .WithMany(c => c.ChatSessions)
                 .HasForeignKey(cs => cs.CategoryId)
                 .OnDelete(DeleteBehavior.SetNull);
+
+            e.HasOne(cs => cs.GovService)
+                .WithMany()
+                .HasForeignKey(cs => cs.GovServiceId)
+                .OnDelete(DeleteBehavior.SetNull);
+
+            e.Property(cs => cs.Status)
+                .HasConversion<int>()
+                .HasDefaultValue(Khedmetak.DAL.Enums.RequestStatus.Pending);
         });
 
         // ChatMessage
@@ -301,5 +310,5 @@ public class AppDbContext : IdentityDbContext<User, IdentityRole<int>, int>
 
 
 
-}
+    }
 }

@@ -9,8 +9,13 @@ using System.Threading.Tasks;
 
 namespace Khedmetak.DAL.Repo.Abstraction
 {
-    public interface IChatSessionRepository: IGenericRepository<ChatSession>
+    public interface IChatSessionRepository : IGenericRepository<ChatSession>
     {
-        public Task<List<ChatMessage>?> GetLastMessagesAsync(Guid sessionGuid,int count);
+        public Task<List<ChatMessage>?> GetLastMessagesAsync(Guid sessionGuid, int count);
+
+       
+        public Task<List<ChatSession>> GetByUserIdWithDetailsAsync(int userId);
+
+        public Task<ChatSession?> GetBySessionGuidAsync(Guid sessionGuid);
     }
 }
