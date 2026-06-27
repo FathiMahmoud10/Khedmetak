@@ -46,7 +46,7 @@ namespace Khedmetak.API.Controllers
                     reason += " (الحساب مغلق)";
                 if (result.IsNotAllowed)
                     reason += " (الدخول غير مسموح - تأكد من تفعيل الحساب)";
-                
+
                 return Unauthorized(ApiResponse<string>.Fail(reason));
             }
 
@@ -66,6 +66,7 @@ namespace Khedmetak.API.Controllers
 
             return Ok(ApiResponse<AuthResponseDto>.Ok(response));
         }
+
         // Khedmetak.API/Controllers/AuthController.cs - أضف الـ endpoint ده جوه الـ class
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegisterDto dto)
@@ -81,6 +82,9 @@ namespace Khedmetak.API.Controllers
                 UserName = dto.Email,
                 Email = dto.Email,
                 Name = dto.Name,
+                Role = "User",                 // ⬅️ كان فاضي وعمود [Required]، ده سبب فشل CreateAsync بصمت
+                EmailConfirmed = true,          // ⬅️ كان false، يمنع تسجيل الدخول لو فيه RequireConfirmedAccount
+                CreatedAt = DateTime.UtcNow,
                 CitizenProfile = new CitizenProfile
                 {
                     FullName = dto.FullName,
@@ -95,6 +99,7 @@ namespace Khedmetak.API.Controllers
                 }
             };
 
+            // CreateAsync هي اللي بتحط PasswordHash تلقائيًا، فلازم نتأكد من نتيجتها
             var result = await _userManager.CreateAsync(user, dto.Password);
             if (!result.Succeeded)
             {
@@ -102,7 +107,13 @@ namespace Khedmetak.API.Controllers
                 return BadRequest(ApiResponse<string>.Fail(errors));
             }
 
-            await _userManager.AddToRoleAsync(user, "User");
+            // ⬅️ لازم نتأكد إن إضافة الـ Role نجحت برضه
+            var roleResult = await _userManager.AddToRoleAsync(user, "User");
+            if (!roleResult.Succeeded)
+            {
+                var errors = string.Join(", ", roleResult.Errors.Select(e => e.Description));
+                return BadRequest(ApiResponse<string>.Fail("فشل ربط المستخدم بالـ Role: " + errors));
+            }
 
             var roles = await _userManager.GetRolesAsync(user);
             var token = _jwtService.GenerateToken(user, roles);

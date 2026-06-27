@@ -184,87 +184,85 @@ if (!string.IsNullOrWhiteSpace(apiKey))
                 "Bearer",
                 builder.Configuration["AI:EmbeddingAPIKey"]);
     });
-
-
-    #endregion
-
-    #region Qdrant VectorDatabase Configurations
-    builder.Services.Configure<QdrantDBSettings>(
-        builder.Configuration.GetSection("QdrantVectorDB"));
-
-    builder.Services.AddSingleton<QdrantClient>(sp =>
-    {
-        var settings = sp.GetRequiredService<IOptions<QdrantDBSettings>>().Value;
-
-        return new QdrantClient(
-            host: settings.QdrantEndpoint,
-            port: 6334,
-            https: true,
-            apiKey: string.IsNullOrWhiteSpace(settings.QdrantApiKey) ? "placeholder" : settings.QdrantApiKey
-        );
-    });
-    #endregion
-
-    #region Repositories
-    builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
-    builder.Services.AddScoped<IGovServiceRepository, GovServiceRepository>();
-    builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
-    builder.Services.AddScoped<IServiceStepRepository, ServiceStepRepository>();
-    builder.Services.AddScoped<IRequiredDocumentRepository, RequiredDocumentRepository>();
-    //---------------
-    builder.Services.AddScoped<IChatSessionRepository, ChatSessionRepository>();
-
-    #endregion
-
-    #region Services
-    builder.Services.AddScoped<ICategoryService, CategoryService>();
-    builder.Services.AddScoped<IGovServiceService, GovServiceService>();
-    builder.Services.AddScoped<IGovServiceAdminService, GovServiceAdminService>();
-
-    builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
-    builder.Services.AddScoped<IDocumentService, DocumentService>();
-    builder.Services.AddScoped<JwtService>();
-    builder.Services.AddScoped<IUserDashboardService, UserDashboardService>();
-
-    // AI Services
-    builder.Services.AddScoped<IChatSessionService, ChatSessionService>();
-    builder.Services.AddScoped<IChatMessageService, ChatMessageService>();
-    builder.Services.AddScoped<IAIChatService, AIChatService>();
-    builder.Services.AddScoped<IEmbeddingService, EmbeddingService>();
-    builder.Services.AddScoped<IChunkService, ChunkService>();
-    builder.Services.AddScoped<IUserDocumentService, UserDocumentService>();
-    builder.Services.AddScoped<IStatisticsService, StatisticsService>();
-    builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
-
-    builder.Services.AddScoped<IVectorDB, QdrantService>();
-
-    //builder.Services.AddScoped<QdrantService>();
-    builder.Services.AddScoped<IVectorDBOperationsService, VectorDBOperationsService>();
-    builder.Services.AddScoped<IRagContextService, RagContextService>();
-    builder.Services.AddScoped<IServiceIntentAgent,ServiceIntentAgent>();
-    builder.Services.AddScoped<IRewriteUserQuestionAgent, RewriteUserQuestionAgent>();
-    builder.Services.AddScoped<IServiceIntentAgent, ServiceIntentAgent>();
-
-
-    builder.Services.AddScoped<IChatOrchestrator, ChatOrchestrator>();
-
-
-    #endregion
-
-    var app = builder.Build();
-
-    app.UseMiddleware<ExceptionHandlingMiddleware>();
-
-    app.UseSwagger();
-    app.UseSwaggerUI();
-
-    app.UseHttpsRedirection();
-
-    app.UseCors("AllowAll");
-
-    app.UseAuthentication();
-    app.UseAuthorization();
-
-    app.MapControllers();
-    app.Run();
 }
+#endregion
+
+#region Qdrant VectorDatabase Configurations
+builder.Services.Configure<QdrantDBSettings>(
+    builder.Configuration.GetSection("QdrantVectorDB"));
+
+builder.Services.AddSingleton<QdrantClient>(sp =>
+{
+    var settings = sp.GetRequiredService<IOptions<QdrantDBSettings>>().Value;
+
+    return new QdrantClient(
+        host: settings.QdrantEndpoint,
+        port: 6334,
+        https: true,
+        apiKey: string.IsNullOrWhiteSpace(settings.QdrantApiKey) ? "placeholder" : settings.QdrantApiKey
+    );
+});
+#endregion
+
+#region Repositories
+builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
+builder.Services.AddScoped<IGovServiceRepository, GovServiceRepository>();
+builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
+builder.Services.AddScoped<IServiceStepRepository, ServiceStepRepository>();
+builder.Services.AddScoped<IRequiredDocumentRepository, RequiredDocumentRepository>();
+//---------------
+builder.Services.AddScoped<IChatSessionRepository, ChatSessionRepository>();
+
+#endregion
+
+#region Services
+builder.Services.AddScoped<ICategoryService, CategoryService>();
+builder.Services.AddScoped<IGovServiceService, GovServiceService>();
+builder.Services.AddScoped<IGovServiceAdminService, GovServiceAdminService>();
+
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+builder.Services.AddScoped<IDocumentService, DocumentService>();
+builder.Services.AddScoped<JwtService>();
+builder.Services.AddScoped<IUserDashboardService, UserDashboardService>();
+
+// AI Services
+builder.Services.AddScoped<IChatSessionService, ChatSessionService>();
+builder.Services.AddScoped<IChatMessageService, ChatMessageService>();
+builder.Services.AddScoped<IAIChatService, AIChatService>();
+builder.Services.AddScoped<IEmbeddingService, EmbeddingService>();
+builder.Services.AddScoped<IChunkService, ChunkService>();
+builder.Services.AddScoped<IUserDocumentService, UserDocumentService>();
+builder.Services.AddScoped<IStatisticsService, StatisticsService>();
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+
+builder.Services.AddScoped<IVectorDB, QdrantService>();
+
+//builder.Services.AddScoped<QdrantService>();
+builder.Services.AddScoped<IVectorDBOperationsService, VectorDBOperationsService>();
+builder.Services.AddScoped<IRagContextService, RagContextService>();
+builder.Services.AddScoped<IServiceIntentAgent, ServiceIntentAgent>();
+builder.Services.AddScoped<IRewriteUserQuestionAgent, RewriteUserQuestionAgent>();
+builder.Services.AddScoped<IServiceIntentAgent, ServiceIntentAgent>();
+
+
+builder.Services.AddScoped<IChatOrchestrator, ChatOrchestrator>();
+
+
+#endregion
+
+var app = builder.Build();
+
+app.UseMiddleware<ExceptionHandlingMiddleware>();
+
+app.UseSwagger();
+app.UseSwaggerUI();
+
+app.UseHttpsRedirection();
+
+app.UseCors("AllowAll");
+
+app.UseAuthentication();
+app.UseAuthorization();
+
+app.MapControllers();
+app.Run();
