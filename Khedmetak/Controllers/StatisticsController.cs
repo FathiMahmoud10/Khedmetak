@@ -1,4 +1,4 @@
-﻿using Khedmetak.BLL.ApiResponse;
+using Khedmetak.BLL.ApiResponse;
 using Khedmetak.BLL.DTOS.Statistics;
 using Khedmetak.BLL.Services.Abstraction;
 using Microsoft.AspNetCore.Authorization;
@@ -8,15 +8,11 @@ namespace Khedmetak.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    [Authorize]
+    [Authorize(Roles = "Admin")]
     public class StatisticsController : ControllerBase
     {
         private readonly IStatisticsService _statisticsService;
-
-        public StatisticsController(IStatisticsService statisticsService)
-        {
-            _statisticsService = statisticsService;
-        }
+        public StatisticsController(IStatisticsService statisticsService) => _statisticsService = statisticsService;
 
         [HttpGet]
         public async Task<IActionResult> GetStatistics()
