@@ -16,6 +16,7 @@ namespace Khedmetak.AI.Services.Abstraction
      
         public Task<ChatSessionDTO?> GetSessionAllMessages(Guid sessionGuidId);
         public Task<ChatSessionDTO?> GetSessionLast15Messages(Guid sessionGuidId);
+        public  Task<List<UserSessionsDTO>?> GetAllSessionOfUserAsync(string userMail);
 
 
 
