@@ -1,4 +1,5 @@
 using Khedmetak.DAL.Entities;
+using Khedmetak.DAL.Entities.Khedmetak.DAL.Entities;
 using Khedmetak.DAL.Repo.shared;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
@@ -23,6 +24,7 @@ public class AppDbContext : IdentityDbContext<User, IdentityRole<int>, int>
     public DbSet<UserDocument> UserDocuments { get; set; }
     public DbSet<ServiceOption> ServiceOptions { get; set; }
     public DbSet<ServiceOptionChoices> ServiceOptionChoices { get; set; }
+    public DbSet<CitizenProfile> CitizenProfiles { get; set; }
     #endregion
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -307,7 +309,23 @@ public class AppDbContext : IdentityDbContext<User, IdentityRole<int>, int>
                 .HasForeignKey(c => c.ServiceOptionId)
                 .OnDelete(DeleteBehavior.Cascade);
         });
+        // CitizenProfile
+        modelBuilder.Entity<CitizenProfile>(e =>
+        {
+            e.Property(c => c.FullName).IsRequired().HasMaxLength(200);
+            e.Property(c => c.City).IsRequired().HasMaxLength(100);
+            e.Property(c => c.District).HasMaxLength(100);
+            e.Property(c => c.Street).HasMaxLength(200);
+            e.Property(c => c.BuildingNumber).HasMaxLength(50);
+            e.Property(c => c.FloorNumber).HasMaxLength(50);
+            e.Property(c => c.ApartmentNumber).HasMaxLength(50);
+            e.Property(c => c.PostalCode).HasMaxLength(20);
 
+            e.HasOne(c => c.User)
+                .WithOne(u => u.CitizenProfile)
+                .HasForeignKey<CitizenProfile>(c => c.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
 
 
     }
