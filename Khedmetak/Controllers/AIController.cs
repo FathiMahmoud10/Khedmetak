@@ -6,10 +6,13 @@ using Khedmetak.AI.Services.Abstraction;
 using Khedmetak.AI.Services.Implementation;
 using Khedmetak.BLL.ApiResponse;
 using Khedmetak.BLL.DTOS.Categorys;
+using Khedmetak.BLL.Services.Abstraction;
+using Khedmetak.BLL.Services.Implementation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Qdrant.Client.Grpc;
+using System.Security.Claims;
 
 namespace Khedmetak.Controllers
 {
@@ -23,12 +26,14 @@ namespace Khedmetak.Controllers
         //private readonly IAIChatService _aIChatService;
         private readonly IChatSessionService sessionService;
         private readonly IChatMessageService messageService;
+        private readonly IDocumentService documentService;
 
-        public AIController(IChatOrchestrator Orchestrator, IChatSessionService sessionService, IChatMessageService messageService)
+        public AIController(IChatOrchestrator Orchestrator, IDocumentService _documentService, IChatSessionService sessionService, IChatMessageService messageService)
         {
             this.sessionService = sessionService;
             this.messageService = messageService;
             this.chatOrchestrator = Orchestrator;
+            this.documentService = _documentService;
             //_aIChatService = aIChatService;
         }
 
@@ -100,14 +105,36 @@ namespace Khedmetak.Controllers
             return Ok(aiResponse);
         }
 
-            // ================= Embedding Controller ================
-            //[HttpPost("embedding")]
-            //public async Task<IActionResult> GenerateEmbedding([FromBody]string text)
-            //{
-            //    var vector = await embeddingService.GenerateEmbeddingAsync(text);
+        [HttpPost("upload-documents")]
+        public async Task<IActionResult> UploadDocuments(
+    [FromForm] List<IFormFile> files,
+    [FromForm] int? chatSessionId)
+        {
+            // 1. جيب UserId من التوكن
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (userIdClaim == null) return Unauthorized();
+            int userId = int.Parse(userIdClaim);
 
-            //    return Ok(vector);
-            //}
+            if (files == null || files.Count == 0)
+                return BadRequest("No files uploaded.");
+
+            var result = await documentService.SaveUserDocumentsAsync(files, userId, chatSessionId ?? 0);
+
+            if (!result) return StatusCode(500, "Failed to save documents.");
+
+            return Ok("Documents uploaded successfully.");
+        }
+
+        #region MyRegion
+
+        // ================= Embedding Controller ================
+        //[HttpPost("embedding")]
+        //public async Task<IActionResult> GenerateEmbedding([FromBody]string text)
+        //{
+        //    var vector = await embeddingService.GenerateEmbeddingAsync(text);
+
+        //    return Ok(vector);
+        //}
 
         //[HttpGet("ServiceChunks/{serviceId}")]
         //public async Task<ActionResult<List<ServiceChunkDTO>>> GetServiceChunks(int serviceId)
@@ -169,6 +196,7 @@ namespace Khedmetak.Controllers
         //    return Ok(response.Message);
         //}
 
+        #endregion
 
     }
 }

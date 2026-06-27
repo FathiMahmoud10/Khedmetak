@@ -23,7 +23,6 @@ namespace Khedmetak.AI.Services.Implementation
             this.unitOfWork = unitOfWork;
             this.sessionRepo = sessionRepo;
         }
-        //       ========= Add and Save "User and Response" Messages to database ============
         public async Task<bool> AddUserMessageAndResponseAsync(AddMsgAndReplyTOSessionDTO msgAndReply)
         {
             try
