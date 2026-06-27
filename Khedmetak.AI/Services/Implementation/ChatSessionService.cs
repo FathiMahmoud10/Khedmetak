@@ -17,65 +17,65 @@ namespace Khedmetak.AI.Services.Implementation
     public class ChatSessionService : IChatSessionService
     {
         private readonly IChatSessionRepository sessionRepo;
-        //private readonly IGenericRepository<User> userRepo;
+        private readonly IUserRepository userRepo;
         private readonly IUnitOfWork unitOfWork;
 
-        public ChatSessionService(IChatSessionRepository repo,IUnitOfWork unitOfWork)//,IGenericRepository<User> userRepo)
+        public ChatSessionService(IChatSessionRepository repo,IUnitOfWork unitOfWork,IUserRepository userRepo)
         {
             sessionRepo = repo;
             this.unitOfWork = unitOfWork;
-            //this.userRepo = userRepo;
+            this.userRepo = userRepo;
         }
 
         //               =========== Add New Session ===========
         public async Task<Guid> AddNewSession(NewSessionDTO newSessionDTO)
         {
-           //var systemPrompt = new ChatMessage() { Role = "system",
-           //    Content= """
-           //    You are an Egyptian Government Services Assistant.
+            //var systemPrompt = new ChatMessage() { Role = "system",
+            //    Content= """
+            //    You are an Egyptian Government Services Assistant.
 
-           //    Always answer in Egyptian Arabic.
+            //    Always answer in Egyptian Arabic.
 
-           //    Formatting rules:
-           //    - Use Markdown.
-           //    - Use headings (##).
-           //    - Use bullet lists (-).
-           //    - Use numbered lists (1. 2. 3.).
-           //    - Never output JSON.
-           //    - Never output escaped characters such as \n or \r\n.
-           //    - Keep answers concise and structured.
+            //    Formatting rules:
+            //    - Use Markdown.
+            //    - Use headings (##).
+            //    - Use bullet lists (-).
+            //    - Use numbered lists (1. 2. 3.).
+            //    - Never output JSON.
+            //    - Never output escaped characters such as \n or \r\n.
+            //    - Keep answers concise and structured.
 
-           //    Response Template:
+            //    Response Template:
 
-           //    # {Service Name}
+            //    # {Service Name}
 
-           //    ## 📋 Required Documents
-           //    - Document 1
-           //    - Document 2
+            //    ## 📋 Required Documents
+            //    - Document 1
+            //    - Document 2
 
-           //    ## 📝 Steps
-           //    1. Step 1
-           //    2. Step 2
+            //    ## 📝 Steps
+            //    1. Step 1
+            //    2. Step 2
 
-           //    ## 💰 Fees
-           //    - Fee information
-           //    - If unavailable, write: "غير متوفر حالياً"
+            //    ## 💰 Fees
+            //    - Fee information
+            //    - If unavailable, write: "غير متوفر حالياً"
 
-           //    ## ⏳ Processing Time
-           //    - Processing time
-           //    - If unavailable, write: "غير متوفر حالياً"
+            //    ## ⏳ Processing Time
+            //    - Processing time
+            //    - If unavailable, write: "غير متوفر حالياً"
 
 
-           //    """
-           //};
-            //User ? user = await userRepo.FindOneAsync(u => u.Email == newSessionDTO.UserEmail);
+            //    """
+            //};
+            User? user = await userRepo.GetUserAsync(u => u.Email == newSessionDTO.UserEmail);
             //var userId = user.Id;
-            int? userId = null;
+            //int? userId = user;
 
             var session = new ChatSession()
             {
                 StartedAt = newSessionDTO.CreatedAt,
-                UserId = userId
+                UserId = user.Id
 
             };
             //session.ChatMessages.Add(systemPrompt);
@@ -166,6 +166,27 @@ namespace Khedmetak.AI.Services.Implementation
             };
         }
 
+        public async Task<List<UserSessionsDTO>?> GetAllSessionOfUserAsync(string userMail)
+        {
+            User? user = await userRepo.GetUserAsync(u => u.Email == userMail);
+            
+            if (user == null) return null;
+
+            int? userId = user.Id;
+
+            var userSessions = await sessionRepo.FindAsyncr(s=> s.UserId == userId);
+            List<UserSessionsDTO> userSessionsDTO = new List<UserSessionsDTO>();
+            foreach (var session in userSessions)
+            {
+                UserSessionsDTO UserSessionDTO = new UserSessionsDTO()
+                {
+                    GuidId = session.SessionGuid,
+                    StartedAt = session.StartedAt
+                };
+                userSessionsDTO.Add(UserSessionDTO);
+            }
+            return userSessionsDTO;
+        }
 
 
 

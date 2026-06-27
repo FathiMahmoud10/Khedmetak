@@ -1,3 +1,4 @@
+using Khedmetak.AI.DTOs;
 using Khedmetak.AI.DTOs.ChatSessionDTO;
 using Khedmetak.AI.Services.Abstraction;
 using Khedmetak.BLL.ApiResponse;
@@ -47,6 +48,14 @@ namespace Khedmetak.Controllers
                     msgs.ChatSession_ChatHistory ?? new List<ChatSessionMessageDTO>()
                 )
             );
+        }
+
+        [HttpGet("UserSessions/{userMail}")]
+        public async Task<IActionResult> UserSessions(string userMail)
+        {
+            var userSessions = await sessionService.GetAllSessionOfUserAsync(userMail);
+            if (userSessions == null) return NotFound();
+            return Ok(ApiResponse<List<UserSessionsDTO>>.Ok(userSessions));
         }
 
 

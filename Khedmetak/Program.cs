@@ -215,6 +215,9 @@ builder.Services.AddScoped<IServiceStepRepository, ServiceStepRepository>();
 builder.Services.AddScoped<IRequiredDocumentRepository, RequiredDocumentRepository>();
 builder.Services.AddScoped<IChatSessionRepository, ChatSessionRepository>();
 builder.Services.AddScoped<IUserDocumentRepository, UserDocumentRepository>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+
+
 #endregion
 
 #region Services
