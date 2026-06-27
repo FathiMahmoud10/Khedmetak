@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 
-namespace Khedmetak.API.Controllers
+namespace Khedmetak.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]

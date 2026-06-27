@@ -1,5 +1,4 @@
-﻿// UserDocumentService.cs
-using AutoMapper;
+﻿using AutoMapper;
 using Khedmetak.BLL.DTOS.UserDocument;
 using Khedmetak.BLL.Services.Abstraction;
 using Khedmetak.DAL.Entities;
@@ -18,7 +17,8 @@ namespace Khedmetak.BLL.Services.Implementation
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
-            _uploadsRoot = configuration["UploadsPath"] ?? Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
+            _uploadsRoot = configuration["UploadsPath"]
+                ?? Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
         }
 
         public async Task<IEnumerable<UserDocumentDto>> GetUserDocumentsAsync(int userId)
