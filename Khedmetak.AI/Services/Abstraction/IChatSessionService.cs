@@ -13,12 +13,10 @@ namespace Khedmetak.AI.Services.Abstraction
     {
 
         public Task<Guid> AddNewSession(NewSessionDTO newSessionDTO);
-     
+
         public Task<ChatSessionDTO?> GetSessionAllMessages(Guid sessionGuidId);
-        public Task<ChatSessionDTO?> GetSessionLast15Messages(Guid sessionGuidId);
-        public  Task<List<UserSessionsDTO>?> GetAllSessionOfUserAsync(string userMail);
 
-
+        public Task<List<UserSessionSummaryDTO>> GetUserSessionsAsync(string userEmail);
 
         //public Task<ChatSession?> GetSessionById(int id);
 
