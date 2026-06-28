@@ -58,6 +58,21 @@ namespace Khedmetak.Controllers
             return Ok(ApiResponse<List<UserSessionSummaryDTO>>.Ok(userSessions));
         }
 
+        [HttpPost("submitRequest")]
+        public async Task<IActionResult> SubmitRequest([FromBody] SubmitServiceRequestDto dto)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ApiResponse<string>.Fail("بيانات غير صالحة"));
+            }
 
+            var result = await sessionService.SubmitServiceRequestAsync(dto);
+            if (!result.Success)
+            {
+                return BadRequest(ApiResponse<string>.Fail(result.ErrorMessage));
+            }
+
+            return Ok(ApiResponse<Guid>.Ok(result.SessionGuid, "تم تقديم الطلب بنجاح"));
+        }
     }
 }
