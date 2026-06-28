@@ -1,5 +1,5 @@
-﻿using Khedmetak.AI.DTOs.ChatSessionDTO;
-using Khedmetak.AI.DTOs.UserAIChatDataDto;
+﻿using Khedmetak.AI.DTOs;
+using Khedmetak.AI.DTOs.ChatSessionDTO;
 using Khedmetak.AI.Services.Abstraction;
 using Khedmetak.DAL.Entities;
 using Microsoft.AspNetCore.Identity;
@@ -74,35 +74,34 @@ namespace Khedmetak.AI.Services.Implementation
                - If unavailable, write: "غير متوفر حالياً"
 
 
-            //    """
-            //};
-            User? user = await userRepo.GetUserAsync(u => u.Email == newSessionDTO.UserEmail);
-            //var userId = user.Id;
-            //int? userId = user;
-            ChatSession session;
-            if (user != null)
+               """
+            };
+            int? userId = null;
+            if (userManager != null &&
+                !string.IsNullOrWhiteSpace(newSessionDTO.UserEmail) &&
+                !newSessionDTO.UserEmail.Equals("guest@moamaltak.ai", StringComparison.OrdinalIgnoreCase))
             {
-                 session = new ChatSession()
+                var user = await userManager.FindByEmailAsync(newSessionDTO.UserEmail);
+                if (user != null)
                 {
-                    StartedAt = newSessionDTO.CreatedAt,
-                    UserId = user.Id
-
-                };
-            }
-            else
-            {
-                session = new ChatSession()
-                {
-                    StartedAt = newSessionDTO.CreatedAt,
-                
-
-                };
+                    userId = user.Id;
+                }
             }
 
-                //session.ChatMessages.Add(systemPrompt);
+            var session = new ChatSession()
+            {
+                StartedAt = newSessionDTO.CreatedAt,
+                UserId = userId
+            };
 
-                sessionRepo.Add(session);
-            await unitOfWork.SaveChangesAsync(); 
+            if (session.ChatMessages == null)
+            {
+                session.ChatMessages = new List<ChatMessage>();
+            }
+            session.ChatMessages.Add(systemPrompt);
+
+            sessionRepo.Add(session);
+            await unitOfWork.SaveChangesAsync();
 
             return session.SessionGuid;
 

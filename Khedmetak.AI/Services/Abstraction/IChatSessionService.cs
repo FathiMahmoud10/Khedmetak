@@ -1,5 +1,5 @@
-﻿using Khedmetak.AI.DTOs.ChatSessionDTO;
-using Khedmetak.AI.DTOs.UserAIChatDataDto;
+﻿using Khedmetak.AI.DTOs;
+using Khedmetak.AI.DTOs.ChatSessionDTO;
 using Khedmetak.DAL.Entities;
 using System;
 using System.Collections.Generic;
