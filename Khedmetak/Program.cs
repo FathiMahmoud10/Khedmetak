@@ -240,7 +240,7 @@ builder.Services.AddScoped<IStatisticsService, StatisticsService>();
 // AI Services
 builder.Services.AddScoped<IChatSessionService, ChatSessionService>();
 builder.Services.AddScoped<IChatMessageService, ChatMessageService>();
-builder.Services.AddScoped<IAIChatService, AIChatService>();
+//builder.Services.AddScoped<IAIChatService, AIChatService>();
 builder.Services.AddScoped<IEmbeddingService, EmbeddingService>();
 builder.Services.AddScoped<IChunkService, ChunkService>();
 builder.Services.AddScoped<IUserDocumentService, UserDocumentService>();

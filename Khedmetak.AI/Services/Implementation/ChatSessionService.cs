@@ -71,16 +71,29 @@ namespace Khedmetak.AI.Services.Implementation
             User? user = await userRepo.GetUserAsync(u => u.Email == newSessionDTO.UserEmail);
             //var userId = user.Id;
             //int? userId = user;
-
-            var session = new ChatSession()
+            ChatSession session;
+            if (user != null)
             {
-                StartedAt = newSessionDTO.CreatedAt,
-                UserId = user.Id
+                 session = new ChatSession()
+                {
+                    StartedAt = newSessionDTO.CreatedAt,
+                    UserId = user.Id
 
-            };
-            //session.ChatMessages.Add(systemPrompt);
+                };
+            }
+            else
+            {
+                session = new ChatSession()
+                {
+                    StartedAt = newSessionDTO.CreatedAt,
+                
 
-            sessionRepo.Add(session);
+                };
+            }
+
+                //session.ChatMessages.Add(systemPrompt);
+
+                sessionRepo.Add(session);
             await unitOfWork.SaveChangesAsync(); 
 
             return session.SessionGuid;
