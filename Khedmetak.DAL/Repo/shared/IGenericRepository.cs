@@ -12,7 +12,7 @@ namespace Khedmetak.DAL.Repo.shared
         Task<IEnumerable<T>> GetAllAsync(params Expression<Func<T, object>>[] includes);
         Task<T?> GetByIdAsync(int id);
         Task<T?> GetByIdAsync(int id, params Expression<Func<T, object>>[] includes);
-        Task<IEnumerable<T>> FindAsync(Expression<Func<T, bool>> predicate);
+        Task<IEnumerable<T>> FindAsyncr(Expression<Func<T, bool>> predicate);
         Task<IEnumerable<UserDocument>> FindAsync(Expression<Func<UserDocument, bool>> predicate);
 
         void Add(T entity);
