@@ -24,6 +24,7 @@ namespace Khedmetak.AI.Services.Implementation
         private readonly IRagService _ragContextService;
         private readonly IAIServiceResponseAgent _aiResponseAgent;
         private readonly IGovServiceService govService;
+        private readonly IRelevanceValidatorAgent _relevanceValidatorAgent;
 
         private CurrentServiceDetailsDTO currentServiceDetails;
         private bool isServiceChanged = false;
@@ -35,7 +36,8 @@ namespace Khedmetak.AI.Services.Implementation
             IGeneralChatAgent generalChatAgent,
             IRagService ragContextService,
             IAIServiceResponseAgent aiResponseAgent,
-            IGovServiceService govService)
+            IGovServiceService govService,
+            IRelevanceValidatorAgent relevanceValidatorAgent)
         {
             _rewriteAgent = rewriteAgent;
             _intentAgent = intentAgent;
@@ -43,6 +45,8 @@ namespace Khedmetak.AI.Services.Implementation
             _ragContextService = ragContextService;
             _aiResponseAgent = aiResponseAgent;
             this.govService = govService;
+            _relevanceValidatorAgent = relevanceValidatorAgent;
+
         }
 
         public async Task<AIResponseDTO> AskAsync(string userQuestion, ChatSessionDTO session)
@@ -81,7 +85,16 @@ namespace Khedmetak.AI.Services.Implementation
 
                 };
             }
-            
+            // ✅ NEW: Validate that retrieved service actually matches the question
+            var isRelevant = await _relevanceValidatorAgent.IsRelevantAsync(standaloneQuestion, serviceInfo);
+            if (!isRelevant)
+                return new AIResponseDTO()
+                {
+                    CurrentServiceDetails = new CurrentServiceDetailsDTO() { ServiceName = "خدمة ليست متوفرة" },
+                     response = await _aiResponseAgent.GenerateResponseAsync(standaloneQuestion, serviceInfo, session)
+                    
+                };
+
             if (serviceId != serviceInfo.ServiceId)
             {
                  currentServiceDetails = await govService.GetCurrentServiceDetailsAsync(serviceInfo.ServiceId);

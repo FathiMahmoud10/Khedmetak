@@ -1,5 +1,6 @@
 using Khedmetak.AI.Agents.Abstraction;
 using Khedmetak.AI.Agents.Implementaion;
+using Khedmetak.AI.Agents.Implementation;
 using Khedmetak.AI.Configuration;
 using Khedmetak.AI.RAG;
 using Khedmetak.AI.Services.Abstraction;
@@ -248,7 +249,7 @@ builder.Services.AddScoped<IUserDocumentService, UserDocumentService>();
 builder.Services.AddScoped<IVectorDB, QdrantService>();
 builder.Services.AddScoped<IVectorDBOperationsService, VectorDBOperationsService>();
 builder.Services.AddScoped<IVectorDBService, VectorDBService>();
-
+builder.Services.AddScoped<IRelevanceValidatorAgent, RelevanceValidatorAgent>();
 builder.Services.AddScoped<IRagService, RagService>();
 builder.Services.AddScoped<IGovServiceTools, GovServiceTools>();
 
