@@ -223,7 +223,7 @@ builder.Services.AddScoped<IRequiredDocumentRepository, RequiredDocumentReposito
 builder.Services.AddScoped<IChatSessionRepository, ChatSessionRepository>();
 builder.Services.AddScoped<IUserDocumentRepository, UserDocumentRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
-
+builder.Services.AddScoped<IChatSessionRepository, ChatSessionRepository>();
 
 #endregion
 

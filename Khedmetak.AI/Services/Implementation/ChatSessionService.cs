@@ -1,7 +1,8 @@
-﻿using Khedmetak.AI.DTOs;
+using Khedmetak.AI.DTOs;
 using Khedmetak.AI.DTOs.ChatSessionDTO;
 using Khedmetak.AI.Services.Abstraction;
 using Khedmetak.DAL.Entities;
+using Khedmetak.DAL.Enums;
 using Microsoft.AspNetCore.Identity;
 using Khedmetak.DAL.Repo.Abstraction;
 using Khedmetak.DAL.Repo.Abstraction.UnitOfWork;
@@ -213,6 +214,92 @@ namespace Khedmetak.AI.Services.Implementation
                         MessageCount = s.ChatMessages?.Count(m => m.Role == "user") ?? 0
                     };
                 }).ToList();
+        }
+
+        public async Task<ServiceRequestResult> SubmitServiceRequestAsync(SubmitServiceRequestDto dto)
+        {
+            if (dto == null)
+            {
+                return new ServiceRequestResult { Success = false, ErrorMessage = "بيانات غير صالحة" };
+            }
+
+            if (string.IsNullOrWhiteSpace(dto.UserEmail))
+            {
+                return new ServiceRequestResult { Success = false, ErrorMessage = "البريد الإلكتروني مطلوب" };
+            }
+
+            var user = await userManager.FindByEmailAsync(dto.UserEmail);
+            if (user == null)
+            {
+                return new ServiceRequestResult { Success = false, ErrorMessage = "المستخدم غير موجود" };
+            }
+
+            var service = await unitOfWork.GovServices.GetByIdAsync(dto.GovServiceId);
+            if (service == null)
+            {
+                return new ServiceRequestResult { Success = false, ErrorMessage = "الخدمة المطلوبة غير موجودة" };
+            }
+
+            var systemPrompt = new ChatMessage()
+            {
+                Role = "system",
+                Content = """
+               You are an Egyptian Government Services Assistant.
+
+               Always answer in Egyptian Arabic.
+
+               Formatting rules:
+               - Use Markdown.
+               - Use headings (##).
+               - Use bullet lists (-).
+               - Use numbered lists (1. 2. 3.).
+               - Never output JSON.
+               - Never output escaped characters such as \n or \r\n.
+               - Keep answers concise and structured.
+
+               Response Template:
+
+               # {Service Name}
+
+               ## 📋 Required Documents
+               - Document 1
+               - Document 2
+
+               ## 📝 Steps
+               1. Step 1
+               2. Step 2
+
+               ## 💰 Fees
+               - Fee information
+               - If unavailable, write: "غير متوفر حالياً"
+
+               ## ⏳ Processing Time
+               - Processing time
+               - If unavailable, write: "غير متوفر حالياً"
+
+
+               """
+            };
+
+            var session = new ChatSession()
+            {
+                StartedAt = DateTime.Now,
+                UserId = user.Id,
+                GovServiceId = service.Id,
+                CategoryId = service.CategoryId,
+                Status = RequestStatus.Pending
+            };
+
+            session.ChatMessages = new List<ChatMessage> { systemPrompt };
+
+            sessionRepo.Add(session);
+            await unitOfWork.SaveChangesAsync();
+
+            return new ServiceRequestResult
+            {
+                Success = true,
+                SessionGuid = session.SessionGuid
+            };
         }
     }
 }

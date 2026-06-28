@@ -1,4 +1,4 @@
-﻿using Khedmetak.AI.DTOs;
+using Khedmetak.AI.DTOs;
 using Khedmetak.AI.DTOs.ChatSessionDTO;
 using Khedmetak.DAL.Entities;
 using System;
@@ -17,6 +17,7 @@ namespace Khedmetak.AI.Services.Abstraction
         public Task<ChatSessionDTO?> GetSessionAllMessages(Guid sessionGuidId);
         public Task<List<UserSessionSummaryDTO>> GetAllSessionOfUserAsync(string userMail);
         public Task<List<UserSessionSummaryDTO>> GetUserSessionsAsync(string userEmail);
+        public Task<ServiceRequestResult> SubmitServiceRequestAsync(SubmitServiceRequestDto dto);
 
         //public Task<ChatSession?> GetSessionById(int id);
 
