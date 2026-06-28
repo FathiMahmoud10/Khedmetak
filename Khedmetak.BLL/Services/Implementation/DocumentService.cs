@@ -7,11 +7,13 @@ using Khedmetak.DAL.Entities;
 using Khedmetak.DAL.Repo.Abstraction.UnitOfWork;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Hosting;
-
+using System.Linq;
 namespace Khedmetak.BLL.Services.Implementation
 {
     public class DocumentService : IDocumentService
     {
+
+
         private const long MaxFileSizeBytes = 5 * 1024 * 1024;
 
         private readonly IUnitOfWork _unitOfWork;
@@ -23,6 +25,22 @@ namespace Khedmetak.BLL.Services.Implementation
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _webRootPath = Path.Combine(env.ContentRootPath, "wwwroot");
+        }
+        // FIX: same root cause as UserDocumentService — no AutoMapper Profile registers
+        // UserDocument -> Khedmetak.BLL.DTOS.Documents.UserDocumentDto either, so this would
+        // throw the same "Missing type map configuration" error on upload. Map it by hand.
+        private static UserDocumentDto ToDto(UserDocument entity)
+        {
+            return new UserDocumentDto
+            {
+                Id = entity.Id,
+                UserId = entity.UserId,
+                RequiredDocumentId = entity.RequiredDocumentId,
+                FileName = entity.FileName,
+                FilePath = entity.FilePath,
+                FileType = entity.FileType,
+                UploadedAt = entity.UploadedAt,
+            };
         }
 
         public async Task<(bool Success, string Message, UserDocumentDto? Data)>
@@ -37,6 +55,7 @@ namespace Khedmetak.BLL.Services.Implementation
                 return (false, "حجم الملف أكبر من 5 MB", null);
 
             var ext = Path.GetExtension(file.FileName).ToLowerInvariant();
+            var mimeType = file.ContentType.ToLowerInvariant();
 
             var uploadsFolder = Path.Combine(_webRootPath, "uploads", "documents");
             Directory.CreateDirectory(uploadsFolder);
@@ -51,20 +70,25 @@ namespace Khedmetak.BLL.Services.Implementation
             {
                 UserId = userId,
                 RequiredDocumentId = dto.RequiredDocumentId,
-                FileName = file.FileName,
+                FileName = file.FileName,           // ✅ entity now has this
                 FilePath = $"/uploads/documents/{uniqueName}",
-                FileType = ext,
-                UploadedAt = DateTime.UtcNow,
-                ValidationStatus = "Pending"
+                FileType = ext,                     // ✅ entity now has this
+                UploadedAt = DateTime.UtcNow          // ✅ entity now has this
             };
 
             _unitOfWork.UserDocuments.Add(entity);
             await _unitOfWork.SaveChangesAsync();
 
-            return (true, "تم رفع الملف بنجاح", _mapper.Map<UserDocumentDto>(entity));
+            return (true, "تم رفع الملف بنجاح", ToDto(entity));
         }
 
-        // ✅ int? بدل int
+        public async Task<IEnumerable<UserDocumentDto>> GetUserDocumentsAsync(int userId)
+        {
+            var docs = await _unitOfWork.UserDocuments.GetByUserIdAsync(userId);
+            return docs.Select(ToDto);
+        }
+
+
         public async Task<bool> SaveUserDocumentsAsync(List<IFormFile> files, int userId, int? chatSessionId)
         {
             try
@@ -106,10 +130,6 @@ namespace Khedmetak.BLL.Services.Implementation
             }
         }
 
-        public async Task<IEnumerable<UserDocumentDto>> GetUserDocumentsAsync(int userId)
-        {
-            var docs = await _unitOfWork.UserDocuments.GetByUserIdAsync(userId);
-            return _mapper.Map<IEnumerable<UserDocumentDto>>(docs);
-        }
+
     }
 }

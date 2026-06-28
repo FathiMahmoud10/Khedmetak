@@ -13,12 +13,12 @@ namespace Khedmetak.Controllers
     [AllowAnonymous]
     public class SessionController : ControllerBase
     {
-       
+
         private readonly IChatSessionService sessionService;
 
-        public SessionController( IChatSessionService sessionService)
+        public SessionController(IChatSessionService sessionService)
         {
-       
+
             this.sessionService = sessionService;
         }
 
