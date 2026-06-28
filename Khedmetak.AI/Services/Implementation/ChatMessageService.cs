@@ -1,4 +1,4 @@
-﻿using Khedmetak.AI.DTOs;
+﻿using Khedmetak.AI.DTOs.ChatMessagesDTO;
 using Khedmetak.AI.Services.Abstraction;
 using Khedmetak.DAL.Entities;
 using Khedmetak.DAL.Repo.Abstraction.UnitOfWork;

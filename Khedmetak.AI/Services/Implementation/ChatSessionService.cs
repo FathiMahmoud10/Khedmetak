@@ -1,5 +1,5 @@
-﻿using Khedmetak.AI.DTOs;
-using Khedmetak.AI.DTOs.ChatSessionDTO;
+﻿using Khedmetak.AI.DTOs.ChatSessionDTO;
+using Khedmetak.AI.DTOs.UserAIChatDataDto;
 using Khedmetak.AI.Services.Abstraction;
 using Khedmetak.DAL.Entities;
 using Khedmetak.DAL.Repo.Abstraction;

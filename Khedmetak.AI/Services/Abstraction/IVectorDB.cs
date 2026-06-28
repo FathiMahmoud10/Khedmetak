@@ -1,4 +1,5 @@
 ﻿using Khedmetak.AI.DTOs;
+using Khedmetak.AI.DTOs.RagDTOs;
 using Qdrant.Client.Grpc;
 using System;
 using System.Collections.Generic;
@@ -11,8 +12,13 @@ namespace Khedmetak.AI.Services.Abstraction
     public interface IVectorDB
     {
         public Task UpsertServiceChunksAsync(List<ServiceChunkDTO> chunks, Func<string, Task<float[]>> embedFunc);
-
         public Task DeleteServiceChunksAsync(int serviceId);
         public Task<IReadOnlyList<ScoredPoint>> SearchInVectorDBAsync(float[] userQuestionEmbedding);
+       
+        //---------------------
+        public Task UpsertServiceChunkAsync(ServiceChunkDTO chunk, Func<string, Task<float[]>> embedFunc);
+        public Task<RagServiceInfo?> SearchServiceAsync(float[] userQuestionEmbedding);
+
+
     }
 }

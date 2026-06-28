@@ -1,4 +1,4 @@
-﻿using Khedmetak.AI.DTOs;
+﻿using Khedmetak.AI.DTOs.ChatMessagesDTO;
 using Khedmetak.DAL.Entities;
 using System;
 using System.Collections.Generic;

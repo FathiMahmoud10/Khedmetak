@@ -11,6 +11,8 @@ namespace Khedmetak.AI.Services.Abstraction
     {
 
         public Task<List<ServiceChunkDTO>> GenerateChunksAsync(int serviceId);
+        public  Task<ServiceChunkDTO> GenerateServiceChunkAsync(int serviceId);
+
 
 
 

@@ -1,5 +1,6 @@
 ﻿using Khedmetak.AI.Configuration;
 using Khedmetak.AI.DTOs;
+using Khedmetak.AI.DTOs.RagDTOs;
 using Khedmetak.AI.Services.Abstraction;
 using Microsoft.Extensions.Options;
 using Qdrant.Client;
@@ -72,6 +73,46 @@ namespace Khedmetak.AI.Services.Implementation
         }
 
 
+
+        public async Task UpsertServiceChunkAsync(ServiceChunkDTO chunk, Func<string, Task<float[]>> embedFunc)
+        {
+            
+                float[] vector = await embedFunc(chunk.Content);
+
+                var point = new PointStruct
+                {
+                    Id = new PointId
+                    {
+                        Uuid = CreateDeterministicGuid(chunk.ChunkId)
+                    },
+                    Vectors = new Dictionary<string, Vector>
+                    {
+                        ["dense"] = vector
+                    },
+
+                    Payload =
+                    {
+                        ["ServiceId"] = chunk.ServiceId,
+                        ["ServiceName"] = chunk.ServiceName,
+                        ["CategoryId"] = chunk.CategoryId,
+                        ["CategoryName"] = chunk.CategoryName ?? "",
+
+                        ["ChunckId"] = chunk.ChunkId,
+                        ["ChunckType"] = chunk.ChunkType,
+
+                        ["Content"] = chunk.Content,
+                        ["Language"] = "ar"
+                    }
+                };
+
+             
+            await _client.UpsertAsync(
+                collectionName: CollectionName,
+                points: new[] { point }
+            );
+        }
+
+
         // ========================= DELETE ALL CHUNKS OF SERVICE =========================
         public async Task DeleteServiceChunksAsync(int serviceId)
         {
@@ -107,6 +148,34 @@ namespace Khedmetak.AI.Services.Implementation
                limit: 10
            );
             return results;
+        }
+        // ========================= Search About the moast match Chunk to embedding of user question  in Vector DB =========================
+
+        public async Task<RagServiceInfo?> SearchServiceAsync(float[] userQuestionEmbedding)
+        {
+            var results = await _client.QueryAsync(
+                collectionName: CollectionName,
+                query: userQuestionEmbedding,
+                usingVector: "dense",
+                limit: 1
+            );
+
+            var point = results.FirstOrDefault();
+
+            if (point == null)
+                return null;
+
+            if (!point.Payload.TryGetValue("ServiceId", out var serviceIdValue) ||
+                !point.Payload.TryGetValue("ServiceName", out var serviceNameValue))
+            {
+                return null;
+            }
+
+            return new RagServiceInfo
+            {
+                ServiceId = (int)serviceIdValue.IntegerValue,
+                ServiceName = serviceNameValue.StringValue
+            };
         }
 
         // =========== to Generate the Point Id when add chunk to  Vector Database  ==========

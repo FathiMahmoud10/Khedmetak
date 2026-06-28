@@ -1,4 +1,5 @@
 ﻿using Khedmetak.AI.DTOs.ChatSessionDTO;
+using Khedmetak.AI.Services.Implementation;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,8 +10,8 @@ namespace Khedmetak.AI.Services.Abstraction
 {
     public interface IChatOrchestrator
     {
-        public  Task<string> AskAsync(
-          string userQuestion,
-          ChatSessionDTO session);
+
+        public Task<AIResponseDTO> AskAsync(string userQuestion, ChatSessionDTO session);
+
     }
 }

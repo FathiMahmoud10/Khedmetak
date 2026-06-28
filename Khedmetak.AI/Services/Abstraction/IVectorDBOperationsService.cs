@@ -1,4 +1,5 @@
-﻿using Qdrant.Client.Grpc;
+﻿using Khedmetak.AI.DTOs.RagDTOs;
+using Qdrant.Client.Grpc;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,6 +15,10 @@ namespace Khedmetak.AI.Services.Abstraction
         public Task DeleteGovServiceFromVectorDBAsync(int serviceId);
 
         public Task<IReadOnlyList<ScoredPoint>> SearchInVectorDBAsync(string userQustion);
+
+        //-------- to get ServiceId and ServiceName  information from Vector DB
+        public  Task<RagServiceInfo?> GetServiceInfoFromVectorDBAsync(string userQustion);
+
 
     }
 }

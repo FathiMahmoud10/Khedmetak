@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Khedmetak.AI.DTOs
+namespace Khedmetak.AI.DTOs.ChatMessagesDTO
 {
     // to add and save the user message and AI Response of a specific session together to Database
     public class AddMsgAndReplyTOSessionDTO

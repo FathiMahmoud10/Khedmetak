@@ -39,6 +39,7 @@ namespace Khedmetak.BLL.Services.Implementation
             return _mapper.Map<GovServiceDetailsDto>(service);
         }
 
+       
 
         public async Task<GovServiceDto> CreateServiceAsync(CreateGovServiceDto dto)
         {
@@ -71,6 +72,22 @@ namespace Khedmetak.BLL.Services.Implementation
             _unitOfWork.GovServices.Delete(entity);
             await _unitOfWork.SaveChangesAsync();
             return true;
+        }
+
+        // ---------------- 
+
+        public async Task<CurrentServiceDetailsDTO?> GetCurrentServiceDetailsAsync(int id)
+        {
+            var service = await _unitOfWork.GovServices.GetServiceWithDetailsAsync(id);
+            if (service is null) return null;
+            return new CurrentServiceDetailsDTO()
+            {
+                ServiceName = service.SrvName,
+                CategoryName = service.Category.Name,
+                RequiredDocumentsCount = service.RequiredDocuments?.Count ?? 0,
+                Fees = service.SrvFees,
+                TakenTime = service.SrvTime
+            };
         }
     }
 }
