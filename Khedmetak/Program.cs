@@ -174,7 +174,7 @@ if (!string.IsNullOrWhiteSpace(apiKey))
         new ApiKeyCredential(apiKey),
         new OpenAIClientOptions
         {
-            Endpoint = new Uri("https://models.github.ai/inference"),
+            Endpoint = new Uri("https://models.inference.ai.azure.com"),
         });
 
     builder.Services.AddKeyedSingleton<OpenAIClient>("github", openAIClient);

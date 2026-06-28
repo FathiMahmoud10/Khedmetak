@@ -77,5 +77,10 @@ namespace Khedmetak.DAL.Repositories
         {
             throw new NotImplementedException();
         }
+
+        public Task<IEnumerable<T>> FindAsync(Expression<Func<T, bool>> predicate, params Expression<Func<T, object>>[] includes)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
