@@ -41,7 +41,7 @@ namespace Khedmetak.DAL.Repositories
             return await query.FirstOrDefaultAsync(e => e.Id == id);
         }
 
-        public async Task<IEnumerable<T>> FindAsync(Expression<Func<T, bool>> predicate)
+        public async Task<IEnumerable<T>> FindAsyncr(Expression<Func<T, bool>> predicate)
             => await _dbSet.Where(predicate).ToListAsync();
 
         public void Add(T entity)
@@ -69,6 +69,16 @@ namespace Khedmetak.DAL.Repositories
             }
 
             return await query.FirstOrDefaultAsync(predicate);
+        }
+
+        public Task<IEnumerable<UserDocument>> FindAsync(Expression<Func<UserDocument, bool>> predicate)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<IEnumerable<T>> FindAsync(Expression<Func<T, bool>> predicate, params Expression<Func<T, object>>[] includes)
+        {
+            throw new NotImplementedException();
         }
     }
 }

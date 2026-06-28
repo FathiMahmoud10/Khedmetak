@@ -13,7 +13,7 @@ namespace Khedmetak.DAL.Repo.Abstraction
     {
         public Task<List<ChatMessage>?> GetLastMessagesAsync(Guid sessionGuid, int count);
 
-       
+        Task<List<ChatSession>> GetByUserIdAsync(int userId);
         public Task<List<ChatSession>> GetByUserIdWithDetailsAsync(int userId);
 
         public Task<ChatSession?> GetBySessionGuidAsync(Guid sessionGuid);
