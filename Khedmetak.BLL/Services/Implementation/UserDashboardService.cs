@@ -34,6 +34,15 @@ namespace Khedmetak.BLL.Services.Implementation
             // A "request" is a session the user actually linked to a government service.
             var requests = sessions.Where(s => s.GovServiceId != null).ToList();
 
+            // -------------------------------------------------------------------------
+            // FIX: TotalUploadedFiles must count ALL documents that belong to the user
+            // (whether uploaded inside a chat session or directly from "My Files"),
+            // not just the ones attached to a ChatSession. Summing s.UserDocuments
+            // only counted chat-linked files and silently ignored standalone uploads.
+            // -------------------------------------------------------------------------
+            var userDocuments = await _unitOfWork.UserDocuments.GetByUserIdAsync(userId);
+            var totalUploadedFiles = userDocuments.Count();
+
             var stats = new UserDashboardStatsDto
             {
                 TotalRequests = requests.Count,
@@ -41,7 +50,7 @@ namespace Khedmetak.BLL.Services.Implementation
                 InProgressCount = requests.Count(s => s.Status == RequestStatus.InProgress),
                 CompletedCount = requests.Count(s => s.Status == RequestStatus.Completed),
                 RejectedCount = requests.Count(s => s.Status == RequestStatus.Rejected),
-                TotalUploadedFiles = sessions.Sum(s => s.UserDocuments?.Count ?? 0),
+                TotalUploadedFiles = totalUploadedFiles,
                 TotalChatSessions = sessions.Count,
                 RecentRequests = requests
                     .OrderByDescending(s => s.StartedAt)
