@@ -1,3 +1,4 @@
+using Khedmetak.DAL.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
@@ -12,6 +13,7 @@ namespace Khedmetak.DAL.Repo.shared
         Task<T?> GetByIdAsync(int id);
         Task<T?> GetByIdAsync(int id, params Expression<Func<T, object>>[] includes);
         Task<IEnumerable<T>> FindAsyncr(Expression<Func<T, bool>> predicate);
+        Task<IEnumerable<T>> FindAllByAsync(Expression<Func<T, bool>> predicate, params Expression<Func<T, object>>[] includes);
         Task<IEnumerable<UserDocument>> FindAsync(Expression<Func<UserDocument, bool>> predicate);
 
         void Add(T entity);
@@ -21,5 +23,7 @@ namespace Khedmetak.DAL.Repo.shared
         //---------
         public Task<T?> FindOneAsync(Expression<Func<T, bool>> predicate);
         public Task<T?> FindOneAsync(Expression<Func<T, bool>> predicate, params Expression<Func<T, object>>[] includes);
+
+
     }
 }

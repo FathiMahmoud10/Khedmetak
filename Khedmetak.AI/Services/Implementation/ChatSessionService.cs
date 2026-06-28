@@ -193,7 +193,7 @@ namespace Khedmetak.AI.Services.Implementation
                 return new List<UserSessionSummaryDTO>();
             }
 
-            var sessions = await sessionRepo.FindAsync(s => s.UserId == user.Id, s => s.ChatMessages);
+            var sessions = await sessionRepo.FindAllByAsync(s => s.UserId == user.Id, s => s.ChatMessages);
 
             return sessions
                 .OrderByDescending(s => s.StartedAt)
