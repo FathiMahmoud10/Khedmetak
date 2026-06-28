@@ -174,7 +174,7 @@ namespace Khedmetak.AI.Services.Implementation
 
             int? userId = user.Id;
 
-            var userSessions = await sessionRepo.FindAsyncr(s=> s.UserId == userId);
+            var userSessions = await sessionRepo.FindAsync(s=> s.UserId == userId);
             List<UserSessionsDTO> userSessionsDTO = new List<UserSessionsDTO>();
             foreach (var session in userSessions)
             {

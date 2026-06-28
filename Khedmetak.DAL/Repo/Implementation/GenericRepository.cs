@@ -1,3 +1,4 @@
+// Khedmetak.DAL.Repositories.GenericRepository.cs
 using Khedmetak.Core.Data;
 using Khedmetak.DAL.Entities;
 using Khedmetak.DAL.Entities.Base;
@@ -15,9 +16,8 @@ namespace Khedmetak.DAL.Repositories
         public GenericRepository(AppDbContext context)
         {
             _context = context;
-            _dbSet   = context.Set<T>();
+            _dbSet = context.Set<T>();
         }
-
 
         public async Task<IEnumerable<T>> GetAllAsync()
             => await _dbSet.ToListAsync();
@@ -44,8 +44,6 @@ namespace Khedmetak.DAL.Repositories
         public async Task<IEnumerable<T>> FindAsync(Expression<Func<T, bool>> predicate)
             => await _dbSet.Where(predicate).ToListAsync();
 
-       
-
         public void Add(T entity)
             => _dbSet.Add(entity);
 
@@ -61,7 +59,7 @@ namespace Khedmetak.DAL.Repositories
             return await _dbSet.FirstOrDefaultAsync(predicate);
         }
 
-        public async Task<T?> FindOneAsync(Expression<Func<T, bool>> predicate,params Expression<Func<T, object>>[] includes)
+        public async Task<T?> FindOneAsync(Expression<Func<T, bool>> predicate, params Expression<Func<T, object>>[] includes)
         {
             IQueryable<T> query = _dbSet;
 
@@ -71,11 +69,6 @@ namespace Khedmetak.DAL.Repositories
             }
 
             return await query.FirstOrDefaultAsync(predicate);
-        }
-
-        public Task<IEnumerable<UserDocument>> FindAsync(Expression<Func<UserDocument, bool>> predicate)
-        {
-            throw new NotImplementedException();
         }
     }
 }
