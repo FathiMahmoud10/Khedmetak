@@ -55,7 +55,7 @@ namespace Khedmetak.Controllers
         {
             var userSessions = await sessionService.GetAllSessionOfUserAsync(userMail);
             if (userSessions == null) return NotFound();
-            return Ok(ApiResponse<List<UserSessionsDTO>>.Ok(userSessions));
+            return Ok(ApiResponse<List<UserSessionSummaryDTO>>.Ok(userSessions));
         }
 
 

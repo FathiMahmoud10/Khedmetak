@@ -45,7 +45,12 @@ namespace Khedmetak.DAL.Repo.Implementation
                 .OrderByDescending(s => s.StartedAt)
                 .ToListAsync();
         }
-
+        public async Task<List<ChatSession>> GetByUserIdAsync(int userId)
+        {
+            return await _context.ChatSessions
+                .Where(s => s.UserId == userId)
+                .ToListAsync();
+        }
         public async Task<ChatSession?> GetBySessionGuidAsync(Guid sessionGuid)
         {
             return await _context.ChatSessions

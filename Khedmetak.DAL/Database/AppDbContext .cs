@@ -41,8 +41,10 @@ public class AppDbContext : IdentityDbContext<User, IdentityRole<int>, int>
         #region SeedData
         // Seed Roles
         var roleId = 1;
+        var adminRoleId = 2;
         modelBuilder.Entity<IdentityRole<int>>().HasData(
-            new IdentityRole<int> { Id = roleId, Name = "User", NormalizedName = "USER" }
+            new IdentityRole<int> { Id = roleId, Name = "User", NormalizedName = "USER" },
+            new IdentityRole<int> { Id = adminRoleId, Name = "Admin", NormalizedName = "ADMIN" }
         );
 
         // Seed Users
@@ -112,14 +114,31 @@ public class AppDbContext : IdentityDbContext<User, IdentityRole<int>, int>
         };
         rahma.PasswordHash = hasher.HashPassword(rahma, "12345678");
 
-        modelBuilder.Entity<User>().HasData(fathi, aya, naglaa, rahma);
+        var admin = new User
+        {
+            Id = 5,
+            UserName = "Admin",
+            NormalizedUserName = "ADMIN",
+            Email = "admin@khedmetak.com",
+            NormalizedEmail = "ADMIN@KHEDMETAK.COM",
+            EmailConfirmed = true,
+            Name = "Admin",
+            Role = "Admin",
+            Password = "Admin@123",
+            SecurityStamp = "a1b2c3d4-1111-2222-3333-444455556666",
+            ConcurrencyStamp = "f1e2d3c4-7777-8888-9999-aaaabbbbcccc"
+        };
+        admin.PasswordHash = hasher.HashPassword(admin, "Admin@123");
+
+        modelBuilder.Entity<User>().HasData(fathi, aya, naglaa, rahma, admin);
 
         // Seed User Roles
         modelBuilder.Entity<IdentityUserRole<int>>().HasData(
             new IdentityUserRole<int> { UserId = 1, RoleId = roleId },
             new IdentityUserRole<int> { UserId = 2, RoleId = roleId },
             new IdentityUserRole<int> { UserId = 3, RoleId = roleId },
-            new IdentityUserRole<int> { UserId = 4, RoleId = roleId }
+            new IdentityUserRole<int> { UserId = 4, RoleId = roleId },
+            new IdentityUserRole<int> { UserId = 5, RoleId = adminRoleId }
         );
 
         modelBuilder.Entity<Category>().HasData(
