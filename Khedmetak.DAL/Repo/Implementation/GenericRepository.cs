@@ -15,7 +15,7 @@ namespace Khedmetak.DAL.Repositories
         public GenericRepository(AppDbContext context)
         {
             _context = context;
-            _dbSet   = context.Set<T>();
+            _dbSet = context.Set<T>();
         }
 
 
@@ -44,7 +44,17 @@ namespace Khedmetak.DAL.Repositories
         public async Task<IEnumerable<T>> FindAsyncr(Expression<Func<T, bool>> predicate)
             => await _dbSet.Where(predicate).ToListAsync();
 
-       
+        public async Task<IEnumerable<T>> FindAllByAsync(Expression<Func<T, bool>> predicate, params Expression<Func<T, object>>[] includes)
+        {
+            IQueryable<T> query = _dbSet;
+
+            foreach (var include in includes)
+                query = query.Include(include);
+
+            return await query.Where(predicate).ToListAsync();
+        }
+
+
 
         public void Add(T entity)
             => _dbSet.Add(entity);
@@ -61,7 +71,7 @@ namespace Khedmetak.DAL.Repositories
             return await _dbSet.FirstOrDefaultAsync(predicate);
         }
 
-        public async Task<T?> FindOneAsync(Expression<Func<T, bool>> predicate,params Expression<Func<T, object>>[] includes)
+        public async Task<T?> FindOneAsync(Expression<Func<T, bool>> predicate, params Expression<Func<T, object>>[] includes)
         {
             IQueryable<T> query = _dbSet;
 
