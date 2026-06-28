@@ -106,7 +106,10 @@ namespace Khedmetak.AI.Services.Implementation
             return session.SessionGuid;
 
         }
-
+        public async Task<List<UserSessionSummaryDTO>> GetAllSessionOfUserAsync(string userMail)
+        {
+            return await GetUserSessionsAsync(userMail);
+        }
 
         //      ===================  الحصول على كل الرسابل الخاصة ب chatSession معينة =================
         public async Task<ChatSessionDTO?> GetSessionAllMessages(Guid sessionGuidId)
@@ -142,6 +145,35 @@ namespace Khedmetak.AI.Services.Implementation
             }
 
             return new ChatSessionDTO()
+            {
+                SessionGuidId = sessionGuidId,
+                ChatSession_ChatHistory = chatHistory
+            };
+        }
+        public async Task<ChatSessionDTO?> GetSessionLast15Messages(Guid sessionGuidId)
+        {
+            var chatSession = await sessionRepo.FindOneAsync(
+                s => s.SessionGuid == sessionGuidId,
+                s => s.ChatMessages);
+
+            if (chatSession == null)
+                return null;
+
+            var last15 = chatSession.ChatMessages?
+                .Where(m => m.Role != "system")
+                .OrderByDescending(m => m.SentAt)
+                .Take(15)
+                .OrderBy(m => m.SentAt)
+                .ToList() ?? new List<ChatMessage>();
+
+            var chatHistory = last15.Select(m => new ChatSessionMessageDTO
+            {
+                MessageId = m.Id,
+                Content = m.Content,
+                Role = m.Role,
+            }).ToList();
+
+            return new ChatSessionDTO
             {
                 SessionGuidId = sessionGuidId,
                 ChatSession_ChatHistory = chatHistory
