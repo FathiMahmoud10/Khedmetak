@@ -1,4 +1,4 @@
-﻿using Khedmetak.AI.DTOs;
+using Khedmetak.AI.DTOs;
 using Khedmetak.AI.Services.Abstraction;
 using Khedmetak.DAL.Entities;
 using Khedmetak.DAL.Repo.shared;
@@ -144,8 +144,60 @@ namespace Khedmetak.AI.Services.Implementation
 
             return chunks;
         }
-       
-        
+
+
+        private string GetKeywordsForService(GovService service)
+        {
+            return service.Id switch
+            {
+                1 => "بطاقة رقم قومي\nرقم قومي\nبطاقة شخصية\nNational ID\nاستخراج بطاقة",
+                2 => "تجديد بطاقة\nبطاقة شخصية\nرقم قومي\nتجديد رقم قومي\nNational ID",
+                3 => "رخصة سيارة\nرخصة مركبة\nمرور\nتجديد رخصة\nCar license",
+                4 => "شهادة ميلاد\nبدل فاقد\nاستخراج شهادة ميلاد\nBirth certificate\nميلاد",
+                _ => string.Join("\n", service.SrvName.Split(' ').Concat(service.SrvDesc.Split(' ')).Distinct().Where(w => w.Length > 3))
+            };
+        }
+
+        public async Task<ServiceChunkDTO> GenerateServiceChunkAsync(int serviceId)
+        {
+            var service = await serviceRepository.GetByIdAsync(
+                serviceId,
+                s => s.Category
+            );
+
+            if (service is null)
+                throw new Exception($"Service {serviceId} not found.");
+
+            var keywords = GetKeywordsForService(service);
+
+            var content = $"""
+اسم الخدمة:
+{service.SrvName}
+
+الوصف:
+{service.SrvDesc}
+
+الفئة:
+{service.Category?.Name ?? "غير محدد"}
+
+كلمات مفتاحية:
+{keywords}
+""";
+
+            return new ServiceChunkDTO
+            {
+                ChunkId = $"service_{service.Id}",
+                ServiceId = service.Id,
+                ChunkType = ChunkType.Overview.ToString(),
+
+                Content = content,
+
+                CategoryId = service.CategoryId,
+                CategoryName = service.Category?.Name ?? "",
+                ServiceName = service.SrvName
+            };
+        }
+
         //private static Dictionary<string, object> BuildMetadata( GovService service,string chunkType,string content )
         //{
         //    return new Dictionary<string, object>

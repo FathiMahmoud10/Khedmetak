@@ -1,6 +1,6 @@
-﻿
-using Khedmetak.AI.DTOs;
+﻿using Khedmetak.AI.DTOs.ChatMessagesDTO;
 using Khedmetak.AI.DTOs.ChatSessionDTO;
+using Khedmetak.AI.DTOs.UserAIChatDataDto;
 using Khedmetak.AI.RAG;
 using Khedmetak.AI.Services.Abstraction;
 using Khedmetak.AI.Services.Implementation;
@@ -92,7 +92,7 @@ namespace Khedmetak.Controllers
             {
                 SessionGuidId = userMessageDTO.SessionGuidId,
                 UserMessage = userMessageDTO.Message,
-                AIResponse = aiResponse
+                AIResponse = aiResponse.response
             };
             await messageService.AddUserMessageAndResponseAsync(msgAndReply);
 

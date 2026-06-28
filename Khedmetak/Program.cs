@@ -22,9 +22,11 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using OpenAI;
+using OpenAI.Chat;
 using Qdrant.Client;
 using System.ClientModel;
 using System.Net.Http.Headers;
@@ -178,6 +180,10 @@ if (!string.IsNullOrWhiteSpace(apiKey))
         });
 
     builder.Services.AddKeyedSingleton<OpenAIClient>("github", openAIClient);
+    builder.Services.AddSingleton<IChatClient>(sp =>
+        new ChatClientBuilder(openAIClient.GetChatClient(
+            builder.Configuration["AI:Model"]).
+            AsIChatClient()).UseFunctionInvocation().Build());
 
     builder.Services.AddHttpClient("jina", client =>
     {
@@ -234,18 +240,24 @@ builder.Services.AddScoped<IStatisticsService, StatisticsService>();
 // AI Services
 builder.Services.AddScoped<IChatSessionService, ChatSessionService>();
 builder.Services.AddScoped<IChatMessageService, ChatMessageService>();
-builder.Services.AddScoped<IAIChatService, AIChatService>();
+//builder.Services.AddScoped<IAIChatService, AIChatService>();
 builder.Services.AddScoped<IEmbeddingService, EmbeddingService>();
 builder.Services.AddScoped<IChunkService, ChunkService>();
 builder.Services.AddScoped<IUserDocumentService, UserDocumentService>();
 
 builder.Services.AddScoped<IVectorDB, QdrantService>();
 builder.Services.AddScoped<IVectorDBOperationsService, VectorDBOperationsService>();
-builder.Services.AddScoped<IRagContextService, RagContextService>();
+builder.Services.AddScoped<IVectorDBService, VectorDBService>();
+
+builder.Services.AddScoped<IRagService, RagService>();
+builder.Services.AddScoped<IGovServiceTools, GovServiceTools>();
 
 // Agents
 builder.Services.AddScoped<IServiceIntentAgent, ServiceIntentAgent>();
-builder.Services.AddScoped<IRewriteUserQuestionAgent, RewriteUserQuestionAgent>();
+builder.Services.AddScoped<IRewriteQuestionAgent, RewriteQuestionAgent>();
+builder.Services.AddScoped<IAIServiceResponseAgent, AIServiceResponseAgent>();
+builder.Services.AddScoped<IGeneralChatAgent, GeneralChatAgent>();
+
 builder.Services.AddScoped<IChatOrchestrator, ChatOrchestrator>();
 #endregion
 

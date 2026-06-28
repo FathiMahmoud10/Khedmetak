@@ -1,4 +1,4 @@
-﻿using Khedmetak.AI.Agents.Abstraction;
+using Khedmetak.AI.Agents.Abstraction;
 using Khedmetak.AI.Configuration;
 using Khedmetak.AI.DTOs.ChatSessionDTO;
 using Microsoft.Extensions.DependencyInjection;
@@ -13,14 +13,15 @@ using System.Threading.Tasks;
 
 namespace Khedmetak.AI.Agents.Implementaion
 {
-    public class RewriteUserQuestionAgent:IRewriteUserQuestionAgent
+    public class RewriteQuestionAgent : IRewriteQuestionAgent
     {
         private readonly ChatClient _chat;
 
-        public RewriteUserQuestionAgent([FromKeyedServices("github")] OpenAIClient githubClient, IOptions<AISettings> settings)
+        public RewriteQuestionAgent([FromKeyedServices("github")] OpenAIClient githubClient, IOptions<AISettings> settings)
         {
             _chat = githubClient.GetChatClient(settings.Value.Model);
         }
+
         public async Task<string> RewriteQuestionAsync(string userQuestion, ChatSessionDTO? chatSessionDto)
         {
             List<ChatMessage> messages = new();
@@ -80,9 +81,8 @@ How can I apply for a passport?
             ChatCompletion completion = await _chat.CompleteChatAsync(messages);
 
             var response = completion.Content[0].Text;
-            Console.WriteLine("Rewrite Agent: "+response);
+            Console.WriteLine("Rewrite Agent: " + response);
             return response;
         }
-
     }
 }

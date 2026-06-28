@@ -13,5 +13,9 @@ namespace Khedmetak.BLL.Services.Abstraction
         Task<GovServiceDto> CreateServiceAsync(CreateGovServiceDto dto);
         Task<GovServiceDto?> UpdateServiceAsync(int id, UpdateGovServiceDto dto);
         Task<bool> DeleteServiceAsync(int id);
+
+        //----------------
+        Task<CurrentServiceDetailsDTO?> GetCurrentServiceDetailsAsync(int id);
+
     }
 }

@@ -1,6 +1,6 @@
 ﻿using Khedmetak.AI.Agents.Abstraction;
 using Khedmetak.AI.Agents.Implementaion;
-using Khedmetak.AI.DTOs;
+using Khedmetak.AI.DTOs.UserAIChatDataDto;
 using Khedmetak.AI.Services.Abstraction;
 using Microsoft.AspNetCore.Mvc;
 
