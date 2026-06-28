@@ -4,12 +4,14 @@ using Khedmetak.AI.Services.Abstraction;
 using Khedmetak.DAL.Entities;
 using Khedmetak.DAL.Enums;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Configuration;
 using Khedmetak.DAL.Repo.Abstraction;
 using Khedmetak.DAL.Repo.Abstraction.UnitOfWork;
 using Khedmetak.DAL.Repo.Implementation.UnitOfWork;
 using Khedmetak.DAL.Repo.shared;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -21,12 +23,15 @@ namespace Khedmetak.AI.Services.Implementation
         private readonly IGenericRepository<ChatSession> sessionRepo;
         private readonly IUnitOfWork unitOfWork;
         private readonly UserManager<User> userManager;
+        private readonly string _uploadsRoot;
 
-        public ChatSessionService(IGenericRepository<ChatSession> repo, IUnitOfWork unitOfWork, UserManager<User> userManager)
+        public ChatSessionService(IGenericRepository<ChatSession> repo, IUnitOfWork unitOfWork, UserManager<User> userManager, IConfiguration configuration)
         {
             sessionRepo = repo;
             this.unitOfWork = unitOfWork;
             this.userManager = userManager;
+            _uploadsRoot = configuration["UploadsPath"]
+                ?? Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
         }
 
         //               =========== Add New Session ===========
@@ -281,9 +286,12 @@ namespace Khedmetak.AI.Services.Implementation
                """
             };
 
+            // ── تخزين التاريخ ──
+            var submittedAt = DateTime.UtcNow;
+
             var session = new ChatSession()
             {
-                StartedAt = DateTime.Now,
+                StartedAt = submittedAt,
                 UserId = user.Id,
                 GovServiceId = service.Id,
                 CategoryId = service.CategoryId,
@@ -295,11 +303,55 @@ namespace Khedmetak.AI.Services.Implementation
             sessionRepo.Add(session);
             await unitOfWork.SaveChangesAsync();
 
+            // ── تخزين الملفات (لو موجودة) ──
+            int uploadedFilesCount = 0;
+            if (dto.Files != null && dto.Files.Count > 0)
+            {
+                var userFolder = Path.Combine(_uploadsRoot, user.Id.ToString());
+                Directory.CreateDirectory(userFolder);
+
+                foreach (var file in dto.Files)
+                {
+                    if (file.Length == 0) continue;
+
+                    var ext = Path.GetExtension(file.FileName).ToLowerInvariant();
+                    var uniqueName = $"{Guid.NewGuid()}{ext}";
+                    var fullPath = Path.Combine(userFolder, uniqueName);
+                    var relativePath = Path.Combine("uploads", user.Id.ToString(), uniqueName);
+
+                    using (var stream = new FileStream(fullPath, FileMode.Create))
+                    {
+                        await file.CopyToAsync(stream);
+                    }
+
+                    var doc = new UserDocument
+                    {
+                        UserId = user.Id,
+                        ChatSessionId = session.Id,
+                        FileName = file.FileName,
+                        FilePath = relativePath,
+                        FileType = file.ContentType,
+                        UploadedAt = submittedAt,
+                        ValidationStatus = "Pending"
+                    };
+
+                    unitOfWork.UserDocuments.Add(doc);
+                    uploadedFilesCount++;
+                }
+
+                await unitOfWork.SaveChangesAsync();
+            }
+
             return new ServiceRequestResult
             {
                 Success = true,
-                SessionGuid = session.SessionGuid
+                SessionGuid = session.SessionGuid,
+                SubmittedAt = submittedAt,
+                UserName = user.Name,
+                UserEmail = user.Email,
+                PhoneNumber = user.PhoneNumber,
+                UploadedFilesCount = uploadedFilesCount
             };
         }
     }
-}
+}

@@ -59,7 +59,8 @@ namespace Khedmetak.Controllers
         }
 
         [HttpPost("submitRequest")]
-        public async Task<IActionResult> SubmitRequest([FromBody] SubmitServiceRequestDto dto)
+        [Consumes("multipart/form-data")]
+        public async Task<IActionResult> SubmitRequest([FromForm] SubmitServiceRequestDto dto)
         {
             if (!ModelState.IsValid)
             {
@@ -72,7 +73,7 @@ namespace Khedmetak.Controllers
                 return BadRequest(ApiResponse<string>.Fail(result.ErrorMessage));
             }
 
-            return Ok(ApiResponse<Guid>.Ok(result.SessionGuid, "تم تقديم الطلب بنجاح"));
+            return Ok(ApiResponse<ServiceRequestResult>.Ok(result, "تم تقديم الطلب بنجاح"));
         }
     }
 }

@@ -1,4 +1,6 @@
+using Microsoft.AspNetCore.Http;
 using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 namespace Khedmetak.AI.DTOs.ChatSessionDTO
@@ -11,5 +13,13 @@ namespace Khedmetak.AI.DTOs.ChatSessionDTO
 
         [Required(ErrorMessage = "معرف الخدمة مطلوب")]
         public int GovServiceId { get; set; }
+
+        // ── بيانات المستخدم ──
+        public string? UserName { get; set; }
+        public string? PhoneNumber { get; set; }
+        public string? Notes { get; set; }
+
+        // ── الملفات (اختياري) ──
+        public List<IFormFile>? Files { get; set; }
     }
 }
