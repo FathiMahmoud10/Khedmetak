@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Khedmetak.AI.DTOs
+namespace Khedmetak.AI.DTOs.UserAIChatDataDto
 {
     public class UserSessionsDTO
     {

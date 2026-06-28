@@ -4,13 +4,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Khedmetak.AI.DTOs
+namespace Khedmetak.AI.DTOs.UserAIChatDataDto
 {
-    // to send Reply from AI to a specefic session
-    public class ChatResponseDTO
+    // to receive the user message for a specefic session 
+    public class UserMessageDTO
     {
-        public Guid SessionGuidId { get; set; }
         public string Message { get; set; }
+        public Guid SessionGuidId { get; set; } 
         
     }
 }

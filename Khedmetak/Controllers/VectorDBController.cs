@@ -10,14 +10,15 @@ namespace Khedmetak.Controllers
     [Authorize(Roles = "Admin")]
     public class VectorDBController : ControllerBase
     {
-        private readonly IVectorDBOperationsService _vectorIndexingService;
-        private readonly IRagContextService _ragService;
+       
+            private readonly IVectorDBService _vectorIndexingService;
+        private readonly IRagService _ragService;
 
-        public VectorDBController(IVectorDBOperationsService vectorIndexingService, IRagContextService ragService)
-        {
-            _vectorIndexingService = vectorIndexingService;
-            _ragService = ragService;
-        }
+        public VectorDBController(IVectorDBService vectorIndexingService,IRagService ragService)
+            {
+                _vectorIndexingService = vectorIndexingService;
+                _ragService = ragService;
+            }
 
         [HttpPost("Add-service/{serviceId:int}")]
         public async Task<IActionResult> IndexService(int serviceId)
@@ -36,8 +37,12 @@ namespace Khedmetak.Controllers
         [HttpGet("search")]
         public async Task<IActionResult> Search([FromQuery] string question)
         {
-            if (string.IsNullOrWhiteSpace(question)) return BadRequest("Question is required.");
-            string results = await _ragService.GenerateContextFromQuestionAsync(question);
+            if (string.IsNullOrWhiteSpace(question))
+                return BadRequest("Question is required.");
+
+            var results =
+                await _ragService.SearchServiceAsync(question);
+
             return Ok(results);
         }
     }

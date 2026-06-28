@@ -6,10 +6,12 @@ using System.Threading.Tasks;
 
 namespace Khedmetak.AI.DTOs.RagDTOs
 {
-    public class RagResponseDTO
+    public class RagServiceInfo
     {
-        public string Answer { get; set; } = string.Empty;
+        public string ServiceName { get; set; } = string.Empty;
 
-        public List<string> RetrievedChunks { get; set; } = new();
+        public int ServiceId { get; set; } 
     }
+
+    
 }
