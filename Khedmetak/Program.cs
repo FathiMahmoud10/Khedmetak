@@ -8,9 +8,12 @@ using Khedmetak.AI.Services.Implementation;
 using Khedmetak.API.Middlewares;
 using Khedmetak.BLL.MappingProfile;
 using Khedmetak.BLL.Services.Abstraction;
+using Khedmetak.BLL.Services.Abstraction.Fawry;
 using Khedmetak.BLL.Services.Implementation;
 using Khedmetak.Core.Data;
 using Khedmetak.DAL.Entities;
+using Khedmetak.DAL.Entities.FawrySettings;
+using Khedmetak.DAL.Repo;
 using Khedmetak.DAL.Repo.Abstraction;
 using Khedmetak.DAL.Repo.Abstraction.UnitOfWork;
 using Khedmetak.DAL.Repo.Implementation;
@@ -224,12 +227,13 @@ builder.Services.AddScoped<IChatSessionRepository, ChatSessionRepository>();
 builder.Services.AddScoped<IUserDocumentRepository, UserDocumentRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IChatSessionRepository, ChatSessionRepository>();
-
+builder.Services.AddScoped<IPaymentRepository, PaymentRepository>();
 #endregion
 
 #region Services
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
-
+builder.Services.Configure<FawrySettings>(builder.Configuration.GetSection("Fawry"));
+builder.Services.AddScoped<IFawryService, FawryMockService>(); // للتجربة دلوقتي
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IGovServiceService, GovServiceService>();
 builder.Services.AddScoped<IGovServiceAdminService, GovServiceAdminService>();
