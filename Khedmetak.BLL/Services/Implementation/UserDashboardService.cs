@@ -1,4 +1,4 @@
-﻿using Khedmetak.BLL.DTOS.UserDashboard;
+using Khedmetak.BLL.DTOS.UserDashboard;
 using Khedmetak.BLL.Services.Abstraction;
 using Khedmetak.DAL.Entities;
 using Khedmetak.DAL.Enums;
@@ -119,7 +119,12 @@ namespace Khedmetak.BLL.Services.Implementation
             StartedAt = s.StartedAt,
             EndedAt = s.EndedAt,
             MessagesCount = s.ChatMessages?.Count ?? 0,
-            UploadedDocumentsCount = s.UserDocuments?.Count ?? 0
+            UploadedDocumentsCount = s.UserDocuments?.Count ?? 0,
+            Preview = s.ChatMessages?
+                .Where(m => m.Role == "user")
+                .OrderBy(m => m.SentAt)
+                .Select(m => m.Content)
+                .FirstOrDefault() ?? string.Empty
         };
     }
 }

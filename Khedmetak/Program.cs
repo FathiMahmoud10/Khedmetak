@@ -262,7 +262,6 @@ builder.Services.AddScoped<IGeneralChatAgent, GeneralChatAgent>();
 builder.Services.AddScoped<IChatOrchestrator, ChatOrchestrator>();
 #endregion
 
-// ✅ Build بره الـ if
 var app = builder.Build();
 
 app.UseMiddleware<ExceptionHandlingMiddleware>();
@@ -272,7 +271,6 @@ app.UseSwaggerUI();
 
 app.UseHttpsRedirection();
 
-// ✅ CORS لازم يكون قبل Authentication
 app.UseCors("AllowAll");
 
 app.UseAuthentication();
