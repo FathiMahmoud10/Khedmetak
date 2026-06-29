@@ -262,7 +262,6 @@ builder.Services.AddScoped<IGeneralChatAgent, GeneralChatAgent>();
 builder.Services.AddScoped<IChatOrchestrator, ChatOrchestrator>();
 #endregion
 
-// ✅ Build بره الـ if
 var app = builder.Build();
 
 app.UseMiddleware<ExceptionHandlingMiddleware>();

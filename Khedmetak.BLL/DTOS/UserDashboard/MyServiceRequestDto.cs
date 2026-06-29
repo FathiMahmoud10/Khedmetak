@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 namespace Khedmetak.BLL.DTOS.UserDashboard
 {
@@ -24,5 +24,10 @@ namespace Khedmetak.BLL.DTOS.UserDashboard
 
         public int MessagesCount { get; set; }
         public int UploadedDocumentsCount { get; set; }
+
+        /// <summary>
+        /// أول رسالة كتبها المستخدم في الشات — تُستخدم كـ preview للجلسة.
+        /// </summary>
+        public string Preview { get; set; } = string.Empty;
     }
 }
