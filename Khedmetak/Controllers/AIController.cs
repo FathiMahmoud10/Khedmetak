@@ -1,4 +1,4 @@
-﻿using Khedmetak.AI.DTOs.ChatMessagesDTO;
+using Khedmetak.AI.DTOs.ChatMessagesDTO;
 using Khedmetak.AI.DTOs.ChatSessionDTO;
 using Khedmetak.AI.DTOs.UserAIChatDataDto;
 using Khedmetak.AI.RAG;
@@ -116,13 +116,26 @@ namespace Khedmetak.Controllers
             int userId = int.Parse(userIdClaim);
 
             if (files == null || files.Count == 0)
-                return BadRequest("No files uploaded.");
+                return BadRequest(ApiResponse<string>.Fail("No files uploaded."));
 
-            var result = await documentService.SaveUserDocumentsAsync(files, userId, chatSessionId ?? 0);
+            var savedDocs = await documentService.SaveUserDocumentsWithDetailsAsync(files, userId, chatSessionId ?? 0);
 
-            if (!result) return StatusCode(500, "Failed to save documents.");
+            if (savedDocs == null || savedDocs.Count == 0)
+                return StatusCode(500, ApiResponse<string>.Fail("Failed to save documents."));
 
-            return Ok("Documents uploaded successfully.");
+            // بناء الـ URL الكامل لكل ملف
+            var baseUrl = $"{Request.Scheme}://{Request.Host}";
+            var results = savedDocs.Select(doc => new
+            {
+                doc.Id,
+                doc.FileName,
+                doc.FilePath,
+                doc.FileType,
+                doc.UploadedAt,
+                FileUrl = $"{baseUrl}{doc.FilePath}"
+            }).ToList();
+
+            return Ok(ApiResponse<object>.Ok(results, "تم رفع الملفات بنجاح"));
         }
 
         #region MyRegion

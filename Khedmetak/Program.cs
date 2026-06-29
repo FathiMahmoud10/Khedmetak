@@ -272,6 +272,9 @@ app.UseSwaggerUI();
 
 app.UseHttpsRedirection();
 
+// ✅ Static files عشان الملفات المرفوعة في wwwroot/uploads تكون accessible
+app.UseStaticFiles();
+
 // ✅ CORS لازم يكون قبل Authentication
 app.UseCors("AllowAll");
 

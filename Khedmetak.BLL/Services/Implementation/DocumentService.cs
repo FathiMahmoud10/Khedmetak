@@ -111,5 +111,52 @@ namespace Khedmetak.BLL.Services.Implementation
             var docs = await _unitOfWork.UserDocuments.GetByUserIdAsync(userId);
             return _mapper.Map<IEnumerable<UserDocumentDto>>(docs);
         }
+
+        /// <summary>
+        /// حفظ ملفات ورجّع تفاصيلها (بما فيها الـ FilePath) عشان الـ controller يقدر يبني URLs كاملة.
+        /// </summary>
+        public async Task<List<UserDocumentDto>?> SaveUserDocumentsWithDetailsAsync(List<IFormFile> files, int userId, int? chatSessionId)
+        {
+            try
+            {
+                var uploadsFolder = Path.Combine(_webRootPath, "uploads", "documents");
+                Directory.CreateDirectory(uploadsFolder);
+
+                var savedEntities = new List<UserDocument>();
+
+                foreach (var file in files)
+                {
+                    if (file.Length == 0 || file.Length > MaxFileSizeBytes) continue;
+
+                    var ext = Path.GetExtension(file.FileName).ToLowerInvariant();
+                    var uniqueName = $"{Guid.NewGuid()}{ext}";
+                    var fullPath = Path.Combine(uploadsFolder, uniqueName);
+
+                    await using (var stream = new FileStream(fullPath, FileMode.Create))
+                        await file.CopyToAsync(stream);
+
+                    var entity = new UserDocument
+                    {
+                        UserId = userId,
+                        ChatSessionId = chatSessionId,
+                        FileName = file.FileName,
+                        FilePath = $"/uploads/documents/{uniqueName}",
+                        FileType = ext,
+                        UploadedAt = DateTime.UtcNow,
+                        ValidationStatus = "Pending"
+                    };
+
+                    _unitOfWork.UserDocuments.Add(entity);
+                    savedEntities.Add(entity);
+                }
+
+                await _unitOfWork.SaveChangesAsync();
+                return _mapper.Map<List<UserDocumentDto>>(savedEntities);
+            }
+            catch
+            {
+                return null;
+            }
+        }
     }
 }
