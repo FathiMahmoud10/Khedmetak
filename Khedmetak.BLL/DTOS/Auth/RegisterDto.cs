@@ -1,4 +1,4 @@
-﻿// Khedmetak.BLL/DTOS/Auth/RegisterDto.cs
+// Khedmetak.BLL/DTOS/Auth/RegisterDto.cs
 using System;
 using System.ComponentModel.DataAnnotations;
 
@@ -41,5 +41,12 @@ namespace Khedmetak.BLL.DTOS.Auth
         public string FloorNumber { get; set; } = string.Empty;
         public string ApartmentNumber { get; set; } = string.Empty;
         public string PostalCode { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "الرقم القومي مطلوب")]
+        [StringLength(14, MinimumLength = 14, ErrorMessage = "الرقم القومي يجب أن يكون 14 رقماً")]
+        public string NationalId { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "رقم الهاتف مطلوب")]
+        public string Phone { get; set; } = string.Empty;
     }
 }

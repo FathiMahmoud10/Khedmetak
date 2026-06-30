@@ -82,6 +82,7 @@ namespace Khedmetak.BLL.Services.Implementation
             if (service is null) return null;
             return new CurrentServiceDetailsDTO()
             {
+                Id = service.Id,
                 ServiceName = service.SrvName,
                 CategoryName = service.Category.Name,
                 RequiredDocumentsCount = service.RequiredDocuments?.Count ?? 0,

@@ -2,6 +2,8 @@
   <Project Path="Khedmetak.AI/Khedmetak.AI.csproj" />
   <Project Path="Khedmetak.BLL/Khedmetak.BLL.csproj" />
   <Project Path="Khedmetak.DAL/Khedmetak.DAL.csproj" />
+  <Project Path="Khedmetak.DigitalPortal/Khedmetak.DigitalPortal.csproj" />
+  <Project Path="EgyptDigitalPortal.SimulatedServer/EgyptDigitalPortal.SimulatedServer.csproj" />
   <Project Path="Khedmetak/Khedmetak.csproj" />
   <Project Path="Shard/Shard.csproj" />
 </Solution>

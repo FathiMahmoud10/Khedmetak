@@ -67,7 +67,6 @@ namespace Khedmetak.API.Controllers
             return Ok(ApiResponse<AuthResponseDto>.Ok(response));
         }
 
-        // Khedmetak.API/Controllers/AuthController.cs - أضف الـ endpoint ده جوه الـ class
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegisterDto dto)
         {
@@ -82,12 +81,14 @@ namespace Khedmetak.API.Controllers
                 UserName = dto.Email,
                 Email = dto.Email,
                 Name = dto.Name,
+                PhoneNumber = dto.Phone,
                 Role = "User",                 // ⬅️ كان فاضي وعمود [Required]، ده سبب فشل CreateAsync بصمت
                 EmailConfirmed = true,          // ⬅️ كان false، يمنع تسجيل الدخول لو فيه RequireConfirmedAccount
                 CreatedAt = DateTime.UtcNow,
                 CitizenProfile = new CitizenProfile
                 {
                     FullName = dto.FullName,
+                    NationalId = dto.NationalId,
                     DateOfBirth = dto.DateOfBirth,
                     City = dto.City,
                     District = dto.District,
@@ -113,6 +114,25 @@ namespace Khedmetak.API.Controllers
             {
                 var errors = string.Join(", ", roleResult.Errors.Select(e => e.Description));
                 return BadRequest(ApiResponse<string>.Fail("فشل ربط المستخدم بالـ Role: " + errors));
+            }
+
+            // تلقائيًا نقوم بتسجيله في بوابة مصر الرقمية المحاكية ليسهل عليه تسجيل الدخول بـ OTP لاحقاً
+            if (!PortalSimulatedController.Citizens.Any(c => c.NationalId == dto.NationalId))
+            {
+                PortalSimulatedController.Citizens.Add(new MockCitizenRecord
+                {
+                    NationalId = dto.NationalId,
+                    PhoneNumber = dto.Phone,
+                    FullName = dto.FullName,
+                    DateOfBirth = dto.DateOfBirth,
+                    City = dto.City,
+                    District = dto.District,
+                    Street = dto.Street,
+                    BuildingNumber = dto.BuildingNumber,
+                    FloorNumber = dto.FloorNumber,
+                    ApartmentNumber = dto.ApartmentNumber,
+                    PostalCode = dto.PostalCode
+                });
             }
 
             var roles = await _userManager.GetRolesAsync(user);

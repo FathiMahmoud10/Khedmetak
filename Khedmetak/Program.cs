@@ -10,6 +10,8 @@ using Khedmetak.BLL.MappingProfile;
 using Khedmetak.BLL.Services.Abstraction;
 using Khedmetak.BLL.Services.Abstraction.Fawry;
 using Khedmetak.BLL.Services.Implementation;
+using Khedmetak.DigitalPortal.Services.Abstraction;
+using Khedmetak.DigitalPortal.Services.Implementation;
 using Khedmetak.Core.Data;
 using Khedmetak.DAL.Entities;
 using Khedmetak.DAL.Entities.FawrySettings;
@@ -47,6 +49,7 @@ builder.Services.AddControllers(options =>
     options.Filters.Add(new AuthorizeFilter(policy));
 });
 builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddHttpContextAccessor();
 #endregion
 
 #region Swagger
@@ -241,6 +244,15 @@ builder.Services.AddScoped<IDocumentService, DocumentService>();
 builder.Services.AddScoped<JwtService>();
 builder.Services.AddScoped<IUserDashboardService, UserDashboardService>();
 builder.Services.AddScoped<IStatisticsService, StatisticsService>();
+builder.Services.AddHttpClient<IDigitalPortalService, DigitalPortalHttpService>(client =>
+{
+    var baseUrl = builder.Configuration["DigitalPortalSettings:BaseUrl"] ?? "http://localhost:5200/";
+    if (!baseUrl.EndsWith("/"))
+    {
+        baseUrl += "/";
+    }
+    client.BaseAddress = new Uri(baseUrl);
+});
 
 // AI Services
 builder.Services.AddScoped<IChatSessionService, ChatSessionService>();

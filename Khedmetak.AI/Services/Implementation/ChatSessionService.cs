@@ -96,7 +96,7 @@ namespace Khedmetak.AI.Services.Implementation
 
             var session = new ChatSession()
             {
-                StartedAt = newSessionDTO.CreatedAt,
+                StartedAt = newSessionDTO.CreatedAt == default ? DateTime.UtcNow : newSessionDTO.CreatedAt,
                 UserId = userId
             };
 
