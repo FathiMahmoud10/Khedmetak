@@ -7,11 +7,17 @@ namespace Khedmetak.AI.Services.Abstraction
 {
     public interface IGovServiceTools
     {
+        // ----------- General Agent tools------------
+
+        Task<List<ServiceDTO>> GetAllServices();
+
+        // ---------- AIResponseAgent tools ------------
         Task<GovServiceSummaryDto?> GetServiceSummary(int serviceId);
         Task<List<RequiredDocumentDto>?> GetRequiredDocuments(int serviceId);
         Task<List<ServiceStepDto>?> GetServiceSteps(int serviceId);
         Task<GovServiceFeesDto?> GetServiceFees(int serviceId);
         Task<string?> GetServiceEstimatedTime(int serviceId);
+
         //Task<List<ServiceOptionDto>?> GetServiceOptions(int serviceId);
         //Task<List<ServiceGeneralDocDto>?> GetGeneralDocuments(int serviceId);
     }
