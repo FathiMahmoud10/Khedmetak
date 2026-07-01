@@ -39,6 +39,7 @@ Rules:
 3. Preserve the user's original intent. Do not answer the question.
 4. Do not add information that is not implied by the conversation.
 5. Return ONLY the final question. Do not explain your reasoning. Do not use quotation marks or markdown.
+6. Reply in English.
 
 Examples:
 
@@ -63,7 +64,7 @@ How can I apply for a passport?
 
             if (chatSessionDto?.ChatSession_ChatHistory != null)
             {
-                foreach (var msg in chatSessionDto.ChatSession_ChatHistory.TakeLast(10))
+                foreach (var msg in chatSessionDto.ChatSession_ChatHistory.TakeLast(6))
                 {
                     if (msg.Role.Equals("user", StringComparison.OrdinalIgnoreCase))
                     {
@@ -76,12 +77,14 @@ How can I apply for a passport?
                 }
             }
 
+           
             messages.Add(ChatMessage.CreateUserMessage(userQuestion));
 
             ChatCompletion completion = await _chat.CompleteChatAsync(messages);
 
             var response = completion.Content[0].Text;
             Console.WriteLine("Rewrite Agent: " + response);
+
             return response;
         }
     }

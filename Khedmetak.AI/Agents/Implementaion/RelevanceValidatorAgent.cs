@@ -17,30 +17,42 @@ namespace Khedmetak.AI.Agents.Implementation
 
         public async Task<bool> IsRelevantAsync(string userQuestion, RagServiceInfo serviceInfo)
         {
-            var prompt = $"""
-                أنت محكّم دقيق. مهمتك فقط: هل سؤال المستخدم يتعلق بالخدمة الحكومية المسترجعة؟
+            var systemPrompt = """
+You are a strict relevance validator for Egyptian government services.
 
-                سؤال المستخدم: {userQuestion}
+Your task is to determine whether the retrieved service is the EXACT government service requested by the user.
 
-                الخدمة المسترجعة:
-                - اسم الخدمة: {serviceInfo.ServiceName}
+Evaluation rules:
+- Compare the user's intent with the retrieved service based on meaning, purpose, and government operation.
+- Ignore wording differences, synonyms, abbreviations, and common alternative expressions.
+- Return true ONLY if both refer to the same government service and same operation.
+- Return false if they differ in operation, even if they belong to the same service family (e.g. New, Renewal, Replacement, Lost, Damaged, Update, Correction, Cancellation).
+- Return false if the retrieved service is merely related, similar, a prerequisite, a follow-up, or an alternative service.
+- If there is any uncertainty, return false.
 
-                قواعد التقييم:
-                - أجب بـ true إذا كان السؤال يستفسر عن هذه الخدمة تحديداً أو خدمة مشابهة جداً لها.
-                - أجب بـ false إذا كانت الخدمة المسترجعة لا تتوافق مع نية المستخدم الحقيقية.
-                - لا تعتمد فقط على تشابه الكلمات — حكّم على المعنى.
+Output rules:
+- Respond with exactly one valid JSON object.
+- The JSON must have a single property named "isRelevant".
+- Do not include explanations, markdown, code fences, or any additional text.
 
-                أجب فقط بـ JSON بهذا الشكل بدون أي نص إضافي:
-                {"isRelevant": true}  أو  {"isRelevant": false}
-                """;
+Valid responses:
+{"isRelevant": true}
+{"isRelevant": false}
+""";
+
+            var userPrompt = $"""
+User Question:
+{userQuestion}
+
+Retrieved Service:
+{serviceInfo.ServiceName}
+""";
 
             var messages = new List<ChatMessage>
-            {
-                new ChatMessage(ChatRole.System,
-                    "أنت محكّم دقيق يجيب فقط بـ JSON صحيح بدون أي نص إضافي."),
-                new ChatMessage(ChatRole.User, prompt)
-            };
-
+{
+    new(ChatRole.System, systemPrompt),
+    new(ChatRole.User, userPrompt)
+};
             var response = await _chatClient.GetResponseAsync(messages);
             var raw = response.Text;
 
@@ -53,6 +65,7 @@ namespace Khedmetak.AI.Agents.Implementation
                     .Trim();
 
                 var result = JsonSerializer.Deserialize<JsonElement>(clean);
+                Console.WriteLine(result);
                 return result.GetProperty("isRelevant").GetBoolean();
             }
             catch

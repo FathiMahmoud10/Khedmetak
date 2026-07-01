@@ -91,7 +91,7 @@ namespace Khedmetak.AI.Services.Implementation
                 return new AIResponseDTO()
                 {
                     CurrentServiceDetails = new CurrentServiceDetailsDTO() { ServiceName = "خدمة ليست متوفرة" },
-                     response = await _aiResponseAgent.GenerateResponseAsync(standaloneQuestion, serviceInfo, session)
+                     response = await _aiResponseAgent.GenerateResponseAsync(standaloneQuestion, serviceInfo)
                     
                 };
 
@@ -104,7 +104,7 @@ namespace Khedmetak.AI.Services.Implementation
             return new AIResponseDTO()
             {
                 CurrentServiceDetails = currentServiceDetails,
-                response = await _aiResponseAgent.GenerateResponseAsync(standaloneQuestion, serviceInfo, session)
+                response = await _aiResponseAgent.GenerateResponseAsync(standaloneQuestion, serviceInfo)
 
             };
         }
