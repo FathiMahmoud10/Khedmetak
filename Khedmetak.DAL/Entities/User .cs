@@ -22,6 +22,8 @@ namespace Khedmetak.DAL.Entities
         public ICollection<UserDocument> UserDocuments { get; set; } = new List<UserDocument>();
         public ICollection<Feedback> Feedbacks { get; set; } = new List<Feedback>();
         public CitizenProfile? CitizenProfile { get; set; }
+        public ICollection<Payment> Payments { get; set; } = new List<Payment>();
+
         #endregion
     }
 }

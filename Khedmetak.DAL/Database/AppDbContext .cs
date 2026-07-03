@@ -13,6 +13,8 @@ public class AppDbContext : IdentityDbContext<User, IdentityRole<int>, int>
         : base(options) { }
 
     #region DbSets
+    public DbSet<Payment> Payments { get; set; }
+
     public DbSet<ChatSession> ChatSessions { get; set; }
     public DbSet<ChatMessage> ChatMessages { get; set; }
     public DbSet<Feedback> Feedbacks { get; set; }
@@ -333,6 +335,7 @@ public class AppDbContext : IdentityDbContext<User, IdentityRole<int>, int>
         modelBuilder.Entity<CitizenProfile>(e =>
         {
             e.Property(c => c.FullName).IsRequired().HasMaxLength(200);
+            e.Property(c => c.NationalId).HasMaxLength(14);
             e.Property(c => c.City).IsRequired().HasMaxLength(100);
             e.Property(c => c.District).HasMaxLength(100);
             e.Property(c => c.Street).HasMaxLength(200);

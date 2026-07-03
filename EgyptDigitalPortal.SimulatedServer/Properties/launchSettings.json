@@ -1,0 +1,12 @@
+{
+  "profiles": {
+    "EgyptDigitalPortal.SimulatedServer": {
+      "commandName": "Project",
+      "launchBrowser": true,
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "applicationUrl": "https://localhost:62668;http://localhost:62669"
+    }
+  }
+}

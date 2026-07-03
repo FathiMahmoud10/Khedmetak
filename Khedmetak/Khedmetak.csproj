@@ -21,6 +21,7 @@
 	<ItemGroup>
 		<ProjectReference Include="..\Khedmetak.AI\Khedmetak.AI.csproj" />
 		<ProjectReference Include="..\Khedmetak.BLL\Khedmetak.BLL.csproj" />
+		<ProjectReference Include="..\Khedmetak.DigitalPortal\Khedmetak.DigitalPortal.csproj" />
 		<ProjectReference Include="..\Shard\Shard.csproj" />
 	</ItemGroup>
 

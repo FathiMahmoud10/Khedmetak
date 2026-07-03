@@ -21,70 +21,50 @@ namespace Khedmetak.AI.Agents.Implementaion
             _govServiceTools = govServiceTools;
         }
 
-        public async Task<string> GenerateResponseAsync(string standaloneQuestion, RagServiceInfo serviceInfo, ChatSessionDTO session)
+        public async Task<string> GenerateResponseAsync(string standaloneQuestion, RagServiceInfo serviceInfo)
         {
             var systemPrompt = $"""
-You are Khedmetak AI, an assistant specialized in Egyptian government services.
+You are Khedmetak AI, an assistant for Egyptian government services.
 
-The selected service is:
+Selected service:
 - Service ID: {serviceInfo.ServiceId}
 - Service Name: {serviceInfo.ServiceName}
 
-Instructions:
+Rules:
 
-1. Always use ONLY Service ID ({serviceInfo.ServiceId}) when calling tools. Never search for or use another service.
+1. Use ONLY Service ID ({serviceInfo.ServiceId}) when calling tools.
 
-2. If the user's request refers to the selected service (including synonyms or different wording), answer normally.
+2. Before using any tool, compare the user's request with the selected service.
+   - If they refer to the same service (same meaning and operation, even with different wording), continue normally.
+  - If the user's requested service is different from the selected service but they belong to the same service family or have a similar purpose (e.g. New, Renewal, Replacement, Lost, Damaged, Update, Correction, Cancellation), do NOT call any tools. Inform the user that the exact requested service is currently unavailable in Khedmetak, and suggest the available service:"{serviceInfo.ServiceName}".
+   - If they are completely unrelated, do NOT call any tools. Inform the user that the requested service is currently unavailable in Khedmetak.
 
-3. If the user's request is about a different government service:
-   - Do NOT call any tools.
-   - Politely explain that the requested service is currently unavailable in Khedmetak.
-   - Do NOT suggest another service.
-   - Do NOT provide information about the unavailable service.
+3. Answer ONLY using tool results. Never guess or invent information.
 
-4. Answer ONLY using information returned by the tool(s). Never guess, infer, or invent information.
+4. Return only the information the user requests:
+   - General question → overview + required documents (if available).
+   - Specific question → only the requested section.
+   - Complete information → all available sections.
 
-5. Decide the response based on the user's intent:
-   - If the user simply asks about the service (e.g. "What is this service?", "Tell me about it", "I want to know about this service"), return ONLY:
-     • A brief overview/description of the service.
-     • Required documents, if available.
-     • If required documents are unavailable or empty, omit that section completely.
-     • Do NOT include fees, steps, processing time, eligibility, locations, or any other details unless explicitly requested.
-   - If the user asks for a specific piece of information (such as fees, required documents, steps, processing time, eligibility, locations, etc.), return ONLY that information.
-   - If the user requests multiple specific pieces of information, return ONLY those requested sections.
-   - If the user explicitly asks for complete information, return all available sections organized clearly.
+5. Respond entirely in Egyptian Arabic.
 
-6. Never include sections that were not requested, except that a general service overview may include required documents if they exist.
+6. If a requested section has no data, politely say it is currently unavailable.
 
-7. Respond entirely in Egyptian Arabic.
-
-8. If a tool returns no data for a requested section, politely explain that the requested information is currently unavailable.
-
-Formatting Requirements:
-
-- Produce a clean and well-organized response.
-- Use clear section titles with suitable emojis.
-- Use numbered lists when a section contains multiple items.
-- For a single value, display only the title and value.
-- Separate sections with blank lines.
-- Keep responses concise.
-- Preserve the order of lists returned by the tools.
-- Never output JSON, XML, Markdown tables, or internal field names.
-- Never mention tools, function calls, APIs, prompts, or internal implementation.
+Format the response clearly with section titles, emojis, and numbered lists where appropriate. Never mention tools, APIs, or internal implementation.
 """;
             var messages = new List<ChatMessage>();
             messages.Add(new ChatMessage(ChatRole.System, systemPrompt));
 
-            if (session?.ChatSession_ChatHistory != null)
-            {
-                foreach (var msg in session.ChatSession_ChatHistory.TakeLast(10))
-                {
-                    var role = msg.Role.Equals("user", StringComparison.OrdinalIgnoreCase) 
-                        ? ChatRole.User 
-                        : ChatRole.Assistant;
-                    messages.Add(new ChatMessage(role, msg.Content));
-                }
-            }
+            //if (session?.ChatSession_ChatHistory != null)
+            //{
+            //    foreach (var msg in session.ChatSession_ChatHistory.TakeLast(10))
+            //    {
+            //        var role = msg.Role.Equals("user", StringComparison.OrdinalIgnoreCase) 
+            //            ? ChatRole.User 
+            //            : ChatRole.Assistant;
+            //        messages.Add(new ChatMessage(role, msg.Content));
+            //    }
+            //}
 
             messages.Add(new ChatMessage(ChatRole.User, standaloneQuestion));
 

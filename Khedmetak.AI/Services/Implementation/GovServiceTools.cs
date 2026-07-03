@@ -17,6 +17,22 @@ namespace Khedmetak.AI.Services.Implementation
             _govServiceService = govServiceService;
         }
 
+        [Description("Get a list of all available government services.")]
+        public async Task<List<ServiceDTO>> GetAllServices()
+        {
+            var services = await _govServiceService.GetAllServicesAsync();
+            var serviceDTOs = new List<ServiceDTO>();   
+            foreach (var service in services)
+            {
+                serviceDTOs.Add(new ServiceDTO
+                {
+                    ServiceName = service.SrvName,
+                    Description = service.SrvDesc
+                });
+            }
+            return serviceDTOs;
+        }
+
         [Description("Get summary and basic description of the government service.")]
         public async Task<GovServiceSummaryDto?> GetServiceSummary(
             [Description("The ID of the government service.")] int serviceId)

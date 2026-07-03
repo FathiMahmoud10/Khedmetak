@@ -157,10 +157,10 @@ namespace Khedmetak.AI.Services.Implementation
                 collectionName: CollectionName,
                 query: userQuestionEmbedding,
                 usingVector: "dense",
-                limit: 1
+                limit: 3
             );
 
-            var point = results.FirstOrDefault();
+            var point = results.FirstOrDefault(p => p.Score >= 0.4f);
 
             if (point == null)
                 return null;
