@@ -1,4 +1,4 @@
-﻿using Khedmetak.DAL.Entities.Base;
+using Khedmetak.DAL.Entities.Base;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,13 +18,13 @@ namespace Khedmetak.DAL.Entities
             public string ValidationStatus { get; set; } = string.Empty;
 
             #region Foreign Keys
-            public int UserId { get; set; }
+            public int? UserId { get; set; }
             public int? ChatSessionId { get; set; }                // ✅ nullable — not every doc needs a chat
             public int? RequiredDocumentId { get; set; }
             #endregion
 
             #region Relations
-            public User User { get; set; } = null!;
+            public User? User { get; set; }
             public ChatSession? ChatSession { get; set; }          // ✅ nullable to match
             public RequiredDocument? RequiredDocument { get; set; }
             #endregion

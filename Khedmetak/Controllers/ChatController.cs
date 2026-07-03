@@ -109,7 +109,7 @@ namespace Khedmetak.API.Controllers
             // ── تسجيل الملف في قاعدة البيانات ──
             var entity = new UserDocument
             {
-                UserId = session.UserId ?? 0,
+                UserId = session.UserId,
                 ChatSessionId = session.Id,
                 FileName = dto.File.FileName,
                 FilePath = relativePath,

@@ -298,7 +298,8 @@ public class AppDbContext : IdentityDbContext<User, IdentityRole<int>, int>
             e.HasOne(d => d.User)
                 .WithMany(u => u.UserDocuments)
                 .HasForeignKey(d => d.UserId)
-                .OnDelete(DeleteBehavior.Restrict);
+                .IsRequired(false)
+                .OnDelete(DeleteBehavior.SetNull);
 
             e.HasOne(d => d.ChatSession)
                 .WithMany(cs => cs.UserDocuments)
