@@ -17,6 +17,8 @@ namespace Khedmetak.DAL.Repositories
                 .Include(g => g.ServiceGeneralDocs)
                 .Include(g => g.ServiceOptions)
                     .ThenInclude(o => o.ServiceOptionChoices)
+                .Include(g => g.ServiceFeeTiers.OrderBy(t => t.DisplayOrder))
+                .Include(g => g.ImportantNotes.OrderBy(n => n.DisplayOrder))
                 .FirstOrDefaultAsync(g => g.Id == id);
 
         public async Task<IEnumerable<GovService>> GetAllWithCategoryAsync()

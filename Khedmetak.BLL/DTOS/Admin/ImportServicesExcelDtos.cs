@@ -12,6 +12,8 @@ namespace Khedmetak.BLL.DTOS.Admin
         public int StepsCreated { get; set; }
         public int DocumentsCreated { get; set; }
         public int CategoriesCreated { get; set; }
+        public int FeeTiersCreated { get; set; }
+        public int ImportantNotesCreated { get; set; }
 
         public List<ImportRowErrorDto> Errors { get; set; } = new();
     }

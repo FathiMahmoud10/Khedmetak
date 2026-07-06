@@ -27,6 +27,8 @@ public class AppDbContext : IdentityDbContext<User, IdentityRole<int>, int>
     public DbSet<ServiceOption> ServiceOptions { get; set; }
     public DbSet<ServiceOptionChoices> ServiceOptionChoices { get; set; }
     public DbSet<CitizenProfile> CitizenProfiles { get; set; }
+    public DbSet<ServiceFeeTier> ServiceFeeTiers { get; set; }
+    public DbSet<ServiceImportantNote> ServiceImportantNotes { get; set; }
     #endregion
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -258,11 +260,38 @@ public class AppDbContext : IdentityDbContext<User, IdentityRole<int>, int>
             e.Property(g => g.SrvName).IsRequired().HasMaxLength(200);
             e.Property(g => g.SrvFees).HasColumnType("decimal(18,2)");
             e.Property(g => g.EstimatedFees).HasColumnType("decimal(18,2)");
+            e.Property(g => g.ProviderEntity).HasMaxLength(200);
+            e.Property(g => g.TargetAudience).HasMaxLength(200);
+            e.Property(g => g.DeliveryMethod).HasMaxLength(200);
 
             e.HasOne(g => g.Category)
                 .WithMany(c => c.GovServices)
                 .HasForeignKey(g => g.CategoryId)
                 .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        // ServiceFeeTier
+        modelBuilder.Entity<ServiceFeeTier>(e =>
+        {
+            e.Property(t => t.TierName).IsRequired().HasMaxLength(100);
+            e.Property(t => t.Duration).HasMaxLength(100);
+            e.Property(t => t.Fees).HasColumnType("decimal(18,2)");
+
+            e.HasOne(t => t.GovService)
+                .WithMany(g => g.ServiceFeeTiers)
+                .HasForeignKey(t => t.GovServiceId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        // ServiceImportantNote
+        modelBuilder.Entity<ServiceImportantNote>(e =>
+        {
+            e.Property(n => n.Note).IsRequired().HasMaxLength(500);
+
+            e.HasOne(n => n.GovService)
+                .WithMany(g => g.ImportantNotes)
+                .HasForeignKey(n => n.GovServiceId)
+                .OnDelete(DeleteBehavior.Cascade);
         });
 
         // ServiceSteps

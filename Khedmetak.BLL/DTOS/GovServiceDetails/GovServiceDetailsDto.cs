@@ -17,9 +17,17 @@ namespace Khedmetak.BLL.DTOS.GovServiceDetails
         public string CategoryName { get; set; } = string.Empty;
         public int CategoryId { get; set; }
 
+        // بيانات الشريط العلوي بصفحة الخدمة
+        public string ProviderEntity { get; set; } = string.Empty;
+        public string TargetAudience { get; set; } = string.Empty;
+        public string DeliveryMethod { get; set; } = string.Empty;
+        public bool NeedsGuarantee { get; set; }
+
         public List<ServiceStepDto> Steps { get; set; } = new();
         public List<RequiredDocumentDto> RequiredDocuments { get; set; } = new();
         public List<ServiceOptionDto> Options { get; set; } = new();
         public List<ServiceGeneralDocDto> GeneralDocs { get; set; } = new();
+        public List<ServiceFeeTierDto> FeeTiers { get; set; } = new();
+        public List<ServiceImportantNoteDto> ImportantNotes { get; set; } = new();
     }
 }

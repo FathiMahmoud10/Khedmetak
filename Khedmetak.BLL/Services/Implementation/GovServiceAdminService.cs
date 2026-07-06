@@ -15,17 +15,23 @@ namespace Khedmetak.BLL.Services.Implementation
         private readonly IGovServiceRepository _serviceRepository;
         private readonly IServiceStepRepository _stepRepository;
         private readonly IRequiredDocumentRepository _docRepository;
+        private readonly IServiceFeeTierRepository _feeTierRepository;
+        private readonly IServiceImportantNoteRepository _noteRepository;
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _unitOfWork;
         public GovServiceAdminService(
             IGovServiceRepository serviceRepository,
             IServiceStepRepository stepRepository,
             IRequiredDocumentRepository docRepository,
+            IServiceFeeTierRepository feeTierRepository,
+            IServiceImportantNoteRepository noteRepository,
             IMapper mapper, IUnitOfWork unitOfWork)
         {
             _serviceRepository = serviceRepository;
             _stepRepository = stepRepository;
             _docRepository = docRepository;
+            _feeTierRepository = feeTierRepository;
+            _noteRepository = noteRepository;
             _mapper = mapper;
             _unitOfWork = unitOfWork;
         }
@@ -40,7 +46,7 @@ namespace Khedmetak.BLL.Services.Implementation
 
             var lastRow = sheet.LastRowUsed()?.RowNumber() ?? 1;
             if (lastRow < 2)
-                return result; 
+                return result;
 
             var headerRow = sheet.Row(1);
             var columnIndex = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
@@ -60,6 +66,28 @@ namespace Khedmetak.BLL.Services.Implementation
                 return -1;
             }
 
+            bool ParseYesNo(string text, bool defaultValue = false)
+            {
+                if (string.IsNullOrWhiteSpace(text)) return defaultValue;
+                var t = text.Trim();
+                if (t is "نعم" or "Yes" or "yes" or "True" or "true" or "1" or "إجباري" or "اجباري") return true;
+                if (t is "لا" or "No" or "no" or "False" or "false" or "0" or "اختياري") return false;
+                return bool.TryParse(t, out var b) ? b : defaultValue;
+            }
+
+            // بيسمح بقيم زي "50" أو "50 ج.م" أو "تبدأ من 50 ج.م" أو "50.5" ويستخرج أول رقم منها
+            bool TryParseFee(string text, out decimal fee)
+            {
+                fee = 0;
+                if (string.IsNullOrWhiteSpace(text)) return false;
+                var normalized = text.Trim()
+                    .Replace('٠', '0').Replace('١', '1').Replace('٢', '2').Replace('٣', '3').Replace('٤', '4')
+                    .Replace('٥', '5').Replace('٦', '6').Replace('٧', '7').Replace('٨', '8').Replace('٩', '9')
+                    .Replace(",", "");
+                var match = System.Text.RegularExpressions.Regex.Match(normalized, @"\d+(\.\d+)?");
+                return match.Success && decimal.TryParse(match.Value, out fee);
+            }
+
             var colServiceName = GetColumn("ServiceName", "اسم الخدمة");
             var colCategory = GetColumn("Category", "التصنيف", "الفئة");
             var colFee = GetColumn("Fee", "الرسوم");
@@ -72,6 +100,11 @@ namespace Khedmetak.BLL.Services.Implementation
             var colEstimatedFees = GetColumn("EstimatedFees", "الرسوم التقديرية");
             var colIsMandatory = GetColumn("IsMandatory", "مستند إجباري");
             var colDocumentType = GetColumn("DocumentType", "نوع المستند");
+
+            var colProviderEntity = GetColumn("ProviderEntity", "الجهة المقدمة للخدمة", "الجهة المقدمة");
+            var colTargetAudience = GetColumn("TargetAudience", "الفئة المستهدفة");
+            var colDeliveryMethod = GetColumn("DeliveryMethod", "طريقة الاستلام");
+            var colNeedsGuarantee = GetColumn("NeedsGuarantee", "يحتاج ضمان؟", "يحتاج ضمان");
 
             if (colServiceName == -1 || colCategory == -1 || colFee == -1)
             {
@@ -110,7 +143,7 @@ namespace Khedmetak.BLL.Services.Implementation
 
                 var serviceName = row.Cell(colServiceName).GetString().Trim();
                 if (string.IsNullOrWhiteSpace(serviceName))
-                    continue; 
+                    continue;
 
                 try
                 {
@@ -120,7 +153,7 @@ namespace Khedmetak.BLL.Services.Implementation
                     if (string.IsNullOrWhiteSpace(categoryName))
                         throw new InvalidOperationException("اسم التصنيف (Category) فاضي.");
 
-                    if (!decimal.TryParse(feeText, out var fee))
+                    if (!TryParseFee(feeText, out var fee))
                         throw new InvalidOperationException($"قيمة الرسوم (Fee) غير صحيحة: '{feeText}'.");
 
                     if (!categoriesCache.TryGetValue(categoryName, out var category))
@@ -141,9 +174,13 @@ namespace Khedmetak.BLL.Services.Implementation
                             SrvDesc = colSrvDesc != -1 ? row.Cell(colSrvDesc).GetString().Trim() : string.Empty,
                             SrvTime = colSrvTime != -1 ? row.Cell(colSrvTime).GetString().Trim() : string.Empty,
                             EstimatedFees = colEstimatedFees != -1 &&
-                                             decimal.TryParse(row.Cell(colEstimatedFees).GetString().Trim(), out var estFee)
+                                             TryParseFee(row.Cell(colEstimatedFees).GetString().Trim(), out var estFee)
                                 ? estFee
-                                : fee
+                                : fee,
+                            ProviderEntity = colProviderEntity != -1 ? row.Cell(colProviderEntity).GetString().Trim() : string.Empty,
+                            TargetAudience = colTargetAudience != -1 ? row.Cell(colTargetAudience).GetString().Trim() : string.Empty,
+                            DeliveryMethod = colDeliveryMethod != -1 ? row.Cell(colDeliveryMethod).GetString().Trim() : string.Empty,
+                            NeedsGuarantee = colNeedsGuarantee != -1 && ParseYesNo(row.Cell(colNeedsGuarantee).GetString().Trim())
                         };
                         _serviceRepository.Add(service);
                         servicesCache[serviceName] = service;
@@ -151,7 +188,7 @@ namespace Khedmetak.BLL.Services.Implementation
                     }
                     else
                     {
-                       service.SrvFees = fee;
+                        service.SrvFees = fee;
                         service.Category = category;
 
                         if (colSrvDesc != -1)
@@ -161,8 +198,20 @@ namespace Khedmetak.BLL.Services.Implementation
                             service.SrvTime = row.Cell(colSrvTime).GetString().Trim();
 
                         if (colEstimatedFees != -1 &&
-                            decimal.TryParse(row.Cell(colEstimatedFees).GetString().Trim(), out var estFeeUpdate))
+                            TryParseFee(row.Cell(colEstimatedFees).GetString().Trim(), out var estFeeUpdate))
                             service.EstimatedFees = estFeeUpdate;
+
+                        if (colProviderEntity != -1)
+                            service.ProviderEntity = row.Cell(colProviderEntity).GetString().Trim();
+
+                        if (colTargetAudience != -1)
+                            service.TargetAudience = row.Cell(colTargetAudience).GetString().Trim();
+
+                        if (colDeliveryMethod != -1)
+                            service.DeliveryMethod = row.Cell(colDeliveryMethod).GetString().Trim();
+
+                        if (colNeedsGuarantee != -1)
+                            service.NeedsGuarantee = ParseYesNo(row.Cell(colNeedsGuarantee).GetString().Trim(), service.NeedsGuarantee);
 
                         _serviceRepository.Update(service);
                         result.ServicesUpdated++;
@@ -200,20 +249,24 @@ namespace Khedmetak.BLL.Services.Implementation
                             var docKey = $"{serviceName}|{documentName}";
                             if (docKeys.Add(docKey))
                             {
-                                var isMandatory = true;
-                                if (colIsMandatory != -1)
-                                {
-                                    var isMandatoryText = row.Cell(colIsMandatory).GetString().Trim();
-                                    if (!string.IsNullOrWhiteSpace(isMandatoryText))
-                                        bool.TryParse(isMandatoryText, out isMandatory);
-                                }
+                                var isMandatory = colIsMandatory != -1
+                                    ? ParseYesNo(row.Cell(colIsMandatory).GetString().Trim(), true)
+                                    : true;
 
                                 var documentType = DocumentType.Any;
                                 if (colDocumentType != -1)
                                 {
                                     var documentTypeText = row.Cell(colDocumentType).GetString().Trim();
-                                    if (!string.IsNullOrWhiteSpace(documentTypeText))
-                                        Enum.TryParse(documentTypeText, true, out documentType);
+                                    var mapped = documentTypeText switch
+                                    {
+                                        "صورة" or "صوره" => "Image",
+                                        "PDF" or "بي دي إف" or "بي دي اف" => "PDF",
+                                        "Word" or "وورد" => "Word",
+                                        "أي" or "اي" or "متعدد" or "" => "Any",
+                                        _ => documentTypeText
+                                    };
+                                    if (Enum.TryParse<DocumentType>(mapped, true, out var parsedType))
+                                        documentType = parsedType;
                                 }
 
                                 _docRepository.Add(new RequiredDocument
@@ -237,6 +290,131 @@ namespace Khedmetak.BLL.Services.Implementation
                         RowNumber = rowNum,
                         Message = ex.Message
                     });
+                }
+            }
+
+            // شيت اختياري: "الرسوم والتكاليف" (نفس اسم الشيت في قالب الرفع)
+            if (workbook.Worksheets.TryGetWorksheet("الرسوم والتكاليف", out var feeSheet))
+            {
+                var feeLastRow = feeSheet.LastRowUsed()?.RowNumber() ?? 1;
+                if (feeLastRow >= 2)
+                {
+                    var feeHeaderRow = feeSheet.Row(1);
+                    var feeColumnIndex = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+                    var feeLastCol = feeHeaderRow.LastCellUsed()?.Address.ColumnNumber ?? 0;
+                    for (int c = 1; c <= feeLastCol; c++)
+                    {
+                        var headerText = feeHeaderRow.Cell(c).GetString().Trim();
+                        if (!string.IsNullOrWhiteSpace(headerText) && !feeColumnIndex.ContainsKey(headerText))
+                            feeColumnIndex[headerText] = c;
+                    }
+                    int GetFeeColumn(params string[] names)
+                    {
+                        foreach (var n in names)
+                            if (feeColumnIndex.TryGetValue(n, out var idx)) return idx;
+                        return -1;
+                    }
+
+                    var fColServiceName = GetFeeColumn("ServiceName", "اسم الخدمة");
+                    var fColTierName = GetFeeColumn("TierName", "نوع الاستمارة");
+                    var fColFees = GetFeeColumn("Fees", "الرسوم", "الرسوم (جنيه)");
+                    var fColDuration = GetFeeColumn("Duration", "المدة");
+                    var fColRefundable = GetFeeColumn("IsRefundable", "قابلة للاسترداد؟", "قابلة للاسترداد");
+                    var fColOrder = GetFeeColumn("DisplayOrder", "ترتيب العرض");
+
+                    if (fColServiceName != -1 && fColTierName != -1 && fColFees != -1)
+                    {
+                        for (int r = 2; r <= feeLastRow; r++)
+                        {
+                            var row = feeSheet.Row(r);
+                            var svcName = row.Cell(fColServiceName).GetString().Trim();
+                            var tierName = row.Cell(fColTierName).GetString().Trim();
+                            if (string.IsNullOrWhiteSpace(svcName) || string.IsNullOrWhiteSpace(tierName))
+                                continue;
+
+                            try
+                            {
+                                if (!servicesCache.TryGetValue(svcName, out var svc))
+                                    throw new InvalidOperationException($"الخدمة '{svcName}' غير موجودة (لم تُعرَّف في الشيت الرئيسي).");
+
+                                if (!TryParseFee(row.Cell(fColFees).GetString().Trim(), out var tierFee))
+                                    throw new InvalidOperationException($"قيمة الرسوم غير صحيحة لنوع الاستمارة '{tierName}'.");
+
+                                _feeTierRepository.Add(new ServiceFeeTier
+                                {
+                                    GovService = svc,
+                                    TierName = tierName,
+                                    Fees = tierFee,
+                                    Duration = fColDuration != -1 ? row.Cell(fColDuration).GetString().Trim() : string.Empty,
+                                    IsRefundable = fColRefundable != -1 && ParseYesNo(row.Cell(fColRefundable).GetString().Trim()),
+                                    DisplayOrder = fColOrder != -1 && int.TryParse(row.Cell(fColOrder).GetString().Trim(), out var ord) ? ord : r
+                                });
+                                result.FeeTiersCreated++;
+                            }
+                            catch (Exception ex)
+                            {
+                                result.Errors.Add(new ImportRowErrorDto { RowNumber = r, Message = $"[الرسوم والتكاليف] {ex.Message}" });
+                            }
+                        }
+                    }
+                }
+            }
+
+            // شيت اختياري: "معلومات مهمة" (نفس اسم الشيت في قالب الرفع)
+            if (workbook.Worksheets.TryGetWorksheet("معلومات مهمة", out var noteSheet))
+            {
+                var noteLastRow = noteSheet.LastRowUsed()?.RowNumber() ?? 1;
+                if (noteLastRow >= 2)
+                {
+                    var noteHeaderRow = noteSheet.Row(1);
+                    var noteColumnIndex = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+                    var noteLastCol = noteHeaderRow.LastCellUsed()?.Address.ColumnNumber ?? 0;
+                    for (int c = 1; c <= noteLastCol; c++)
+                    {
+                        var headerText = noteHeaderRow.Cell(c).GetString().Trim();
+                        if (!string.IsNullOrWhiteSpace(headerText) && !noteColumnIndex.ContainsKey(headerText))
+                            noteColumnIndex[headerText] = c;
+                    }
+                    int GetNoteColumn(params string[] names)
+                    {
+                        foreach (var n in names)
+                            if (noteColumnIndex.TryGetValue(n, out var idx)) return idx;
+                        return -1;
+                    }
+
+                    var nColServiceName = GetNoteColumn("ServiceName", "اسم الخدمة");
+                    var nColNote = GetNoteColumn("Note", "نص الملاحظة");
+                    var nColOrder = GetNoteColumn("DisplayOrder", "ترتيب العرض");
+
+                    if (nColServiceName != -1 && nColNote != -1)
+                    {
+                        for (int r = 2; r <= noteLastRow; r++)
+                        {
+                            var row = noteSheet.Row(r);
+                            var svcName = row.Cell(nColServiceName).GetString().Trim();
+                            var noteText = row.Cell(nColNote).GetString().Trim();
+                            if (string.IsNullOrWhiteSpace(svcName) || string.IsNullOrWhiteSpace(noteText))
+                                continue;
+
+                            try
+                            {
+                                if (!servicesCache.TryGetValue(svcName, out var svc))
+                                    throw new InvalidOperationException($"الخدمة '{svcName}' غير موجودة (لم تُعرَّف في الشيت الرئيسي).");
+
+                                _noteRepository.Add(new ServiceImportantNote
+                                {
+                                    GovService = svc,
+                                    Note = noteText,
+                                    DisplayOrder = nColOrder != -1 && int.TryParse(row.Cell(nColOrder).GetString().Trim(), out var ord) ? ord : r
+                                });
+                                result.ImportantNotesCreated++;
+                            }
+                            catch (Exception ex)
+                            {
+                                result.Errors.Add(new ImportRowErrorDto { RowNumber = r, Message = $"[معلومات مهمة] {ex.Message}" });
+                            }
+                        }
+                    }
                 }
             }
 
@@ -265,6 +443,10 @@ namespace Khedmetak.BLL.Services.Implementation
             entity.SrvDesc = dto.SrvDesc;
             entity.SrvTime = dto.SrvTime;
             entity.CategoryId = dto.CategoryId;
+            entity.ProviderEntity = dto.ProviderEntity;
+            entity.TargetAudience = dto.TargetAudience;
+            entity.DeliveryMethod = dto.DeliveryMethod;
+            entity.NeedsGuarantee = dto.NeedsGuarantee;
 
             _serviceRepository.Update(entity);
             await _unitOfWork.SaveChangesAsync();
@@ -387,6 +569,99 @@ namespace Khedmetak.BLL.Services.Implementation
             if (entity is null || entity.GovServiceId != govServiceId) return false;
 
             _docRepository.Delete(entity);
+            await _unitOfWork.SaveChangesAsync();
+            return true;
+        }
+
+
+        public async Task<IEnumerable<ServiceFeeTierAdminDto>> GetFeeTiersAsync(int govServiceId)
+        {
+            var tiers = await _feeTierRepository.GetByServiceIdAsync(govServiceId);
+            return _mapper.Map<IEnumerable<ServiceFeeTierAdminDto>>(tiers);
+        }
+
+        public async Task<ServiceFeeTierAdminDto?> AddFeeTierAsync(int govServiceId, CreateServiceFeeTierDto dto)
+        {
+            var service = await _serviceRepository.GetByIdAsync(govServiceId);
+            if (service is null) return null;
+
+            var entity = _mapper.Map<ServiceFeeTier>(dto);
+            entity.GovServiceId = govServiceId;
+
+            _feeTierRepository.Add(entity);
+            await _unitOfWork.SaveChangesAsync();
+
+            return _mapper.Map<ServiceFeeTierAdminDto>(entity);
+        }
+
+        public async Task<ServiceFeeTierAdminDto?> UpdateFeeTierAsync(int govServiceId, int tierId, UpdateServiceFeeTierDto dto)
+        {
+            var entity = await _feeTierRepository.GetByIdAsync(tierId);
+            if (entity is null || entity.GovServiceId != govServiceId) return null;
+
+            entity.TierName = dto.TierName;
+            entity.Fees = dto.Fees;
+            entity.Duration = dto.Duration;
+            entity.IsRefundable = dto.IsRefundable;
+            entity.DisplayOrder = dto.DisplayOrder;
+
+            _feeTierRepository.Update(entity);
+            await _unitOfWork.SaveChangesAsync();
+
+            return _mapper.Map<ServiceFeeTierAdminDto>(entity);
+        }
+
+        public async Task<bool> DeleteFeeTierAsync(int govServiceId, int tierId)
+        {
+            var entity = await _feeTierRepository.GetByIdAsync(tierId);
+            if (entity is null || entity.GovServiceId != govServiceId) return false;
+
+            _feeTierRepository.Delete(entity);
+            await _unitOfWork.SaveChangesAsync();
+            return true;
+        }
+
+
+        public async Task<IEnumerable<ServiceImportantNoteAdminDto>> GetImportantNotesAsync(int govServiceId)
+        {
+            var notes = await _noteRepository.GetByServiceIdAsync(govServiceId);
+            return _mapper.Map<IEnumerable<ServiceImportantNoteAdminDto>>(notes);
+        }
+
+        public async Task<ServiceImportantNoteAdminDto?> AddImportantNoteAsync(int govServiceId, CreateServiceImportantNoteDto dto)
+        {
+            var service = await _serviceRepository.GetByIdAsync(govServiceId);
+            if (service is null) return null;
+
+            var entity = _mapper.Map<ServiceImportantNote>(dto);
+            entity.GovServiceId = govServiceId;
+
+            _noteRepository.Add(entity);
+            await _unitOfWork.SaveChangesAsync();
+
+            return _mapper.Map<ServiceImportantNoteAdminDto>(entity);
+        }
+
+        public async Task<ServiceImportantNoteAdminDto?> UpdateImportantNoteAsync(int govServiceId, int noteId, UpdateServiceImportantNoteDto dto)
+        {
+            var entity = await _noteRepository.GetByIdAsync(noteId);
+            if (entity is null || entity.GovServiceId != govServiceId) return null;
+
+            entity.Note = dto.Note;
+            entity.DisplayOrder = dto.DisplayOrder;
+
+            _noteRepository.Update(entity);
+            await _unitOfWork.SaveChangesAsync();
+
+            return _mapper.Map<ServiceImportantNoteAdminDto>(entity);
+        }
+
+        public async Task<bool> DeleteImportantNoteAsync(int govServiceId, int noteId)
+        {
+            var entity = await _noteRepository.GetByIdAsync(noteId);
+            if (entity is null || entity.GovServiceId != govServiceId) return false;
+
+            _noteRepository.Delete(entity);
             await _unitOfWork.SaveChangesAsync();
             return true;
         }

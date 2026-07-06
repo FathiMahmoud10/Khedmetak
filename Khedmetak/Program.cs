@@ -243,6 +243,8 @@ builder.Services.AddScoped<IGovServiceAdminService, GovServiceAdminService>();
 builder.Services.AddScoped<IDocumentService, DocumentService>();
 builder.Services.AddScoped<JwtService>();
 builder.Services.AddScoped<IUserDashboardService, UserDashboardService>();
+builder.Services.AddScoped<IServiceFeeTierRepository, ServiceFeeTierRepository>();
+builder.Services.AddScoped<IServiceImportantNoteRepository, ServiceImportantNoteRepository>();
 builder.Services.AddScoped<IStatisticsService, StatisticsService>();
 builder.Services.AddHttpClient<IDigitalPortalService, DigitalPortalHttpService>(client =>
 {

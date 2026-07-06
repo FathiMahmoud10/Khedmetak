@@ -26,7 +26,9 @@ namespace Khedmetak.BLL.MappingProfile
                 .ForMember(dest => dest.Steps,             opt => opt.MapFrom(src => src.ServiceSteps))
                 .ForMember(dest => dest.RequiredDocuments, opt => opt.MapFrom(src => src.RequiredDocuments))
                 .ForMember(dest => dest.Options,           opt => opt.MapFrom(src => src.ServiceOptions))
-                .ForMember(dest => dest.GeneralDocs,       opt => opt.MapFrom(src => src.ServiceGeneralDocs));
+                .ForMember(dest => dest.GeneralDocs,       opt => opt.MapFrom(src => src.ServiceGeneralDocs))
+                .ForMember(dest => dest.FeeTiers,          opt => opt.MapFrom(src => src.ServiceFeeTiers))
+                .ForMember(dest => dest.ImportantNotes,    opt => opt.MapFrom(src => src.ImportantNotes));
 
             CreateMap<CreateGovServiceDto, GovService>();
             CreateMap<UpdateGovServiceDto, GovService>();
@@ -50,6 +52,16 @@ namespace Khedmetak.BLL.MappingProfile
 
             CreateMap<ServiceSteps, ServiceStepAdminDto>();
             CreateMap<RequiredDocument, RequiredDocumentAdminDto>();
+
+            CreateMap<ServiceFeeTier, ServiceFeeTierDto>();
+            CreateMap<ServiceFeeTier, ServiceFeeTierAdminDto>();
+            CreateMap<CreateServiceFeeTierDto, ServiceFeeTier>();
+            CreateMap<UpdateServiceFeeTierDto, ServiceFeeTier>();
+
+            CreateMap<ServiceImportantNote, ServiceImportantNoteDto>();
+            CreateMap<ServiceImportantNote, ServiceImportantNoteAdminDto>();
+            CreateMap<CreateServiceImportantNoteDto, ServiceImportantNote>();
+            CreateMap<UpdateServiceImportantNoteDto, ServiceImportantNote>();
         }
     }
 }

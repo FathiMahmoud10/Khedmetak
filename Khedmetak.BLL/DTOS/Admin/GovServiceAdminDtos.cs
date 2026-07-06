@@ -22,6 +22,17 @@ namespace Khedmetak.BLL.DTOS.Admin
 
         [Required]
         public int CategoryId { get; set; }
+
+        [MaxLength(200)]
+        public string ProviderEntity { get; set; } = string.Empty;
+
+        [MaxLength(200)]
+        public string TargetAudience { get; set; } = string.Empty;
+
+        [MaxLength(200)]
+        public string DeliveryMethod { get; set; } = string.Empty;
+
+        public bool NeedsGuarantee { get; set; }
     }
 
  
@@ -44,6 +55,17 @@ namespace Khedmetak.BLL.DTOS.Admin
 
         [Required]
         public int CategoryId { get; set; }
+
+        [MaxLength(200)]
+        public string ProviderEntity { get; set; } = string.Empty;
+
+        [MaxLength(200)]
+        public string TargetAudience { get; set; } = string.Empty;
+
+        [MaxLength(200)]
+        public string DeliveryMethod { get; set; } = string.Empty;
+
+        public bool NeedsGuarantee { get; set; }
     }
 
     public class UpdateFeesDto
