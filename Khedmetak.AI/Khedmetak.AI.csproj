@@ -16,8 +16,12 @@
     <PackageReference Include="Microsoft.Extensions.AI" Version="10.7.0" />
     <PackageReference Include="Microsoft.Extensions.AI.OpenAI" Version="10.7.0" />
     <PackageReference Include="Microsoft.Extensions.Http" Version="10.0.9" />
-    <PackageReference Include="OpenAI" Version="2.11.0" />
+    <PackageReference Include="Microsoft.ML.OnnxRuntime" Version="1.27.0" />
+    
+	  <PackageReference Include="OpenAI" Version="2.12.0" />
+   
     <PackageReference Include="Qdrant.Client" Version="1.18.1" />
+    <PackageReference Include="SkiaSharp" Version="4.148.0" />
   </ItemGroup>
 
   <ItemGroup>

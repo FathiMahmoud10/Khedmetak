@@ -1,11 +1,12 @@
 ﻿using Khedmetak.AI.DTOs;
-using Khedmetak.AI.DTOs.RagDTOs;
+//using Khedmetak.AI.DTOs.RagDTOs;
 using Qdrant.Client.Grpc;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Shard.DTOS;
 
 namespace Khedmetak.AI.Services.Abstraction
 {

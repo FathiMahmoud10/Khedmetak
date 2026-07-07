@@ -38,6 +38,8 @@ using System.ClientModel;
 using System.Net.Http.Headers;
 using System.Text;
 
+using Shard.VectorDBInterfaces;
+
 var builder = WebApplication.CreateBuilder(args);
 
 #region Controllers
@@ -172,13 +174,12 @@ builder.Services.AddCors(options =>
 #endregion
 
 #region AI Configuration
-builder.Services.Configure<AISettings>(
-    builder.Configuration.GetSection("AI"));
+builder.Services.Configure<AISettings>(builder.Configuration.GetSection("AI"));
 
 var apiKey = builder.Configuration.GetSection("AI")["ApiKey"];
 
-if (!string.IsNullOrWhiteSpace(apiKey))
-{
+//if (!string.IsNullOrWhiteSpace(apiKey))
+
     var openAIClient = new OpenAIClient(
         new ApiKeyCredential(apiKey),
         new OpenAIClientOptions
@@ -186,12 +187,53 @@ if (!string.IsNullOrWhiteSpace(apiKey))
             Endpoint = new Uri("https://models.github.ai/inference"),
         });
 
+    //------------ OpenAI Client For AI Chat  --------------
     builder.Services.AddKeyedSingleton<OpenAIClient>("github", openAIClient);
-    builder.Services.AddSingleton<IChatClient>(sp =>
-        new ChatClientBuilder(openAIClient.GetChatClient(
-            builder.Configuration["AI:Model"]).
-            AsIChatClient()).UseFunctionInvocation().Build());
 
+
+    // ----------- Chat Client for AI Chat ----------- 
+    builder.Services.AddKeyedSingleton<IChatClient>("Chat", (sp, _) =>
+    {
+        var client = new OpenAIClient(
+            new ApiKeyCredential(builder.Configuration["AI:ApiKey"]!),
+             new OpenAIClientOptions
+             {
+                 Endpoint = new Uri("https://models.github.ai/inference")
+             });
+
+        return new ChatClientBuilder(
+            client.GetChatClient(builder.Configuration["AI:Model"]!)
+                .AsIChatClient())
+            .UseFunctionInvocation()
+            .Build();
+    });
+
+    //------------Chat Client For Document Validation  --------------
+    builder.Services.AddKeyedSingleton<IChatClient>("DocValidation", (sp, _) =>
+    {
+        var client = new OpenAIClient(
+            new ApiKeyCredential(builder.Configuration["AIValidation:Llama:ApiKey"]!),
+            new OpenAIClientOptions
+            {
+                Endpoint = new Uri("https://models.github.ai/inference")
+            });
+
+        return new ChatClientBuilder(
+            client.GetChatClient(builder.Configuration["AIValidation:Llama:DocumentModel"]!)
+                .AsIChatClient())
+            //.UseFunctionInvocation()
+            .Build();
+    });
+
+
+
+    //builder.Services.AddSingleton<IChatClient>(sp =>
+    //    new ChatClientBuilder(openAIClient.GetChatClient(
+    //        builder.Configuration["AI:Model"]).
+    //        AsIChatClient()).UseFunctionInvocation().Build());
+
+
+    //----------- Embedding Client for Jina API -----------
     builder.Services.AddHttpClient("jina", client =>
     {
         client.BaseAddress = new Uri("https://api.jina.ai");
@@ -200,7 +242,21 @@ if (!string.IsNullOrWhiteSpace(apiKey))
                 "Bearer",
                 builder.Configuration["AI:EmbeddingAPIKey"]);
     });
-}
+
+    // ------------- Embedding for image --------------
+    builder.Services.AddSingleton<IClipImageEmbeddingService>(sp =>
+    {
+        var env = sp.GetRequiredService<IHostEnvironment>();
+
+        var modelPath = Path.Combine(
+            env.ContentRootPath,
+            "AIModels",
+            "Clip",
+            "image_encode.onnx");
+
+        return new ClipImageEmbeddingService(modelPath);
+    });
+
 #endregion
 
 #region Qdrant VectorDatabase
@@ -263,10 +319,14 @@ builder.Services.AddScoped<IChatMessageService, ChatMessageService>();
 builder.Services.AddScoped<IEmbeddingService, EmbeddingService>();
 builder.Services.AddScoped<IChunkService, ChunkService>();
 builder.Services.AddScoped<IUserDocumentService, UserDocumentService>();
+builder.Services.AddScoped<IDocumentValidationService, DocumentValidationService>();
+
+
 
 builder.Services.AddScoped<IVectorDB, QdrantService>();
-builder.Services.AddScoped<IVectorDBOperationsService, VectorDBOperationsService>();
+//builder.Services.AddScoped<IVectorDBOperationsService, VectorDBOperationsService>();
 builder.Services.AddScoped<IVectorDBService, VectorDBService>();
+builder.Services.AddScoped<IImageVectorDbService, ImageVectorDbService>();
 builder.Services.AddScoped<IRelevanceValidatorAgent, RelevanceValidatorAgent>();
 builder.Services.AddScoped<IRagService, RagService>();
 builder.Services.AddScoped<IGovServiceTools, GovServiceTools>();

@@ -1,7 +1,7 @@
-using Khedmetak.AI.DTOs.RagDTOs;
+using Shard.DTOS;
 using System.Threading.Tasks;
 
-namespace Khedmetak.AI.Services.Abstraction
+namespace Shard.VectorDBInterfaces
 {
     public interface IVectorDBService
     {

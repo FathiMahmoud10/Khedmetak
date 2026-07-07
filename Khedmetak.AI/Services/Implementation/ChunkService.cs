@@ -2,12 +2,7 @@ using Khedmetak.AI.DTOs;
 using Khedmetak.AI.Services.Abstraction;
 using Khedmetak.DAL.Entities;
 using Khedmetak.DAL.Repo.shared;
-using Khedmetak.DAL.Repositories;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+
 
 namespace Khedmetak.AI.Services.Implementation
 {
@@ -146,17 +141,17 @@ namespace Khedmetak.AI.Services.Implementation
         }
 
 
-        private string GetKeywordsForService(GovService service)
-        {
-            return service.Id switch
-            {
-                1 => "بطاقة رقم قومي\nرقم قومي\nبطاقة شخصية\nNational ID\nاستخراج بطاقة",
-                2 => "تجديد بطاقة\nبطاقة شخصية\nرقم قومي\nتجديد رقم قومي\nNational ID",
-                3 => "رخصة سيارة\nرخصة مركبة\nمرور\nتجديد رخصة\nCar license",
-                4 => "شهادة ميلاد\nبدل فاقد\nاستخراج شهادة ميلاد\nBirth certificate\nميلاد",
-                _ => string.Join("\n", service.SrvName.Split(' ').Concat(service.SrvDesc.Split(' ')).Distinct().Where(w => w.Length > 3))
-            };
-        }
+        //private string GetKeywordsForService(GovService service)
+        //{
+        //    return service.Id switch
+        //    {
+        //        1 => "بطاقة رقم قومي\nرقم قومي\nبطاقة شخصية\nNational ID\nاستخراج بطاقة",
+        //        2 => "تجديد بطاقة\nبطاقة شخصية\nرقم قومي\nتجديد رقم قومي\nNational ID",
+        //        3 => "رخصة سيارة\nرخصة مركبة\nمرور\nتجديد رخصة\nCar license",
+        //        4 => "شهادة ميلاد\nبدل فاقد\nاستخراج شهادة ميلاد\nBirth certificate\nميلاد",
+        //        _ => string.Join("\n", service.SrvName.Split(' ').Concat(service.SrvDesc.Split(' ')).Distinct().Where(w => w.Length > 3))
+        //    };
+        //}
 
         public async Task<ServiceChunkDTO> GenerateServiceChunkAsync(int serviceId)
         {
@@ -168,7 +163,7 @@ namespace Khedmetak.AI.Services.Implementation
             if (service is null)
                 throw new Exception($"Service {serviceId} not found.");
 
-            var keywords = GetKeywordsForService(service);
+            //var keywords = GetKeywordsForService(service);
 
             var content = $"""
 اسم الخدمة:
@@ -180,8 +175,6 @@ namespace Khedmetak.AI.Services.Implementation
 الفئة:
 {service.Category?.Name ?? "غير محدد"}
 
-كلمات مفتاحية:
-{keywords}
 """;
 
             return new ServiceChunkDTO

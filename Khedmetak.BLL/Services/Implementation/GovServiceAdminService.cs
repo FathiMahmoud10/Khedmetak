@@ -7,6 +7,7 @@ using Khedmetak.DAL.Entities;
 using Khedmetak.DAL.Enums;
 using Khedmetak.DAL.Repo.Abstraction.UnitOfWork;
 using Khedmetak.DAL.Repositories.Interfaces;
+using Shard.VectorDBInterfaces;
 
 namespace Khedmetak.BLL.Services.Implementation
 {
@@ -19,13 +20,16 @@ namespace Khedmetak.BLL.Services.Implementation
         private readonly IServiceImportantNoteRepository _noteRepository;
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IVectorDBService _vectorDbService;
+
         public GovServiceAdminService(
             IGovServiceRepository serviceRepository,
             IServiceStepRepository stepRepository,
             IRequiredDocumentRepository docRepository,
             IServiceFeeTierRepository feeTierRepository,
             IServiceImportantNoteRepository noteRepository,
-            IMapper mapper, IUnitOfWork unitOfWork)
+            IMapper mapper, IUnitOfWork unitOfWork,
+            IVectorDBService vectorDBService)
         {
             _serviceRepository = serviceRepository;
             _stepRepository = stepRepository;
@@ -34,6 +38,7 @@ namespace Khedmetak.BLL.Services.Implementation
             _noteRepository = noteRepository;
             _mapper = mapper;
             _unitOfWork = unitOfWork;
+            _vectorDbService = vectorDBService;
         }
 
 
@@ -183,6 +188,8 @@ namespace Khedmetak.BLL.Services.Implementation
                             NeedsGuarantee = colNeedsGuarantee != -1 && ParseYesNo(row.Cell(colNeedsGuarantee).GetString().Trim())
                         };
                         _serviceRepository.Add(service);
+                        await _vectorDbService.AddOrUpdateGovServiceToVectorDBAsync(service.Id); // add service to vector database after creation
+                       
                         servicesCache[serviceName] = service;
                         result.ServicesCreated++;
                     }
@@ -429,6 +436,7 @@ namespace Khedmetak.BLL.Services.Implementation
 
             _serviceRepository.Add(entity);
             await _unitOfWork.SaveChangesAsync();
+            await _vectorDbService.AddOrUpdateGovServiceToVectorDBAsync(entity.Id); // add service to vector database after creation
 
             var created = await _serviceRepository.GetServiceWithDetailsAsync(entity.Id);
             return _mapper.Map<GovServiceDto>(created);
@@ -450,6 +458,8 @@ namespace Khedmetak.BLL.Services.Implementation
 
             _serviceRepository.Update(entity);
             await _unitOfWork.SaveChangesAsync();
+            await _vectorDbService.AddOrUpdateGovServiceToVectorDBAsync(entity.Id); // update service to vector database after Updated
+
 
             var updated = await _serviceRepository.GetServiceWithDetailsAsync(id);
             return _mapper.Map<GovServiceDto>(updated);
@@ -462,6 +472,8 @@ namespace Khedmetak.BLL.Services.Implementation
 
             _serviceRepository.Delete(entity);
             await _unitOfWork.SaveChangesAsync();
+            await _vectorDbService.DeleteGovServiceFromVectorDBAsync(entity.Id); // remove service from vector database after deletion
+
             return true;
         }
 

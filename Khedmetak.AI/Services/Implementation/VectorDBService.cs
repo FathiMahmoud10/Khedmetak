@@ -1,9 +1,12 @@
-using Khedmetak.AI.DTOs.RagDTOs;
+//using Khedmetak.AI.DTOs.RagDTOs;
 using Khedmetak.AI.Services.Abstraction;
 using Khedmetak.DAL.Entities;
 using Khedmetak.DAL.Repo.shared;
+using Shard.VectorDBInterfaces;
+using Shard.DTOS;
 using System;
 using System.Threading.Tasks;
+
 
 namespace Khedmetak.AI.Services.Implementation
 {

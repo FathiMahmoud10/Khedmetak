@@ -4,12 +4,12 @@ using Khedmetak.AI.RAG;
 using Khedmetak.AI.Services.Abstraction;
 using Khedmetak.BLL.DTOS.GovService;
 using Khedmetak.BLL.Services.Abstraction;
+
 using System;
 using System.Threading.Tasks;
 
 namespace Khedmetak.AI.Services.Implementation
 {
-    
 
     public class AIResponseDTO
     {
@@ -21,7 +21,7 @@ namespace Khedmetak.AI.Services.Implementation
         private readonly IRewriteQuestionAgent _rewriteAgent;
         private readonly IServiceIntentAgent _intentAgent;
         private readonly IGeneralChatAgent _generalChatAgent;
-        private readonly IRagService _ragContextService;
+        private readonly IRagService _ragService;
         private readonly IAIServiceResponseAgent _aiResponseAgent;
         private readonly IGovServiceService govService;
         private readonly IRelevanceValidatorAgent _relevanceValidatorAgent;
@@ -34,7 +34,7 @@ namespace Khedmetak.AI.Services.Implementation
             IRewriteQuestionAgent rewriteAgent,
             IServiceIntentAgent intentAgent,
             IGeneralChatAgent generalChatAgent,
-            IRagService ragContextService,
+            IRagService ragService,
             IAIServiceResponseAgent aiResponseAgent,
             IGovServiceService govService,
             IRelevanceValidatorAgent relevanceValidatorAgent)
@@ -42,7 +42,7 @@ namespace Khedmetak.AI.Services.Implementation
             _rewriteAgent = rewriteAgent;
             _intentAgent = intentAgent;
             _generalChatAgent = generalChatAgent;
-            _ragContextService = ragContextService;
+            _ragService = ragService;
             _aiResponseAgent = aiResponseAgent;
             this.govService = govService;
             _relevanceValidatorAgent = relevanceValidatorAgent;
@@ -68,7 +68,7 @@ namespace Khedmetak.AI.Services.Implementation
             }
 
             // 4. Retrieve service info from RAG
-            var serviceInfo = await _ragContextService.SearchServiceAsync(intent.Intent);
+            var serviceInfo = await _ragService.SearchServiceAsync(intent.Intent);
 
             // 5. If service not found, ask user for clarification
             if (serviceInfo == null)

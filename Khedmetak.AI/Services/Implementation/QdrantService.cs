@@ -1,13 +1,13 @@
 ﻿using Khedmetak.AI.Configuration;
 using Khedmetak.AI.DTOs;
-using Khedmetak.AI.DTOs.RagDTOs;
+//using Khedmetak.AI.DTOs.RagDTOs;
 using Khedmetak.AI.Services.Abstraction;
 using Microsoft.Extensions.Options;
 using Qdrant.Client;
 using Qdrant.Client.Grpc;
 using System.Security.Cryptography;
 using System.Text;
-
+using Shard.DTOS;
 
 
 namespace Khedmetak.AI.Services.Implementation
@@ -17,13 +17,14 @@ namespace Khedmetak.AI.Services.Implementation
     {
 
         private string CollectionName;
+        private string ImageCollectionName;
         private readonly QdrantClient _client;
 
         public QdrantService(QdrantClient client, IOptions<QdrantDBSettings> options)
         {
 
             CollectionName = options.Value.QdrantCollection;
-
+            ImageCollectionName = options.Value.QdrantImageCollection;
             _client = client;
         }
 

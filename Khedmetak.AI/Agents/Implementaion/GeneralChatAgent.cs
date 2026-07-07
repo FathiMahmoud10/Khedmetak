@@ -2,6 +2,7 @@ using Khedmetak.AI.Agents.Abstraction;
 using Khedmetak.AI.DTOs.ChatSessionDTO;
 using Khedmetak.AI.Services.Abstraction;
 using Microsoft.Extensions.AI;
+using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,7 +15,7 @@ namespace Khedmetak.AI.Agents.Implementaion
         private readonly IChatClient _chatClient;
         private readonly IGovServiceTools _Tools;
 
-        public GeneralChatAgent(IChatClient chatClient,IGovServiceTools tools)
+        public GeneralChatAgent([FromKeyedServices("Chat")] IChatClient chatClient,IGovServiceTools tools)
         {
             _chatClient = chatClient;
             _Tools = tools;

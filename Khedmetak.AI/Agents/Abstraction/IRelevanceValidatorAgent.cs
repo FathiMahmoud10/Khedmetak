@@ -1,5 +1,6 @@
 ﻿// Khedmetak.AI.Agents.Abstraction/IRelevanceValidatorAgent.cs
-using Khedmetak.AI.DTOs.RagDTOs;
+//using Khedmetak.AI.DTOs.RagDTOs;
+using Shard.DTOS;
 using Khedmetak.AI.RAG;
 
 namespace Khedmetak.AI.Agents.Abstraction

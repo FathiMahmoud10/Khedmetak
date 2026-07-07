@@ -1,7 +1,7 @@
 using Khedmetak.AI.RAG;
-using Khedmetak.AI.Services.Abstraction;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Shard.VectorDBInterfaces;
 
 namespace Khedmetak.Controllers
 {

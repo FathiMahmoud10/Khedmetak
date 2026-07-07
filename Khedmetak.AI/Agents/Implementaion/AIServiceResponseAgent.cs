@@ -1,12 +1,11 @@
 ﻿using Khedmetak.AI.Agents.Abstraction;
 using Khedmetak.AI.DTOs.ChatSessionDTO;
-using Khedmetak.AI.DTOs.RagDTOs;
+//using Khedmetak.AI.DTOs.RagDTOs;
 using Khedmetak.AI.Services.Abstraction;
 using Microsoft.Extensions.AI;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection;
+using Shard.DTOS;
+
 
 namespace Khedmetak.AI.Agents.Implementaion
 {
@@ -15,7 +14,7 @@ namespace Khedmetak.AI.Agents.Implementaion
         private readonly IChatClient _chatClient;
         private readonly IGovServiceTools _govServiceTools;
 
-        public AIServiceResponseAgent(IChatClient chatClient, IGovServiceTools govServiceTools)
+        public AIServiceResponseAgent( [FromKeyedServices("Chat")]  IChatClient chatClient, IGovServiceTools govServiceTools)
         {
             _chatClient = chatClient;
             _govServiceTools = govServiceTools;

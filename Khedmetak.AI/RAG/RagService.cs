@@ -1,5 +1,6 @@
-using Khedmetak.AI.DTOs.RagDTOs;
-using Khedmetak.AI.Services.Abstraction;
+//using Khedmetak.AI.DTOs.RagDTOs;
+using Shard.VectorDBInterfaces;
+using Shard.DTOS;
 using System.Threading.Tasks;
 
 namespace Khedmetak.AI.RAG
