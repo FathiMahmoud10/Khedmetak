@@ -1,6 +1,7 @@
 using Khedmetak.AI.Agents.Abstraction;
 using Khedmetak.AI.Agents.Implementaion;
 using Khedmetak.AI.Agents.Implementation;
+using Khedmetak.AI.Orchestrators;
 using Khedmetak.AI.Configuration;
 using Khedmetak.AI.RAG;
 using Khedmetak.AI.Services.Abstraction;
@@ -319,7 +320,10 @@ builder.Services.AddScoped<IChatMessageService, ChatMessageService>();
 builder.Services.AddScoped<IEmbeddingService, EmbeddingService>();
 builder.Services.AddScoped<IChunkService, ChunkService>();
 builder.Services.AddScoped<IUserDocumentService, UserDocumentService>();
-builder.Services.AddScoped<IDocumentValidationService, DocumentValidationService>();
+builder.Services.AddScoped<ITemplatesAgent, TemplatesAgent>();
+builder.Services.AddHttpClient<IOCRAgent, OCRAgent>();
+builder.Services.AddScoped<IRulesValidationAgent, RulesValidationAgent>();
+builder.Services.AddScoped<IDocumentValidationOrchestrator, DocumentValidationOrchestrator>();
 
 
 
