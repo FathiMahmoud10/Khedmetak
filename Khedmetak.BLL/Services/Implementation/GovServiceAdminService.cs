@@ -141,6 +141,20 @@ namespace Khedmetak.BLL.Services.Implementation
             foreach (var doc in existingDocs)
                 docKeys.Add($"{doc.GovService.SrvName.Trim()}|{doc.DocumentName.Trim()}");
 
+            var feeTierKeys = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            var existingFeeTiers = await _feeTierRepository.GetAllAsync(t => t.GovService);
+            foreach (var t in existingFeeTiers)
+                feeTierKeys.Add($"{t.GovService.SrvName.Trim()}|{t.TierName.Trim()}");
+
+            var noteKeys = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            var existingNotes = await _noteRepository.GetAllAsync(n => n.GovService);
+            foreach (var n in existingNotes)
+                noteKeys.Add($"{n.GovService.SrvName.Trim()}|{n.Note.Trim()}");
+
+            // الخدمات اللي هتتعمل لها Create في اللوب ده هنندكسها في الـ VectorDB بعد ما نعمل SaveChanges
+            // (مينفعش نندكس قبل الحفظ لأن الـ Id بيكون لسه 0 قبل ما EF يحفظ الصف في الداتابيز)
+            var servicesToIndex = new List<GovService>();
+
             for (int rowNum = 2; rowNum <= lastRow; rowNum++)
             {
                 var row = sheet.Row(rowNum);
@@ -188,9 +202,9 @@ namespace Khedmetak.BLL.Services.Implementation
                             NeedsGuarantee = colNeedsGuarantee != -1 && ParseYesNo(row.Cell(colNeedsGuarantee).GetString().Trim())
                         };
                         _serviceRepository.Add(service);
-                        await _vectorDbService.AddOrUpdateGovServiceToVectorDBAsync(service.Id); // add service to vector database after creation
-                       
+
                         servicesCache[serviceName] = service;
+                        servicesToIndex.Add(service); // هنندكسها في الـ VectorDB بعد الحفظ
                         result.ServicesCreated++;
                     }
                     else
@@ -347,16 +361,20 @@ namespace Khedmetak.BLL.Services.Implementation
                                 if (!TryParseFee(row.Cell(fColFees).GetString().Trim(), out var tierFee))
                                     throw new InvalidOperationException($"قيمة الرسوم غير صحيحة لنوع الاستمارة '{tierName}'.");
 
-                                _feeTierRepository.Add(new ServiceFeeTier
+                                var feeTierKey = $"{svcName}|{tierName}";
+                                if (feeTierKeys.Add(feeTierKey))
                                 {
-                                    GovService = svc,
-                                    TierName = tierName,
-                                    Fees = tierFee,
-                                    Duration = fColDuration != -1 ? row.Cell(fColDuration).GetString().Trim() : string.Empty,
-                                    IsRefundable = fColRefundable != -1 && ParseYesNo(row.Cell(fColRefundable).GetString().Trim()),
-                                    DisplayOrder = fColOrder != -1 && int.TryParse(row.Cell(fColOrder).GetString().Trim(), out var ord) ? ord : r
-                                });
-                                result.FeeTiersCreated++;
+                                    _feeTierRepository.Add(new ServiceFeeTier
+                                    {
+                                        GovService = svc,
+                                        TierName = tierName,
+                                        Fees = tierFee,
+                                        Duration = fColDuration != -1 ? row.Cell(fColDuration).GetString().Trim() : string.Empty,
+                                        IsRefundable = fColRefundable != -1 && ParseYesNo(row.Cell(fColRefundable).GetString().Trim()),
+                                        DisplayOrder = fColOrder != -1 && int.TryParse(row.Cell(fColOrder).GetString().Trim(), out var ord) ? ord : r
+                                    });
+                                    result.FeeTiersCreated++;
+                                }
                             }
                             catch (Exception ex)
                             {
@@ -408,13 +426,17 @@ namespace Khedmetak.BLL.Services.Implementation
                                 if (!servicesCache.TryGetValue(svcName, out var svc))
                                     throw new InvalidOperationException($"الخدمة '{svcName}' غير موجودة (لم تُعرَّف في الشيت الرئيسي).");
 
-                                _noteRepository.Add(new ServiceImportantNote
+                                var noteKey = $"{svcName}|{noteText}";
+                                if (noteKeys.Add(noteKey))
                                 {
-                                    GovService = svc,
-                                    Note = noteText,
-                                    DisplayOrder = nColOrder != -1 && int.TryParse(row.Cell(nColOrder).GetString().Trim(), out var ord) ? ord : r
-                                });
-                                result.ImportantNotesCreated++;
+                                    _noteRepository.Add(new ServiceImportantNote
+                                    {
+                                        GovService = svc,
+                                        Note = noteText,
+                                        DisplayOrder = nColOrder != -1 && int.TryParse(row.Cell(nColOrder).GetString().Trim(), out var ord) ? ord : r
+                                    });
+                                    result.ImportantNotesCreated++;
+                                }
                             }
                             catch (Exception ex)
                             {
@@ -426,6 +448,23 @@ namespace Khedmetak.BLL.Services.Implementation
             }
 
             await _unitOfWork.SaveChangesAsync();
+
+            // دلوقتي كل الخدمات الجديدة عندها Id حقيقي من الداتابيز، نقدر نندكسها في الـ VectorDB بأمان
+            foreach (var svc in servicesToIndex)
+            {
+                try
+                {
+                    await _vectorDbService.AddOrUpdateGovServiceToVectorDBAsync(svc.Id);
+                }
+                catch (Exception ex)
+                {
+                    result.Errors.Add(new ImportRowErrorDto
+                    {
+                        RowNumber = 0,
+                        Message = $"[VectorDB] فشل فهرسة الخدمة '{svc.SrvName}' (Id={svc.Id}): {ex.Message}"
+                    });
+                }
+            }
 
             return result;
         }
