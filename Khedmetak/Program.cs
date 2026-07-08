@@ -1,18 +1,18 @@
 using Khedmetak.AI.Agents.Abstraction;
 using Khedmetak.AI.Agents.Implementaion;
 using Khedmetak.AI.Agents.Implementation;
-using Khedmetak.AI.Orchestrators;
 using Khedmetak.AI.Configuration;
+using Khedmetak.AI.Orchestrators;
 using Khedmetak.AI.RAG;
 using Khedmetak.AI.Services.Abstraction;
 using Khedmetak.AI.Services.Implementation;
 using Khedmetak.API.Middlewares;
 using Khedmetak.BLL.MappingProfile;
+using Khedmetak.BLL.Services;
 using Khedmetak.BLL.Services.Abstraction;
 using Khedmetak.BLL.Services.Abstraction.Fawry;
 using Khedmetak.BLL.Services.Implementation;
-using Khedmetak.DigitalPortal.Services.Abstraction;
-using Khedmetak.DigitalPortal.Services.Implementation;
+using Khedmetak.BLL.Services.Interfaces;
 using Khedmetak.Core.Data;
 using Khedmetak.DAL.Entities;
 using Khedmetak.DAL.Entities.FawrySettings;
@@ -24,6 +24,8 @@ using Khedmetak.DAL.Repo.Implementation.UnitOfWork;
 using Khedmetak.DAL.Repo.shared;
 using Khedmetak.DAL.Repositories;
 using Khedmetak.DAL.Repositories.Interfaces;
+using Khedmetak.DigitalPortal.Services.Abstraction;
+using Khedmetak.DigitalPortal.Services.Implementation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -35,11 +37,10 @@ using Microsoft.IdentityModel.Tokens;
 using OpenAI;
 using OpenAI.Chat;
 using Qdrant.Client;
+using Shard.VectorDBInterfaces;
 using System.ClientModel;
 using System.Net.Http.Headers;
 using System.Text;
-
-using Shard.VectorDBInterfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -288,6 +289,7 @@ builder.Services.AddScoped<IUserDocumentRepository, UserDocumentRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IChatSessionRepository, ChatSessionRepository>();
 builder.Services.AddScoped<IPaymentRepository, PaymentRepository>();
+builder.Services.AddScoped<IStandardDocumentRepository, StandardDocumentRepository>();
 #endregion
 
 #region Services
@@ -303,6 +305,7 @@ builder.Services.AddScoped<IUserDashboardService, UserDashboardService>();
 builder.Services.AddScoped<IServiceFeeTierRepository, ServiceFeeTierRepository>();
 builder.Services.AddScoped<IServiceImportantNoteRepository, ServiceImportantNoteRepository>();
 builder.Services.AddScoped<IStatisticsService, StatisticsService>();
+builder.Services.AddScoped<IStandardDocumentService, StandardDocumentService>();
 builder.Services.AddHttpClient<IDigitalPortalService, DigitalPortalHttpService>(client =>
 {
     var baseUrl = builder.Configuration["DigitalPortalSettings:BaseUrl"] ?? "http://localhost:5200/";

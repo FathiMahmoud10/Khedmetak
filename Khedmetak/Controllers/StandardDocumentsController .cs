@@ -1,6 +1,7 @@
-﻿using Khedmetak.Core.Data;
-using Khedmetak.DAL.Entities;
-using Khedmetak.DAL.Repositories.Interfaces;
+﻿// Khedmetak.API/Controllers/StandardDocumentsController.cs
+using Khedmetak.BLL.DTOS.StandardDocument;
+using Khedmetak.BLL.DTOS.StandardDocument.Khedmetak.DAL.DTOs.StandardDocument;
+using Khedmetak.BLL.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Khedmetak.API.Controllers
@@ -9,56 +10,61 @@ namespace Khedmetak.API.Controllers
     [Route("api/[controller]")]
     public class StandardDocumentsController : ControllerBase
     {
-        private readonly IStandardDocumentRepository _repo;
-        private readonly AppDbContext _context; 
+        private readonly IStandardDocumentService _service;
+        private readonly IWebHostEnvironment _env;
 
-        public StandardDocumentsController(IStandardDocumentRepository repo, AppDbContext context)
+        public StandardDocumentsController(IStandardDocumentService service, IWebHostEnvironment env)
         {
-            _repo = repo;
-            _context = context;
+            _service = service;
+            _env = env;
         }
 
         [HttpGet]
         public async Task<IActionResult> GetAll()
-            => Ok(await _repo.GetAllAsync());
+            => Ok(await _service.GetAllAsync());
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)
         {
-            var doc = await _repo.GetByIdWithUsagesAsync(id);
-            return doc is null ? NotFound() : Ok(doc);
+            var result = await _service.GetByIdAsync(id);
+            return result is null ? NotFound() : Ok(result);
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] StandardDocument dto)
+        public async Task<IActionResult> Create([FromForm] CreateStandardDocumentDto dto)
         {
-            _repo.Add(dto);
-            await _context.SaveChangesAsync();
-            return CreatedAtAction(nameof(GetById), new { id = dto.Id }, dto);
+            try
+            {
+                var result = await _service.CreateAsync(dto, _env.WebRootPath);
+                return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, [FromBody] StandardDocument dto)
+        public async Task<IActionResult> Update(int id, [FromForm] UpdateStandardDocumentDto dto)
         {
             if (id != dto.Id) return BadRequest();
 
-            var existing = await _repo.GetByIdAsync(id);
-            if (existing is null) return NotFound();
-
-            _repo.Update(dto);
-            await _context.SaveChangesAsync();
-            return NoContent();
+            try
+            {
+                var success = await _service.UpdateAsync(dto, _env.WebRootPath);
+                return success ? NoContent() : NotFound();
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
-            var doc = await _repo.GetByIdAsync(id);
-            if (doc is null) return NotFound();
-
-            _repo.Delete(doc);
-            await _context.SaveChangesAsync();
-            return NoContent();
+            var success = await _service.DeleteAsync(id, _env.WebRootPath);
+            return success ? NoContent() : NotFound();
         }
     }
 }
