@@ -16,6 +16,7 @@ namespace Khedmetak.BLL.Services.Implementation
         private readonly IGovServiceRepository _serviceRepository;
         private readonly IServiceStepRepository _stepRepository;
         private readonly IRequiredDocumentRepository _docRepository;
+        private readonly IStandardDocumentRepository _standardDocRepository;   // <-- جديد
         private readonly IServiceFeeTierRepository _feeTierRepository;
         private readonly IServiceImportantNoteRepository _noteRepository;
         private readonly IMapper _mapper;
@@ -26,6 +27,7 @@ namespace Khedmetak.BLL.Services.Implementation
             IGovServiceRepository serviceRepository,
             IServiceStepRepository stepRepository,
             IRequiredDocumentRepository docRepository,
+            IStandardDocumentRepository standardDocRepository,   // <-- جديد
             IServiceFeeTierRepository feeTierRepository,
             IServiceImportantNoteRepository noteRepository,
             IMapper mapper, IUnitOfWork unitOfWork,
@@ -34,13 +36,13 @@ namespace Khedmetak.BLL.Services.Implementation
             _serviceRepository = serviceRepository;
             _stepRepository = stepRepository;
             _docRepository = docRepository;
+            _standardDocRepository = standardDocRepository;   // <-- جديد
             _feeTierRepository = feeTierRepository;
             _noteRepository = noteRepository;
             _mapper = mapper;
             _unitOfWork = unitOfWork;
             _vectorDbService = vectorDBService;
         }
-
 
         public async Task<ImportServicesResultDto> ImportServicesFromExcelAsync(Stream excelFileStream)
         {
@@ -499,7 +501,6 @@ namespace Khedmetak.BLL.Services.Implementation
             await _unitOfWork.SaveChangesAsync();
             await _vectorDbService.AddOrUpdateGovServiceToVectorDBAsync(entity.Id); // update service to vector database after Updated
 
-
             var updated = await _serviceRepository.GetServiceWithDetailsAsync(id);
             return _mapper.Map<GovServiceDto>(updated);
         }
@@ -516,7 +517,6 @@ namespace Khedmetak.BLL.Services.Implementation
             return true;
         }
 
-
         public async Task<GovServiceDto?> UpdateFeesAsync(int id, UpdateFeesDto dto)
         {
             var entity = await _serviceRepository.GetByIdAsync(id);
@@ -531,8 +531,6 @@ namespace Khedmetak.BLL.Services.Implementation
             var updated = await _serviceRepository.GetServiceWithDetailsAsync(id);
             return _mapper.Map<GovServiceDto>(updated);
         }
-
-
 
         public async Task<IEnumerable<ServiceStepAdminDto>> GetStepsAsync(int govServiceId)
         {
@@ -578,7 +576,6 @@ namespace Khedmetak.BLL.Services.Implementation
             return true;
         }
 
-
         public async Task<IEnumerable<RequiredDocumentAdminDto>> GetRequiredDocumentsAsync(int govServiceId)
         {
             var docs = await _docRepository.GetByServiceIdAsync(govServiceId);
@@ -590,42 +587,27 @@ namespace Khedmetak.BLL.Services.Implementation
             var service = await _serviceRepository.GetByIdAsync(govServiceId);
             if (service is null) return null;
 
-            var entity = _mapper.Map<RequiredDocument>(dto);
-            entity.GovServiceId = govServiceId;
-
-            if (dto.StandardDocumentFile != null && dto.StandardDocumentFile.Length > 0)
+            if (dto.StandardDocumentId.HasValue)
             {
-                var ext = Path.GetExtension(dto.StandardDocumentFile.FileName).ToLowerInvariant();
-                var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "standards");
-                Directory.CreateDirectory(uploadsFolder);
-                var uniqueName = $"{Guid.NewGuid()}{ext}";
-                var fullPath = Path.Combine(uploadsFolder, uniqueName);
-                using (var stream = new FileStream(fullPath, FileMode.Create))
-                {
-                    await dto.StandardDocumentFile.CopyToAsync(stream);
-                }
+                var standardExists = await _standardDocRepository.GetByIdAsync(dto.StandardDocumentId.Value);
+                if (standardExists is null)
+                    throw new InvalidOperationException($"StandardDocument with id {dto.StandardDocumentId.Value} not found.");
+            }
 
-                entity.StandardDocument = new StandardDocument
-                {
-                    DocumentName = dto.DocumentName,
-                    ImagePath = $"/uploads/standards/{uniqueName}",
-                    GeneralRule = dto.GeneralRule
-                };
-            }
-            else if (!string.IsNullOrEmpty(dto.GeneralRule))
+            var entity = new RequiredDocument
             {
-                entity.StandardDocument = new StandardDocument
-                {
-                    DocumentName = dto.DocumentName,
-                    ImagePath = string.Empty,
-                    GeneralRule = dto.GeneralRule
-                };
-            }
+                DocumentName = dto.DocumentName,
+                IsMandatory = dto.IsMandatory,
+                DocumentType = dto.DocumentType,
+                GovServiceId = govServiceId,
+                StandardDocumentId = dto.StandardDocumentId
+            };
 
             _docRepository.Add(entity);
             await _unitOfWork.SaveChangesAsync();
 
-            return _mapper.Map<RequiredDocumentAdminDto>(entity);
+            var created = await _docRepository.GetByIdAsync(entity.Id, r => r.StandardDocument);
+            return _mapper.Map<RequiredDocumentAdminDto>(created);
         }
 
         public async Task<RequiredDocumentAdminDto?> UpdateRequiredDocumentAsync(int govServiceId, int docId, UpdateRequiredDocumentDto dto)
@@ -633,59 +615,23 @@ namespace Khedmetak.BLL.Services.Implementation
             var entity = await _docRepository.GetByIdAsync(docId, r => r.StandardDocument);
             if (entity is null || entity.GovServiceId != govServiceId) return null;
 
+            if (dto.StandardDocumentId.HasValue)
+            {
+                var standardExists = await _standardDocRepository.GetByIdAsync(dto.StandardDocumentId.Value);
+                if (standardExists is null)
+                    throw new InvalidOperationException($"StandardDocument with id {dto.StandardDocumentId.Value} not found.");
+            }
+
             entity.DocumentName = dto.DocumentName;
             entity.IsMandatory = dto.IsMandatory;
             entity.DocumentType = dto.DocumentType;
-
-            if (dto.StandardDocumentFile != null && dto.StandardDocumentFile.Length > 0)
-            {
-                var ext = Path.GetExtension(dto.StandardDocumentFile.FileName).ToLowerInvariant();
-                var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "standards");
-                Directory.CreateDirectory(uploadsFolder);
-                var uniqueName = $"{Guid.NewGuid()}{ext}";
-                var fullPath = Path.Combine(uploadsFolder, uniqueName);
-                using (var stream = new FileStream(fullPath, FileMode.Create))
-                {
-                    await dto.StandardDocumentFile.CopyToAsync(stream);
-                }
-
-                if (entity.StandardDocument != null)
-                {
-                    entity.StandardDocument.DocumentName = dto.DocumentName;
-                    entity.StandardDocument.ImagePath = $"/uploads/standards/{uniqueName}";
-                    entity.StandardDocument.GeneralRule = dto.GeneralRule;
-                }
-                else
-                {
-                    entity.StandardDocument = new StandardDocument
-                    {
-                        DocumentName = dto.DocumentName,
-                        ImagePath = $"/uploads/standards/{uniqueName}",
-                        GeneralRule = dto.GeneralRule
-                    };
-                }
-            }
-            else if (!string.IsNullOrEmpty(dto.GeneralRule))
-            {
-                if (entity.StandardDocument != null)
-                {
-                    entity.StandardDocument.GeneralRule = dto.GeneralRule;
-                }
-                else
-                {
-                    entity.StandardDocument = new StandardDocument
-                    {
-                        DocumentName = dto.DocumentName,
-                        ImagePath = string.Empty,
-                        GeneralRule = dto.GeneralRule
-                    };
-                }
-            }
+            entity.StandardDocumentId = dto.StandardDocumentId;
 
             _docRepository.Update(entity);
             await _unitOfWork.SaveChangesAsync();
 
-            return _mapper.Map<RequiredDocumentAdminDto>(entity);
+            var updated = await _docRepository.GetByIdAsync(entity.Id, r => r.StandardDocument);
+            return _mapper.Map<RequiredDocumentAdminDto>(updated);
         }
 
         public async Task<bool> DeleteRequiredDocumentAsync(int govServiceId, int docId)
@@ -697,7 +643,6 @@ namespace Khedmetak.BLL.Services.Implementation
             await _unitOfWork.SaveChangesAsync();
             return true;
         }
-
 
         public async Task<IEnumerable<ServiceFeeTierAdminDto>> GetFeeTiersAsync(int govServiceId)
         {
@@ -745,7 +690,6 @@ namespace Khedmetak.BLL.Services.Implementation
             await _unitOfWork.SaveChangesAsync();
             return true;
         }
-
 
         public async Task<IEnumerable<ServiceImportantNoteAdminDto>> GetImportantNotesAsync(int govServiceId)
         {

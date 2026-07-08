@@ -22,8 +22,7 @@ namespace Khedmetak.API.Controllers
         }
 
         [HttpPost("{id:int}/required-documents")]
-        [Consumes("multipart/form-data")]
-        public async Task<IActionResult> AddRequiredDocument(int id, [FromForm] CreateRequiredDocumentDto dto)
+        public async Task<IActionResult> AddRequiredDocument(int id, [FromBody] CreateRequiredDocumentDto dto)
         {
             if (!ModelState.IsValid) return BadRequest(ApiResponse<object>.Fail("Invalid input data."));
             var doc = await _adminService.AddRequiredDocumentAsync(id, dto);
@@ -32,8 +31,7 @@ namespace Khedmetak.API.Controllers
         }
 
         [HttpPut("{id:int}/required-documents/{docId:int}")]
-        [Consumes("multipart/form-data")]
-        public async Task<IActionResult> UpdateRequiredDocument(int id, int docId, [FromForm] UpdateRequiredDocumentDto dto)
+        public async Task<IActionResult> UpdateRequiredDocument(int id, int docId, [FromBody] UpdateRequiredDocumentDto dto)
         {
             if (!ModelState.IsValid) return BadRequest(ApiResponse<object>.Fail("Invalid input data."));
             var doc = await _adminService.UpdateRequiredDocumentAsync(id, docId, dto);

@@ -1,5 +1,4 @@
 using Khedmetak.DAL.Enums;
-using Microsoft.AspNetCore.Http;
 
 namespace Khedmetak.BLL.DTOS.Admin
 {
@@ -17,23 +16,25 @@ namespace Khedmetak.BLL.DTOS.Admin
         public string DocumentName { get; set; } = string.Empty;
         public bool IsMandatory { get; set; }
         public DocumentType DocumentType { get; set; }
+        public int GovServiceId { get; set; }
         public StandardDocumentAdminDto? StandardDocument { get; set; }
     }
+
     public class CreateRequiredDocumentDto
     {
         public string DocumentName { get; set; } = string.Empty;
         public bool IsMandatory { get; set; }
         public DocumentType DocumentType { get; set; }
-        public IFormFile? StandardDocumentFile { get; set; }
-        public string? GeneralRule { get; set; }
+        public int GovServiceId { get; set; }
+        public int? StandardDocumentId { get; set; }
     }
 
     public class UpdateRequiredDocumentDto
     {
+        public int Id { get; set; }
         public string DocumentName { get; set; } = string.Empty;
         public bool IsMandatory { get; set; }
         public DocumentType DocumentType { get; set; }
-        public IFormFile? StandardDocumentFile { get; set; }
-        public string? GeneralRule { get; set; }
+        public int? StandardDocumentId { get; set; }
     }
 }
