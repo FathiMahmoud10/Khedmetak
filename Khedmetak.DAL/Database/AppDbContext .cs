@@ -31,6 +31,7 @@ public class AppDbContext : IdentityDbContext<User, IdentityRole<int>, int>
     public DbSet<ServiceImportantNote> ServiceImportantNotes { get; set; }
     public DbSet<ServiceFormField> ServiceFormFields { get; set; }
     public DbSet<ConditionalRule> ConditionalRules { get; set; }
+    public DbSet<StandardDocument> StandardDocuments { get; set; }
     #endregion
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -320,6 +321,11 @@ public class AppDbContext : IdentityDbContext<User, IdentityRole<int>, int>
             e.HasOne(r => r.GovService)
                 .WithMany(g => g.RequiredDocuments)
                 .HasForeignKey(r => r.GovServiceId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            e.HasOne(r => r.StandardDocument)
+                .WithOne(s => s.RequiredDocument)
+                .HasForeignKey<StandardDocument>(s => s.RequiredDocumentId)
                 .OnDelete(DeleteBehavior.Cascade);
         });
 

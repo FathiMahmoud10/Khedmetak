@@ -1,4 +1,4 @@
-﻿using Khedmetak.Core.Data;
+using Khedmetak.Core.Data;
 using Khedmetak.DAL.Entities;
 using Khedmetak.DAL.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
@@ -14,6 +14,7 @@ namespace Khedmetak.DAL.Repositories
                 .Include(g => g.Category)
                 .Include(g => g.ServiceSteps.OrderBy(s => s.StepOrder))
                 .Include(g => g.RequiredDocuments)
+                    .ThenInclude(r => r.StandardDocument)
                 .Include(g => g.ServiceGeneralDocs)
                 .Include(g => g.ServiceOptions)
                     .ThenInclude(o => o.ServiceOptionChoices)

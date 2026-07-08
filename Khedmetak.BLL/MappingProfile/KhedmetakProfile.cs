@@ -50,6 +50,9 @@ namespace Khedmetak.BLL.MappingProfile
             CreateMap<CreateRequiredDocumentDto, RequiredDocument>();
             CreateMap<UpdateRequiredDocumentDto, RequiredDocument>();
 
+            CreateMap<StandardDocument, StandardDocumentDto>();
+            CreateMap<StandardDocument, StandardDocumentAdminDto>();
+
             CreateMap<ServiceSteps, ServiceStepAdminDto>();
             CreateMap<RequiredDocument, RequiredDocumentAdminDto>();
 
