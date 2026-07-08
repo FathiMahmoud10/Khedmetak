@@ -1,5 +1,5 @@
-﻿using Khedmetak.AI.Agents.Abstraction;
 using Khedmetak.AI.DTOs.DocumentValidationDTO;
+using Khedmetak.AI.Orchestrators;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Khedmetak.Controllers;
@@ -8,12 +8,12 @@ namespace Khedmetak.Controllers;
 [Route("api/[controller]")]
 public class DocumentValidationController : ControllerBase
 {
-    private readonly IDocumentValidationService _documentValidationService;
+    private readonly IDocumentValidationOrchestrator _documentValidationOrchestrator;
 
     public DocumentValidationController(
-        IDocumentValidationService documentValidationService)
+        IDocumentValidationOrchestrator documentValidationOrchestrator)
     {
-        _documentValidationService = documentValidationService;
+        _documentValidationOrchestrator = documentValidationOrchestrator;
     }
 
     [HttpPost("validate")]
@@ -38,7 +38,7 @@ public class DocumentValidationController : ControllerBase
             comparisonMediaType = request.ComparisonDocument.ContentType;
         }
 
-        var result = await _documentValidationService.ValidateAsync(
+        var result = await _documentValidationOrchestrator.ValidateAsync(
             stream.ToArray(),
             request.Document.ContentType,
             comparisonBytes,
