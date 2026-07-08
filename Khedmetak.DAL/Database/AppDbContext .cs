@@ -31,6 +31,7 @@ public class AppDbContext : IdentityDbContext<User, IdentityRole<int>, int>
     public DbSet<ServiceImportantNote> ServiceImportantNotes { get; set; }
     public DbSet<ServiceFormField> ServiceFormFields { get; set; }
     public DbSet<ConditionalRule> ConditionalRules { get; set; }
+    public DbSet<StandardDocument> StandardDocuments { get; set; }
     #endregion
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -321,6 +322,11 @@ public class AppDbContext : IdentityDbContext<User, IdentityRole<int>, int>
                 .WithMany(g => g.RequiredDocuments)
                 .HasForeignKey(r => r.GovServiceId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            e.HasOne(r => r.StandardDocument)
+                .WithMany(s => s.RequiredDocuments)
+                .HasForeignKey(r => r.StandardDocumentId)
+                .OnDelete(DeleteBehavior.SetNull);   // لو الـ StandardDocument اتمسح، RequiredDocument يفضل موجود
         });
 
         // UserDocument

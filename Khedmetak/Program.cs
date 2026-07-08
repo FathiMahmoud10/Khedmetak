@@ -1,6 +1,7 @@
 using Khedmetak.AI.Agents.Abstraction;
 using Khedmetak.AI.Agents.Implementaion;
 using Khedmetak.AI.Agents.Implementation;
+using Khedmetak.AI.Orchestrators;
 using Khedmetak.AI.Configuration;
 using Khedmetak.AI.RAG;
 using Khedmetak.AI.Services.Abstraction;
@@ -244,18 +245,18 @@ var apiKey = builder.Configuration.GetSection("AI")["ApiKey"];
     });
 
     // ------------- Embedding for image --------------
-    builder.Services.AddSingleton<IClipImageEmbeddingService>(sp =>
-    {
-        var env = sp.GetRequiredService<IHostEnvironment>();
+    //builder.Services.AddSingleton<IClipImageEmbeddingService>(sp =>
+    //{
+    //    var env = sp.GetRequiredService<IHostEnvironment>();
 
-        var modelPath = Path.Combine(
-            env.ContentRootPath,
-            "AIModels",
-            "Clip",
-            "image_encode.onnx");
+    //    var modelPath = Path.Combine(
+    //        env.ContentRootPath,
+    //        "AIModels",
+    //        "Clip",
+    //        "image_encode.onnx");
 
-        return new ClipImageEmbeddingService(modelPath);
-    });
+    //    return new ClipImageEmbeddingService(modelPath);
+    //});
 
 #endregion
 
@@ -319,14 +320,17 @@ builder.Services.AddScoped<IChatMessageService, ChatMessageService>();
 builder.Services.AddScoped<IEmbeddingService, EmbeddingService>();
 builder.Services.AddScoped<IChunkService, ChunkService>();
 builder.Services.AddScoped<IUserDocumentService, UserDocumentService>();
-builder.Services.AddScoped<IDocumentValidationService, DocumentValidationService>();
+builder.Services.AddScoped<ITemplatesAgent, TemplatesAgent>();
+builder.Services.AddHttpClient<IOCRAgent, OCRAgent>();
+builder.Services.AddScoped<IRulesValidationAgent, RulesValidationAgent>();
+builder.Services.AddScoped<IDocumentValidationOrchestrator, DocumentValidationOrchestrator>();
 
 
 
 builder.Services.AddScoped<IVectorDB, QdrantService>();
 //builder.Services.AddScoped<IVectorDBOperationsService, VectorDBOperationsService>();
 builder.Services.AddScoped<IVectorDBService, VectorDBService>();
-builder.Services.AddScoped<IImageVectorDbService, ImageVectorDbService>();
+//builder.Services.AddScoped<IImageVectorDbService, ImageVectorDbService>();
 builder.Services.AddScoped<IRelevanceValidatorAgent, RelevanceValidatorAgent>();
 builder.Services.AddScoped<IRagService, RagService>();
 builder.Services.AddScoped<IGovServiceTools, GovServiceTools>();
