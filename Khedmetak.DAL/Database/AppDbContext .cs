@@ -324,9 +324,9 @@ public class AppDbContext : IdentityDbContext<User, IdentityRole<int>, int>
                 .OnDelete(DeleteBehavior.Cascade);
 
             e.HasOne(r => r.StandardDocument)
-                .WithOne(s => s.RequiredDocument)
-                .HasForeignKey<StandardDocument>(s => s.RequiredDocumentId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .WithMany(s => s.RequiredDocuments)
+                .HasForeignKey(r => r.StandardDocumentId)
+                .OnDelete(DeleteBehavior.SetNull);   // لو الـ StandardDocument اتمسح، RequiredDocument يفضل موجود
         });
 
         // UserDocument
