@@ -244,18 +244,18 @@ var apiKey = builder.Configuration.GetSection("AI")["ApiKey"];
     });
 
     // ------------- Embedding for image --------------
-    builder.Services.AddSingleton<IClipImageEmbeddingService>(sp =>
-    {
-        var env = sp.GetRequiredService<IHostEnvironment>();
+    //builder.Services.AddSingleton<IClipImageEmbeddingService>(sp =>
+    //{
+    //    var env = sp.GetRequiredService<IHostEnvironment>();
 
-        var modelPath = Path.Combine(
-            env.ContentRootPath,
-            "AIModels",
-            "Clip",
-            "image_encode.onnx");
+    //    var modelPath = Path.Combine(
+    //        env.ContentRootPath,
+    //        "AIModels",
+    //        "Clip",
+    //        "image_encode.onnx");
 
-        return new ClipImageEmbeddingService(modelPath);
-    });
+    //    return new ClipImageEmbeddingService(modelPath);
+    //});
 
 #endregion
 
@@ -326,7 +326,7 @@ builder.Services.AddScoped<IDocumentValidationService, DocumentValidationService
 builder.Services.AddScoped<IVectorDB, QdrantService>();
 //builder.Services.AddScoped<IVectorDBOperationsService, VectorDBOperationsService>();
 builder.Services.AddScoped<IVectorDBService, VectorDBService>();
-builder.Services.AddScoped<IImageVectorDbService, ImageVectorDbService>();
+//builder.Services.AddScoped<IImageVectorDbService, ImageVectorDbService>();
 builder.Services.AddScoped<IRelevanceValidatorAgent, RelevanceValidatorAgent>();
 builder.Services.AddScoped<IRagService, RagService>();
 builder.Services.AddScoped<IGovServiceTools, GovServiceTools>();
