@@ -29,6 +29,8 @@ public class AppDbContext : IdentityDbContext<User, IdentityRole<int>, int>
     public DbSet<CitizenProfile> CitizenProfiles { get; set; }
     public DbSet<ServiceFeeTier> ServiceFeeTiers { get; set; }
     public DbSet<ServiceImportantNote> ServiceImportantNotes { get; set; }
+    public DbSet<ServiceFormField> ServiceFormFields { get; set; }
+    public DbSet<ConditionalRule> ConditionalRules { get; set; }
     #endregion
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -376,6 +378,37 @@ public class AppDbContext : IdentityDbContext<User, IdentityRole<int>, int>
             e.HasOne(c => c.User)
                 .WithOne(u => u.CitizenProfile)
                 .HasForeignKey<CitizenProfile>(c => c.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        // ServiceFormField
+        modelBuilder.Entity<ServiceFormField>(e =>
+        {
+            e.Property(f => f.FieldName).IsRequired().HasMaxLength(100);
+            e.Property(f => f.Label).IsRequired().HasMaxLength(200);
+            e.Property(f => f.FieldType).IsRequired().HasMaxLength(50);
+            e.Property(f => f.Placeholder).HasMaxLength(200);
+            e.Property(f => f.Choices).HasMaxLength(1000);
+            e.Property(f => f.ValidationRegex).HasMaxLength(250);
+
+            e.HasOne(f => f.GovService)
+                .WithMany(g => g.ServiceFormFields)
+                .HasForeignKey(f => f.GovServiceId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        // ConditionalRule
+        modelBuilder.Entity<ConditionalRule>(e =>
+        {
+            e.Property(r => r.TargetType).IsRequired().HasMaxLength(50);
+            e.Property(r => r.DependentOnType).IsRequired().HasMaxLength(50);
+            e.Property(r => r.Operator).IsRequired().HasMaxLength(50);
+            e.Property(r => r.Value).IsRequired().HasMaxLength(200);
+            e.Property(r => r.Action).IsRequired().HasMaxLength(50);
+
+            e.HasOne(r => r.GovService)
+                .WithMany(g => g.ConditionalRules)
+                .HasForeignKey(r => r.GovServiceId)
                 .OnDelete(DeleteBehavior.Cascade);
         });
 
