@@ -4,6 +4,7 @@ using Khedmetak.Core.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Khedmetak.DAL.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260708221227_ModifyStandardDocumentRelation")]
+    partial class ModifyStandardDocumentRelation
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -768,7 +771,7 @@ namespace Khedmetak.DAL.Migrations
                             Id = 1,
                             AccessFailedCount = 0,
                             ConcurrencyStamp = "e7492cfa-e160-49b8-a6d1-817abcf992bf",
-                            CreatedAt = new DateTime(2026, 7, 8, 22, 15, 21, 616, DateTimeKind.Utc).AddTicks(8458),
+                            CreatedAt = new DateTime(2026, 7, 8, 22, 12, 22, 580, DateTimeKind.Utc).AddTicks(6376),
                             Email = "fathi@khedmetak.com",
                             EmailConfirmed = true,
                             LockoutEnabled = false,
@@ -776,7 +779,7 @@ namespace Khedmetak.DAL.Migrations
                             NormalizedEmail = "FATHI@KHEDMETAK.COM",
                             NormalizedUserName = "FATHI",
                             Password = "12345678",
-                            PasswordHash = "AQAAAAIAAYagAAAAEGOi4MQEvjBBPEYY27Kvrxh1cEsQKmXrSARO46zUPZbfp63UrWwC5JaP7u6tnLIVxg==",
+                            PasswordHash = "AQAAAAIAAYagAAAAECs4+e5Hpbc1XIZ2OjaU/sl3fq8A9qEAj2gbmbCHTspUhBMq4jUiOYtB9me0k5HcmA==",
                             PhoneNumberConfirmed = false,
                             Role = "User",
                             SecurityStamp = "f4fb76b8-2ea9-42b7-876a-39fbcf9e6cf4",
@@ -788,7 +791,7 @@ namespace Khedmetak.DAL.Migrations
                             Id = 2,
                             AccessFailedCount = 0,
                             ConcurrencyStamp = "df768913-9118-4a9f-a496-e26bbbc23eef",
-                            CreatedAt = new DateTime(2026, 7, 8, 22, 15, 21, 707, DateTimeKind.Utc).AddTicks(9537),
+                            CreatedAt = new DateTime(2026, 7, 8, 22, 12, 22, 689, DateTimeKind.Utc).AddTicks(6988),
                             Email = "aya@khedmetak.com",
                             EmailConfirmed = true,
                             LockoutEnabled = false,
@@ -796,7 +799,7 @@ namespace Khedmetak.DAL.Migrations
                             NormalizedEmail = "AYA@KHEDMETAK.COM",
                             NormalizedUserName = "AYA",
                             Password = "12345678",
-                            PasswordHash = "AQAAAAIAAYagAAAAEK95TYW9XHn7JFBAI2vQBKDv8Dkop5VhWoGLuJOvcgzP7ooeP/XrutSg//SOOezPrg==",
+                            PasswordHash = "AQAAAAIAAYagAAAAEO2U4hjjV9DWCz0UB2wRB/z/BHkWxnunJaxxRdWKJTlE1Ix4jSR/kXsPplWlGt6yKg==",
                             PhoneNumberConfirmed = false,
                             Role = "User",
                             SecurityStamp = "bc521d96-c167-4277-a859-00ef1295beea",
@@ -808,7 +811,7 @@ namespace Khedmetak.DAL.Migrations
                             Id = 3,
                             AccessFailedCount = 0,
                             ConcurrencyStamp = "b1f5fe6b-67a4-44b7-bdc6-2c93d9fb34d0",
-                            CreatedAt = new DateTime(2026, 7, 8, 22, 15, 21, 811, DateTimeKind.Utc).AddTicks(4355),
+                            CreatedAt = new DateTime(2026, 7, 8, 22, 12, 22, 786, DateTimeKind.Utc).AddTicks(6551),
                             Email = "naglaa@khedmetak.com",
                             EmailConfirmed = true,
                             LockoutEnabled = false,
@@ -816,7 +819,7 @@ namespace Khedmetak.DAL.Migrations
                             NormalizedEmail = "NAGLAA@KHEDMETAK.COM",
                             NormalizedUserName = "NAGLAA",
                             Password = "12345678",
-                            PasswordHash = "AQAAAAIAAYagAAAAEPZaUBrNwFWSd20PaJ5q5+SioGXSXoPqSdmjAEf6/fT98/jjcMlmD5SZtDAGUczoqg==",
+                            PasswordHash = "AQAAAAIAAYagAAAAEM5dRbFge1fpdcVaPl+SxaZ0D2/q3v1aBB9kwxPcCz6vPEJUzqM4eSVXJLuH5wPUYw==",
                             PhoneNumberConfirmed = false,
                             Role = "User",
                             SecurityStamp = "cbe62da6-dbdb-4fbc-bdf8-18e388ffc811",
@@ -828,7 +831,7 @@ namespace Khedmetak.DAL.Migrations
                             Id = 4,
                             AccessFailedCount = 0,
                             ConcurrencyStamp = "5c5fbef1-cb69-42b7-99e2-348f6cfef7e9",
-                            CreatedAt = new DateTime(2026, 7, 8, 22, 15, 21, 901, DateTimeKind.Utc).AddTicks(8793),
+                            CreatedAt = new DateTime(2026, 7, 8, 22, 12, 22, 878, DateTimeKind.Utc).AddTicks(8918),
                             Email = "rahma@khedmetak.com",
                             EmailConfirmed = true,
                             LockoutEnabled = false,
@@ -836,7 +839,7 @@ namespace Khedmetak.DAL.Migrations
                             NormalizedEmail = "RAHMA@KHEDMETAK.COM",
                             NormalizedUserName = "RAHMA",
                             Password = "12345678",
-                            PasswordHash = "AQAAAAIAAYagAAAAEPUpNKC2LJ3jkfHG3PbLOPvSy8tlDQoaeej0Oas3/mAx7uLn+I1Yd/L269W3QBT6Qw==",
+                            PasswordHash = "AQAAAAIAAYagAAAAEGjNyTMOpPH9tqpmUi6knJseo9f1BS5BbPLVUASeLFcj0rQIf7yexZgKg1T+zUQeYQ==",
                             PhoneNumberConfirmed = false,
                             Role = "User",
                             SecurityStamp = "d7d91e6b-e53b-4861-a53d-82c5f1fa6d03",
@@ -848,7 +851,7 @@ namespace Khedmetak.DAL.Migrations
                             Id = 5,
                             AccessFailedCount = 0,
                             ConcurrencyStamp = "f1e2d3c4-7777-8888-9999-aaaabbbbcccc",
-                            CreatedAt = new DateTime(2026, 7, 8, 22, 15, 21, 988, DateTimeKind.Utc).AddTicks(8345),
+                            CreatedAt = new DateTime(2026, 7, 8, 22, 12, 22, 986, DateTimeKind.Utc).AddTicks(6402),
                             Email = "admin@khedmetak.com",
                             EmailConfirmed = true,
                             LockoutEnabled = false,
@@ -856,7 +859,7 @@ namespace Khedmetak.DAL.Migrations
                             NormalizedEmail = "ADMIN@KHEDMETAK.COM",
                             NormalizedUserName = "ADMIN",
                             Password = "Admin@123",
-                            PasswordHash = "AQAAAAIAAYagAAAAEJj2zvS0bSwscHaGoOnUoZa2dNwVSgYVAQri+gRlnacPVPslL7oSrUpc1EoQcrqdWQ==",
+                            PasswordHash = "AQAAAAIAAYagAAAAELzLNLFffOmd5Z0QBDQbwWMWhoNsi2o7Ni/OfuETX6c5p9h7L31KUWgEBqf+NHetSg==",
                             PhoneNumberConfirmed = false,
                             Role = "Admin",
                             SecurityStamp = "a1b2c3d4-1111-2222-3333-444455556666",
@@ -1107,9 +1110,6 @@ namespace Khedmetak.DAL.Migrations
 
                     b.Property<bool>("IsMandatory")
                         .HasColumnType("bit");
-
-                    b.Property<string>("SpecificRule")
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int?>("StandardDocumentId")
                         .HasColumnType("int");

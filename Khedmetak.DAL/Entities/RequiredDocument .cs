@@ -7,6 +7,7 @@ public class RequiredDocument : BaseEntity
     public string DocumentName { get; set; } = string.Empty;
     public bool IsMandatory { get; set; }
     public DocumentType DocumentType { get; set; } = DocumentType.Any;
+    public string ? SpecificRule { get; set; }
 
     #region Foreign Keys
     public int GovServiceId { get; set; }
