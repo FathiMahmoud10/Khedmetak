@@ -1,4 +1,4 @@
-﻿using Khedmetak.DAL.Entities.Base;
+using Khedmetak.DAL.Entities.Base;
 using Khedmetak.DAL.Enums;
 using System;
 using System.Collections.Generic;
@@ -22,6 +22,7 @@ namespace Khedmetak.DAL.Entities
         #region Relations
         public GovService GovService { get; set; } = null!;
         public ICollection<UserDocument> UserDocuments { get; set; } = new List<UserDocument>();
+        public StandardDocument? StandardDocument { get; set; }
         #endregion
     }
 }

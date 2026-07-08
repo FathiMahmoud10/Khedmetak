@@ -1,4 +1,4 @@
-﻿using Khedmetak.DAL.Entities.Base;
+using Khedmetak.DAL.Entities.Base;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -33,6 +33,8 @@ namespace Khedmetak.DAL.Entities
         public ICollection<ServiceOption> ServiceOptions { get; set; } = new List<ServiceOption>();
         public ICollection<ServiceFeeTier> ServiceFeeTiers { get; set; } = new List<ServiceFeeTier>();
         public ICollection<ServiceImportantNote> ImportantNotes { get; set; } = new List<ServiceImportantNote>();
+        public ICollection<ServiceFormField> ServiceFormFields { get; set; } = new List<ServiceFormField>();
+        public ICollection<ConditionalRule> ConditionalRules { get; set; } = new List<ConditionalRule>();
 
         #endregion
     }

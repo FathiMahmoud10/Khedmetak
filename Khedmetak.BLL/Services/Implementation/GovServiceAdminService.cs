@@ -554,6 +554,35 @@ namespace Khedmetak.BLL.Services.Implementation
             var entity = _mapper.Map<RequiredDocument>(dto);
             entity.GovServiceId = govServiceId;
 
+            if (dto.StandardDocumentFile != null && dto.StandardDocumentFile.Length > 0)
+            {
+                var ext = Path.GetExtension(dto.StandardDocumentFile.FileName).ToLowerInvariant();
+                var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "standards");
+                Directory.CreateDirectory(uploadsFolder);
+                var uniqueName = $"{Guid.NewGuid()}{ext}";
+                var fullPath = Path.Combine(uploadsFolder, uniqueName);
+                using (var stream = new FileStream(fullPath, FileMode.Create))
+                {
+                    await dto.StandardDocumentFile.CopyToAsync(stream);
+                }
+
+                entity.StandardDocument = new StandardDocument
+                {
+                    DocumentName = dto.DocumentName,
+                    ImagePath = $"/uploads/standards/{uniqueName}",
+                    GeneralRule = dto.GeneralRule
+                };
+            }
+            else if (!string.IsNullOrEmpty(dto.GeneralRule))
+            {
+                entity.StandardDocument = new StandardDocument
+                {
+                    DocumentName = dto.DocumentName,
+                    ImagePath = string.Empty,
+                    GeneralRule = dto.GeneralRule
+                };
+            }
+
             _docRepository.Add(entity);
             await _unitOfWork.SaveChangesAsync();
 
@@ -562,12 +591,57 @@ namespace Khedmetak.BLL.Services.Implementation
 
         public async Task<RequiredDocumentAdminDto?> UpdateRequiredDocumentAsync(int govServiceId, int docId, UpdateRequiredDocumentDto dto)
         {
-            var entity = await _docRepository.GetByIdAsync(docId);
+            var entity = await _docRepository.GetByIdAsync(docId, r => r.StandardDocument);
             if (entity is null || entity.GovServiceId != govServiceId) return null;
 
             entity.DocumentName = dto.DocumentName;
             entity.IsMandatory = dto.IsMandatory;
             entity.DocumentType = dto.DocumentType;
+
+            if (dto.StandardDocumentFile != null && dto.StandardDocumentFile.Length > 0)
+            {
+                var ext = Path.GetExtension(dto.StandardDocumentFile.FileName).ToLowerInvariant();
+                var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "standards");
+                Directory.CreateDirectory(uploadsFolder);
+                var uniqueName = $"{Guid.NewGuid()}{ext}";
+                var fullPath = Path.Combine(uploadsFolder, uniqueName);
+                using (var stream = new FileStream(fullPath, FileMode.Create))
+                {
+                    await dto.StandardDocumentFile.CopyToAsync(stream);
+                }
+
+                if (entity.StandardDocument != null)
+                {
+                    entity.StandardDocument.DocumentName = dto.DocumentName;
+                    entity.StandardDocument.ImagePath = $"/uploads/standards/{uniqueName}";
+                    entity.StandardDocument.GeneralRule = dto.GeneralRule;
+                }
+                else
+                {
+                    entity.StandardDocument = new StandardDocument
+                    {
+                        DocumentName = dto.DocumentName,
+                        ImagePath = $"/uploads/standards/{uniqueName}",
+                        GeneralRule = dto.GeneralRule
+                    };
+                }
+            }
+            else if (!string.IsNullOrEmpty(dto.GeneralRule))
+            {
+                if (entity.StandardDocument != null)
+                {
+                    entity.StandardDocument.GeneralRule = dto.GeneralRule;
+                }
+                else
+                {
+                    entity.StandardDocument = new StandardDocument
+                    {
+                        DocumentName = dto.DocumentName,
+                        ImagePath = string.Empty,
+                        GeneralRule = dto.GeneralRule
+                    };
+                }
+            }
 
             _docRepository.Update(entity);
             await _unitOfWork.SaveChangesAsync();

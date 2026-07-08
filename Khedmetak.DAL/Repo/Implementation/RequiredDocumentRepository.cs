@@ -12,6 +12,7 @@ namespace Khedmetak.DAL.Repo.Implementation
 
         public async Task<IEnumerable<RequiredDocument>> GetByServiceIdAsync(int govServiceId)
             => await _dbSet
+                .Include(d => d.StandardDocument)
                 .Where(d => d.GovServiceId == govServiceId)
                 .ToListAsync();
     }
