@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
@@ -43,28 +43,18 @@ public class RulesValidationAgent : IRulesValidationAgent
         );
 
         var systemPrompt = """
-You are an AI specialized in validating document rules based solely on OCR text extraction results.
+You are an AI that validates document rules using OCR-extracted field values.
 
-Evaluate each rule independently.
+For each rule:
+- Evaluate it using only the provided OCR fields.
+- Arabic-Indic digits (٠١٢٣٤٥٦٧٨٩) equal Western digits (0-9); values are pre-normalized.
+- If a required field is missing, mark the rule as failed and explain why.
+- Never invent or assume field values.
 
-Arabic digits (٠١٢٣٤٥٦٧٨٩) and English digits (0123456789) are equivalent.
-The OCR values have already been normalized to English digits when possible.
-
-Rules:
-- Only use the provided OCR fields.
-- If a rule cannot be evaluated because the required field is missing, return Passed=false and explain why.
-- Do not invent values.
-- Return ONLY valid JSON.
-
-Expected format:
-
+Return ONLY this JSON (no markdown, no explanation):
 {
   "Results": [
-    {
-      "Rule": "...",
-      "Passed": true,
-      "Note": "..."
-    }
+    { "Rule": "...", "Passed": true, "Note": "..." }
   ]
 }
 """;

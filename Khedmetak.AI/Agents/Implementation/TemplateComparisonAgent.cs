@@ -1,4 +1,6 @@
 using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using Khedmetak.AI.Agents.Abstraction;
 using Khedmetak.AI.DTOs;
@@ -8,82 +10,42 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Khedmetak.AI.Agents.Implementation;
 
-public class TemplateComparisonAgent : ITemplateComparisonAgent
+/// <summary>
+/// Validates document images by combining template layout comparison,
+/// image quality checks, and image-based rule evaluation in a single AI call.
+/// </summary>
+public class TemplatesAgent : ITemplatesAgent
 {
     private readonly IChatClient _chatClient;
 
-    public TemplateComparisonAgent([FromKeyedServices("DocValidation")] IChatClient chatClient)
+    public TemplatesAgent([FromKeyedServices("DocValidation")] IChatClient chatClient)
     {
         _chatClient = chatClient;
     }
 
-    public async Task<TemplateComparisonResult> CompareAsync(
-        byte[] imageBytes,
+    public async Task<ImageValidationResult> ValidateAsync(
+        byte[] userDocumentBytes,
         string mediaType,
-        byte[]? comparisonImageBytes = null,
-        string? comparisonMediaType = null,
-        string? expectedDocumentType = null)
+        byte[]? templateImageBytes,
+        string? templateMediaType,
+        string expectedDocumentName,
+        List<string> imageRules)
     {
-        var hasComparison = comparisonImageBytes is { Length: > 0 };
+        var hasTemplate = templateImageBytes is { Length: > 0 };
+        var hasImageRules = imageRules.Count > 0;
 
-        var systemPrompt = $$"""
-You are an AI specialized in analyzing and comparing Egyptian government documents.
-
-Supported documents include:
-- National ID
-- Passport
-- Birth Certificate
-- Marriage Certificate
-- Divorce Certificate
-- Death Certificate
-- Driving License
-- Vehicle License
-- Military Certificate
-- Graduation Certificate
-- Government permits
-- Tax documents
-- Insurance documents
-- Any Egyptian government document
-
-Your responsibilities:
-1. Detect the uploaded document type (IMAGE 1).
-2. Verify if the detected type matches the expected document type: "{expectedDocumentType}" (if provided).
-3. If a reference template image (IMAGE 2) is provided:
-   - Compare the layout and structure of the uploaded document (IMAGE 1) against the official template (IMAGE 2).
-   - Compare ONLY: layout, field arrangement, headers, logos, colors, fonts, borders, labels, QR position, barcode position, security feature locations, document sections.
-   - Ignore completely: photo, face, signature, name, ID number, address, dates, any personalized information. Personalized information must NEVER affect the comparison.
-
-Return ONLY JSON matching this format:
-{
-  "DetectedDocumentType": "...",
-  "MatchesExpectedType": true/false,
-  "MatchesTemplate": true/false,
-  "Confidence": 0.0,
-  "Summary": "..."
-}
-
-IMPORTANT RULES:
-- Return ONLY JSON.
-- Do NOT write any explanation.
-- Do NOT use Markdown.
-- Do NOT wrap the response in ```json.
-- Do NOT add text before or after the JSON.
-""";
+        var systemPrompt = BuildSystemPrompt(hasTemplate, hasImageRules, imageRules, expectedDocumentName);
 
         var userContent = new List<AIContent>
         {
-            new TextContent("Analyze this document (IMAGE 1 - the primary document)."),
-            new DataContent(imageBytes, mediaType)
+            new TextContent($"Analyze this document (IMAGE 1). It should be: \"{expectedDocumentName}\"."),
+            new DataContent(userDocumentBytes, mediaType)
         };
 
-        if (hasComparison)
+        if (hasTemplate)
         {
-            userContent.Add(new TextContent("This is IMAGE 2 - compare it against IMAGE 1 as instructed."));
-            userContent.Add(new DataContent(comparisonImageBytes!, comparisonMediaType ?? mediaType));
-        }
-        else
-        {
-            userContent.Add(new TextContent("No comparison template was provided. Set MatchesTemplate to false."));
+            userContent.Add(new TextContent("IMAGE 2 is the official template. Compare the uploaded document layout against it."));
+            userContent.Add(new DataContent(templateImageBytes!, templateMediaType ?? mediaType));
         }
 
         var messages = new List<ChatMessage>
@@ -92,12 +54,84 @@ IMPORTANT RULES:
             new(ChatRole.User, userContent.ToArray())
         };
 
-        var options = new ChatOptions
-        {
-            ResponseFormat = ChatResponseFormat.Json
-        };
-
+        var options = new ChatOptions { ResponseFormat = ChatResponseFormat.Json };
         var response = await _chatClient.GetResponseAsync(messages, options);
-        return JsonExtractor.DeserializeResponse<TemplateComparisonResult>(response.Text);
+        return JsonExtractor.DeserializeResponse<ImageValidationResult>(response.Text);
+    }
+
+    private static string BuildSystemPrompt(
+        bool hasTemplate,
+        bool hasImageRules,
+        List<string> imageRules,
+        string expectedDocumentName)
+    {
+        var sb = new StringBuilder();
+
+        sb.Append($$"""
+You are an AI that validates Egyptian government document images.
+
+Tasks for IMAGE 1 (the user's uploaded document):
+
+## 1. Image Quality
+Detect any of these problems:
+- Blurry, out of focus, motion blur
+- Cropped, partial, or missing edges/corners
+- Rotated, tilted, or upside-down
+- Excessive glare or reflections
+- Heavy shadows hiding important areas
+- Low resolution or heavy noise/artifacts
+- Too dark or overexposed
+- Document occupies too small a portion of the image
+- Fingers or objects covering important content
+- Multiple documents in one image
+If any problem prevents reliable reading, set "IsValid" to false and add a message.
+
+## 2. Document Type
+Detect the document type. Set "DetectedDocumentType".
+
+## 3. Expected Type Check
+The expected document is: "{{expectedDocumentName}}".
+If the detected type does not match, set "IsValid" to false and add a message.
+
+""");
+
+        if (hasTemplate)
+        {
+            sb.Append("""
+## 4. Template Comparison (IMAGE 2 = official template)
+Compare IMAGE 1 layout against the official template.
+Compare ONLY: layout, field arrangement, headers, logos, colors, borders, fonts, QR/barcode positions, security features.
+IGNORE completely: photo, name, ID number, address, dates, signature — any personalized data.
+If the layout does not match the template, set "IsValid" to false and add a message.
+
+""");
+        }
+
+        if (hasImageRules)
+        {
+            var ruleLines = string.Join("\n", imageRules.Select((r, i) => $"{i + 1}. {r}"));
+            sb.Append($"""
+## 5. Image Rules
+Evaluate each rule against IMAGE 1:
+{ruleLines}
+For each failed rule: add its text to "FailedImageRules" and a human-readable explanation to "ValidationMessages".
+
+""");
+        }
+
+        sb.Append("""
+Return ONLY this JSON (no markdown, no extra text):
+{
+  "IsValid": true,
+  "DetectedDocumentType": "...",
+  "FailedImageRules": [],
+  "ValidationMessages": []
+}
+- "IsValid" is true only if ALL checks above pass.
+- "ValidationMessages" lists every problem found (one entry per issue).
+- "FailedImageRules" lists only the image rule texts that failed.
+""");
+
+        return sb.ToString();
     }
 }

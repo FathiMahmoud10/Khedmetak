@@ -320,8 +320,8 @@ builder.Services.AddScoped<IChatMessageService, ChatMessageService>();
 builder.Services.AddScoped<IEmbeddingService, EmbeddingService>();
 builder.Services.AddScoped<IChunkService, ChunkService>();
 builder.Services.AddScoped<IUserDocumentService, UserDocumentService>();
-builder.Services.AddScoped<ITemplateComparisonAgent, TemplateComparisonAgent>();
-builder.Services.AddScoped<IOCRAgent, OCRAgent>();
+builder.Services.AddScoped<ITemplatesAgent, TemplatesAgent>();
+builder.Services.AddHttpClient<IOCRAgent, OCRAgent>();
 builder.Services.AddScoped<IRulesValidationAgent, RulesValidationAgent>();
 builder.Services.AddScoped<IDocumentValidationOrchestrator, DocumentValidationOrchestrator>();
 
