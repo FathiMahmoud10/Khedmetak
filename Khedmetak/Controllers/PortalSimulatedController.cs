@@ -4,6 +4,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Khedmetak.Core.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace Khedmetak.API.Controllers
 {
@@ -18,6 +20,12 @@ namespace Khedmetak.API.Controllers
     [AllowAnonymous]
     public class PortalSimulatedController : ControllerBase
     {
+        private readonly AppDbContext _context;
+
+        public PortalSimulatedController(AppDbContext context)
+        {
+            _context = context;
+        }
         // قاعدة بيانات المواطنين التجريبية (static → مشتركة طوال دورة حياة التطبيق)
         public static readonly List<MockCitizenRecord> Citizens = new()
         {
@@ -80,6 +88,12 @@ namespace Khedmetak.API.Controllers
                 c.NationalId == request.NationalId && c.PhoneNumber == request.PhoneNumber);
 
             if (!exists)
+            {
+                exists = _context.CitizenProfiles.Any(c =>
+                    c.NationalId == request.NationalId && (c.User.PhoneNumber == request.PhoneNumber || c.User.UserName == request.PhoneNumber));
+            }
+
+            if (!exists)
                 return BadRequest(new { success = false, message = "المواطن غير مسجل في قاعدة بيانات بوابة مصر الرقمية" });
 
             return Ok(new { success = true, message = "تم إرسال كود التحقق 123456 بنجاح" });
@@ -103,6 +117,31 @@ namespace Khedmetak.API.Controllers
                 c.NationalId == request.NationalId && c.PhoneNumber == request.PhoneNumber);
 
             if (citizen == null)
+            {
+                var dbCitizen = _context.CitizenProfiles
+                    .Include(c => c.User)
+                    .FirstOrDefault(c => c.NationalId == request.NationalId && (c.User.PhoneNumber == request.PhoneNumber || c.User.UserName == request.PhoneNumber));
+
+                if (dbCitizen != null)
+                {
+                    citizen = new MockCitizenRecord
+                    {
+                        NationalId = dbCitizen.NationalId,
+                        PhoneNumber = dbCitizen.User?.PhoneNumber ?? request.PhoneNumber,
+                        FullName = dbCitizen.FullName,
+                        DateOfBirth = dbCitizen.DateOfBirth,
+                        City = dbCitizen.City,
+                        District = dbCitizen.District,
+                        Street = dbCitizen.Street,
+                        BuildingNumber = dbCitizen.BuildingNumber,
+                        FloorNumber = dbCitizen.FloorNumber,
+                        ApartmentNumber = dbCitizen.ApartmentNumber,
+                        PostalCode = dbCitizen.PostalCode
+                    };
+                }
+            }
+
+            if (citizen == null)
                 return NotFound(new { success = false, message = "المواطن غير مسجل" });
 
             return Ok(new { success = true, data = citizen });
@@ -116,6 +155,31 @@ namespace Khedmetak.API.Controllers
         public IActionResult GetCitizenDocuments(string nationalId)
         {
             var citizen = Citizens.FirstOrDefault(c => c.NationalId == nationalId);
+            if (citizen == null)
+            {
+                var dbCitizen = _context.CitizenProfiles
+                    .Include(c => c.User)
+                    .FirstOrDefault(c => c.NationalId == nationalId);
+
+                if (dbCitizen != null)
+                {
+                    citizen = new MockCitizenRecord
+                    {
+                        NationalId = dbCitizen.NationalId,
+                        PhoneNumber = dbCitizen.User?.PhoneNumber ?? string.Empty,
+                        FullName = dbCitizen.FullName,
+                        DateOfBirth = dbCitizen.DateOfBirth,
+                        City = dbCitizen.City,
+                        District = dbCitizen.District,
+                        Street = dbCitizen.Street,
+                        BuildingNumber = dbCitizen.BuildingNumber,
+                        FloorNumber = dbCitizen.FloorNumber,
+                        ApartmentNumber = dbCitizen.ApartmentNumber,
+                        PostalCode = dbCitizen.PostalCode
+                    };
+                }
+            }
+
             if (citizen == null)
                 return NotFound(new { success = false, message = "المواطن غير مسجل" });
 
@@ -163,6 +227,31 @@ namespace Khedmetak.API.Controllers
                 return BadRequest(new { success = false, message = "الرقم القومي واسم الخدمة مطلوبان" });
 
             var citizen = Citizens.FirstOrDefault(c => c.NationalId == request.NationalId);
+            if (citizen == null)
+            {
+                var dbCitizen = _context.CitizenProfiles
+                    .Include(c => c.User)
+                    .FirstOrDefault(c => c.NationalId == request.NationalId);
+
+                if (dbCitizen != null)
+                {
+                    citizen = new MockCitizenRecord
+                    {
+                        NationalId = dbCitizen.NationalId,
+                        PhoneNumber = dbCitizen.User?.PhoneNumber ?? string.Empty,
+                        FullName = dbCitizen.FullName,
+                        DateOfBirth = dbCitizen.DateOfBirth,
+                        City = dbCitizen.City,
+                        District = dbCitizen.District,
+                        Street = dbCitizen.Street,
+                        BuildingNumber = dbCitizen.BuildingNumber,
+                        FloorNumber = dbCitizen.FloorNumber,
+                        ApartmentNumber = dbCitizen.ApartmentNumber,
+                        PostalCode = dbCitizen.PostalCode
+                    };
+                }
+            }
+
             if (citizen == null)
             {
                 Transactions.Add(new PortalTransactionRecord

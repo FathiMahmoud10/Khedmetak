@@ -65,6 +65,20 @@ var mockCitizens = new List<MockCitizen>
         FloorNumber = "2",
         ApartmentNumber = "6",
         PostalCode = "21615"
+    },
+    new()
+    {
+        NationalId = "30202022303798",
+        PhoneNumber = "01097421321",
+        FullName = "فتحي محمود أحمد",
+        DateOfBirth = new DateTime(2002, 2, 2),
+        City = "القاهرة",
+        District = "المعادي",
+        Street = "شارع 9",
+        BuildingNumber = "12",
+        FloorNumber = "4",
+        ApartmentNumber = "8",
+        PostalCode = "11728"
     }
 };
 

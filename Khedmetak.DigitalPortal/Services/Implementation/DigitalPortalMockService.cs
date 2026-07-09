@@ -9,12 +9,15 @@ using Khedmetak.DAL.Entities;
 using Khedmetak.DAL.Entities.Khedmetak.DAL.Entities;
 using Khedmetak.DAL.Repo.Abstraction.UnitOfWork;
 using Microsoft.Extensions.Configuration;
+using Khedmetak.Core.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace Khedmetak.DigitalPortal.Services.Implementation
 {
     public class DigitalPortalMockService : IDigitalPortalService
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly AppDbContext _context;
         private readonly string _uploadsRoot;
 
         // Mock government database of citizens
@@ -64,39 +67,96 @@ namespace Khedmetak.DigitalPortal.Services.Implementation
             }
         };
 
-        public DigitalPortalMockService(IUnitOfWork unitOfWork, IConfiguration configuration)
+        public DigitalPortalMockService(IUnitOfWork unitOfWork, AppDbContext context, IConfiguration configuration)
         {
             _unitOfWork = unitOfWork;
+            _context = context;
             _uploadsRoot = configuration["UploadsPath"]
                 ?? Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
         }
 
-        public Task<bool> SendOtpAsync(DigitalPortalLoginDto dto)
+        public async Task<bool> SendOtpAsync(DigitalPortalLoginDto dto)
         {
             var citizenExists = MockCitizens.Any(c => 
                 c.NationalId == dto.NationalId && 
                 c.PhoneNumber == dto.PhoneNumber);
 
-            return Task.FromResult(citizenExists);
+            if (!citizenExists)
+            {
+                citizenExists = await _context.CitizenProfiles.AnyAsync(c =>
+                    c.NationalId == dto.NationalId && (c.User.PhoneNumber == dto.PhoneNumber || c.User.UserName == dto.PhoneNumber));
+            }
+
+            return citizenExists;
         }
 
-        public Task<DigitalPortalCitizenDto?> VerifyOtpAndGetCitizenAsync(DigitalPortalOtpDto dto)
+        public async Task<DigitalPortalCitizenDto?> VerifyOtpAndGetCitizenAsync(DigitalPortalOtpDto dto)
         {
             if (dto.Otp != "123456")
             {
-                return Task.FromResult<DigitalPortalCitizenDto?>(null);
+                return null;
             }
 
             var citizen = MockCitizens.FirstOrDefault(c => 
                 c.NationalId == dto.NationalId && 
                 c.PhoneNumber == dto.PhoneNumber);
 
-            return Task.FromResult<DigitalPortalCitizenDto?>(citizen);
+            if (citizen == null)
+            {
+                var dbCitizen = await _context.CitizenProfiles
+                    .Include(c => c.User)
+                    .FirstOrDefaultAsync(c => c.NationalId == dto.NationalId && (c.User.PhoneNumber == dto.PhoneNumber || c.User.UserName == dto.PhoneNumber));
+
+                if (dbCitizen != null)
+                {
+                    citizen = new DigitalPortalCitizenDto
+                    {
+                        NationalId = dbCitizen.NationalId,
+                        PhoneNumber = dbCitizen.User?.PhoneNumber ?? dto.PhoneNumber,
+                        FullName = dbCitizen.FullName,
+                        DateOfBirth = dbCitizen.DateOfBirth,
+                        City = dbCitizen.City,
+                        District = dbCitizen.District,
+                        Street = dbCitizen.Street,
+                        BuildingNumber = dbCitizen.BuildingNumber,
+                        FloorNumber = dbCitizen.FloorNumber,
+                        ApartmentNumber = dbCitizen.ApartmentNumber,
+                        PostalCode = dbCitizen.PostalCode
+                    };
+                }
+            }
+
+            return citizen;
         }
 
         public async Task<SyncDocumentsResultDto> SyncCitizenDocumentsAsync(int userId, string nationalId)
         {
             var citizen = MockCitizens.FirstOrDefault(c => c.NationalId == nationalId);
+            if (citizen == null)
+            {
+                var dbCitizen = await _context.CitizenProfiles
+                    .Include(c => c.User)
+                    .FirstOrDefaultAsync(c => c.NationalId == nationalId);
+
+                if (dbCitizen != null)
+                {
+                    citizen = new DigitalPortalCitizenDto
+                    {
+                        NationalId = dbCitizen.NationalId,
+                        PhoneNumber = dbCitizen.User?.PhoneNumber ?? string.Empty,
+                        FullName = dbCitizen.FullName,
+                        DateOfBirth = dbCitizen.DateOfBirth,
+                        City = dbCitizen.City,
+                        District = dbCitizen.District,
+                        Street = dbCitizen.Street,
+                        BuildingNumber = dbCitizen.BuildingNumber,
+                        FloorNumber = dbCitizen.FloorNumber,
+                        ApartmentNumber = dbCitizen.ApartmentNumber,
+                        PostalCode = dbCitizen.PostalCode
+                    };
+                }
+            }
+
             if (citizen == null)
             {
                 return new SyncDocumentsResultDto
@@ -181,6 +241,31 @@ namespace Khedmetak.DigitalPortal.Services.Implementation
             PortalSubmissionRequestDto dto)
         {
             var citizen = MockCitizens.FirstOrDefault(c => c.NationalId == dto.NationalId);
+            if (citizen == null)
+            {
+                var dbCitizen = await _context.CitizenProfiles
+                    .Include(c => c.User)
+                    .FirstOrDefaultAsync(c => c.NationalId == dto.NationalId);
+
+                if (dbCitizen != null)
+                {
+                    citizen = new DigitalPortalCitizenDto
+                    {
+                        NationalId = dbCitizen.NationalId,
+                        PhoneNumber = dbCitizen.User?.PhoneNumber ?? string.Empty,
+                        FullName = dbCitizen.FullName,
+                        DateOfBirth = dbCitizen.DateOfBirth,
+                        City = dbCitizen.City,
+                        District = dbCitizen.District,
+                        Street = dbCitizen.Street,
+                        BuildingNumber = dbCitizen.BuildingNumber,
+                        FloorNumber = dbCitizen.FloorNumber,
+                        ApartmentNumber = dbCitizen.ApartmentNumber,
+                        PostalCode = dbCitizen.PostalCode
+                    };
+                }
+            }
+
             if (citizen == null)
             {
                 return new PortalSubmissionResultDto
