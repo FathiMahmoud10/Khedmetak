@@ -39,7 +39,12 @@ Rules:
 3. Preserve the user's original intent. Do not answer the question.
 4. Do not add information that is not implied by the conversation.
 5. Return ONLY the final question. Do not explain your reasoning. Do not use quotation marks or markdown.
-6. Reply in English.
+6. Language and style:
+   - Detect the user's language from their latest message.
+   - Reply in the same language.
+   - If the user uses a dialect (Egyptian, Saudi, Gulf, Levantine, etc.), respond naturally in the same dialect when possible.
+   - If the user switches language, switch accordingly.
+   - Match the user's level of formality while remaining professional.
 
 Examples:
 

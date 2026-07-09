@@ -68,41 +68,102 @@ public class TemplatesAgent : ITemplatesAgent
         var sb = new StringBuilder();
 
         sb.Append($$"""
-You are an AI that validates Egyptian government document images.
+You are an AI specialized in validating Egyptian government document images.
 
-Tasks for IMAGE 1 (the user's uploaded document):
+Validate IMAGE 1 (the user's uploaded document).
 
-## 1. Image Quality
-Detect any of these problems:
-- Blurry, out of focus, motion blur
-- Cropped, partial, or missing edges/corners
-- Rotated, tilted, or upside-down
-- Excessive glare or reflections
-- Heavy shadows hiding important areas
-- Low resolution or heavy noise/artifacts
-- Too dark or overexposed
-- Document occupies too small a portion of the image
-- Fingers or objects covering important content
-- Multiple documents in one image
-If any problem prevents reliable reading, set "IsValid" to false and add a message.
+## 1. Document Visibility & Completeness
+The uploaded image must contain ONE complete document.
 
-## 2. Document Type
-Detect the document type. Set "DetectedDocumentType".
+Reject the document if any of the following is detected:
+- Any edge or corner is outside the image.
+- Any part of the document is cropped, cut off, or missing.
+- The top, bottom, left, or right side is not fully visible.
+- The document extends beyond the camera frame.
+- Only a zoomed-in section of the document is shown.
+- The document is folded, bent, or curled, hiding information.
+- Fingers, hands, shadows, or objects cover any part of the document.
+- Multiple documents appear in the same image.
+- The document occupies too little of the image to inspect reliably.
 
-## 3. Expected Type Check
-The expected document is: "{{expectedDocumentName}}".
-If the detected type does not match, set "IsValid" to false and add a message.
+The entire document, including all four corners and all edges, must be clearly visible inside the image.
+
+If the complete document is not visible, immediately set "IsValid" to false.
+
+## 2. Image Quality
+The image must be clear enough for reliable inspection.
+
+Reject the document if any of the following is detected:
+- Blur or out-of-focus image.
+- Motion blur.
+- Low resolution.
+- Heavy compression artifacts or excessive noise.
+- Too dark or overexposed.
+- Strong glare or reflections.
+- Heavy shadows hiding important areas.
+- Perspective distortion preventing reliable inspection.
+- Rotated, upside-down, or severely tilted image.
+
+If image quality prevents reliable validation, immediately set "IsValid" to false.
+
+## 3. Image Authenticity & Tampering Detection
+Determine whether the uploaded image appears to be an authentic, unmodified photo of the original document.
+
+Reject the document if there is evidence of manipulation, including but not limited to:
+- Drawn rectangles, boxes, circles, arrows, highlights, or annotations.
+- Black boxes, stickers, labels, or overlays.
+- Covered, hidden, erased, or masked information.
+- Artificial blur or pixelation applied to specific regions.
+- Edited, cloned, copied, or digitally altered regions.
+- Added or removed text, logos, stamps, signatures, QR codes, or graphics.
+- Photoshop, AI editing, or any visible editing artifacts.
+- Screenshot of another image instead of a direct photo of the document.
+- Cropped screenshot or image taken from another application.
+- Any indication that the document has been digitally modified after capture.
+
+If authenticity cannot be trusted, immediately set "IsValid" to false.
+
+## 4. Document Type
+Identify the uploaded document and set "DetectedDocumentType".
+
+## 5. Expected Document Check
+Expected document:
+"{{expectedDocumentName}}"
+
+If the detected document type does not match the expected document, set "IsValid" to false.
 
 """);
 
         if (hasTemplate)
         {
             sb.Append("""
-## 4. Template Comparison (IMAGE 2 = official template)
-Compare IMAGE 1 layout against the official template.
-Compare ONLY: layout, field arrangement, headers, logos, colors, borders, fonts, QR/barcode positions, security features.
-IGNORE completely: photo, name, ID number, address, dates, signature — any personalized data.
-If the layout does not match the template, set "IsValid" to false and add a message.
+## 6. Template Comparison (IMAGE 2 = Official Template)
+
+Compare IMAGE 1 with the official template.
+
+Compare ONLY:
+- Overall layout
+- Headers
+- Logos
+- Borders
+- Colors
+- Fonts
+- Field positions
+- QR/Barcode positions
+- Security features
+- Overall document structure
+
+Ignore all personalized information, including:
+- Personal photo
+- Name
+- National ID number
+- Address
+- Dates
+- Signature
+- Personal numbers
+- User-specific data
+
+If the document layout or design does not match the official template, set "IsValid" to false.
 
 """);
         }
@@ -110,26 +171,39 @@ If the layout does not match the template, set "IsValid" to false and add a mess
         if (hasImageRules)
         {
             var ruleLines = string.Join("\n", imageRules.Select((r, i) => $"{i + 1}. {r}"));
-            sb.Append($"""
-## 5. Image Rules
-Evaluate each rule against IMAGE 1:
-{ruleLines}
-For each failed rule: add its text to "FailedImageRules" and a human-readable explanation to "ValidationMessages".
+
+            sb.Append($$"""
+## 7. Image Rules
+
+Evaluate IMAGE 1 against these rules:
+
+{{ruleLines}}
+
+For every failed rule:
+- Add the exact rule text to "FailedImageRules".
+- Add a clear explanation to "ValidationMessages".
 
 """);
         }
 
         sb.Append("""
-Return ONLY this JSON (no markdown, no extra text):
+Return ONLY this JSON:
+
 {
   "IsValid": true,
   "DetectedDocumentType": "...",
   "FailedImageRules": [],
   "ValidationMessages": []
 }
-- "IsValid" is true only if ALL checks above pass.
-- "ValidationMessages" lists every problem found (one entry per issue).
-- "FailedImageRules" lists only the image rule texts that failed.
+
+Rules:
+- Return ONLY valid JSON.
+- Do not include markdown or extra text.
+- "IsValid" is true ONLY if every validation succeeds.
+- Reject any image that is incomplete, partially visible, manipulated, edited, or of insufficient quality.
+- Do not perform template or rule validation if the document is incomplete or image quality/authenticity is insufficient.
+- Add one message to "ValidationMessages" for every detected issue.
+- "FailedImageRules" contains only the exact image rule texts that failed.
 """);
 
         return sb.ToString();
