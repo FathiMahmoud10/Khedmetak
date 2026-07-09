@@ -214,7 +214,8 @@ namespace Khedmetak.API.Controllers
             {
                 success       = true,
                 transactionId = transactionId,
-                document      = doc
+                data          = doc,
+                message       = $"تم إصدار مستند «{request.ServiceName}» بنجاح عبر بوابة مصر الرقمية"
             });
         }
 
@@ -228,13 +229,92 @@ namespace Khedmetak.API.Controllers
             return Ok(new { success = true, data = Transactions.OrderByDescending(t => t.Timestamp).ToList() });
         }
 
-        // ── helper ──────────────────────────────────────────────────
-        private static object BuildDocument(string fileName, string content) => new
+        // helper
+        private static object BuildDocument(string fileName, string content)
         {
-            fileName   = fileName,
-            fileType   = "application/pdf",
-            fileBase64 = Convert.ToBase64String(Encoding.UTF8.GetBytes(content))
-        };
+            var pdfBytes = BuildPdfBytes(content);
+            return new
+            {
+                fileName   = fileName,
+                fileType   = "application/pdf",
+                fileBase64 = Convert.ToBase64String(pdfBytes)
+            };
+        }
+
+        private static byte[] BuildPdfBytes(string content)
+        {
+            var lines = content.Split('\n');
+            var streamBuilder = new StringBuilder();
+            streamBuilder.Append("BT\n/F1 12 Tf\n18 TL\n50 750 Td\n");
+            foreach (var line in lines)
+            {
+                var escapedLine = line.Replace("(", "\\(").Replace(")", "\\)").Trim();
+                streamBuilder.Append($"({escapedLine}) Tj T*\n");
+            }
+            streamBuilder.Append("ET");
+
+            var streamContent = streamBuilder.ToString();
+            var streamBytes = Encoding.UTF8.GetBytes(streamContent);
+
+            var objects = new List<string>
+            {
+                "%PDF-1.4\n",
+                "1 0 obj\n<< /Type /Catalog /Pages 2 0 R >>\nendobj\n",
+                "2 0 obj\n<< /Type /Pages /Kids [3 0 R] /Count 1 >>\nendobj\n",
+                "3 0 obj\n<< /Type /Page /Parent 2 0 R /Resources << /Font << /F1 4 0 R >> >> /MediaBox [0 0 612 792] /Contents 5 0 R >>\nendobj\n",
+                "4 0 obj\n<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>\nendobj\n"
+            };
+
+            // Calculate offsets
+            var offsets = new List<long>();
+            long currentOffset = 0;
+
+            var headerBytes = Encoding.ASCII.GetBytes(objects[0]);
+            currentOffset += headerBytes.Length;
+
+            for (int i = 1; i <= 4; i++)
+            {
+                offsets.Add(currentOffset);
+                currentOffset += Encoding.UTF8.GetByteCount(objects[i]);
+            }
+
+            var streamHeader = $"5 0 obj\n<< /Length {streamBytes.Length} >>\nstream\n";
+            var streamFooter = "\nendstream\nendobj\n";
+
+            offsets.Add(currentOffset);
+            currentOffset += Encoding.UTF8.GetByteCount(streamHeader) + streamBytes.Length + Encoding.UTF8.GetByteCount(streamFooter);
+
+            using (var ms = new MemoryStream())
+            {
+                ms.Write(headerBytes, 0, headerBytes.Length);
+                for (int i = 1; i <= 4; i++)
+                {
+                    var bytes = Encoding.UTF8.GetBytes(objects[i]);
+                    ms.Write(bytes, 0, bytes.Length);
+                }
+
+                var shBytes = Encoding.UTF8.GetBytes(streamHeader);
+                ms.Write(shBytes, 0, shBytes.Length);
+                ms.Write(streamBytes, 0, streamBytes.Length);
+                var sfBytes = Encoding.UTF8.GetBytes(streamFooter);
+                ms.Write(sfBytes, 0, sfBytes.Length);
+
+                long xrefOffset = ms.Position;
+
+                var xrefBuilder = new StringBuilder();
+                xrefBuilder.Append("xref\n0 6\n0000000000 65535 f \n");
+                foreach (var offset in offsets)
+                {
+                    xrefBuilder.Append($"{offset:D10} 00000 n \n");
+                }
+                xrefBuilder.Append($"trailer\n<< /Size 6 /Root 1 0 R >>\nstartxref\n{xrefOffset}\n%%EOF\n");
+
+                var xrefBytes = Encoding.ASCII.GetBytes(xrefBuilder.ToString());
+                ms.Write(xrefBytes, 0, xrefBytes.Length);
+
+                return ms.ToArray();
+            }
+        }
     }
 
     // ── Request models (local to this controller) ─────────────────

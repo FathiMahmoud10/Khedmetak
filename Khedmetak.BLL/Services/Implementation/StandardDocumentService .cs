@@ -1,4 +1,4 @@
-﻿// Khedmetak.BLL/Services/StandardDocumentService.cs
+// Khedmetak.BLL/Services/StandardDocumentService.cs
 using Khedmetak.BLL.DTOS.StandardDocument;
 using Khedmetak.BLL.DTOS.StandardDocument.Khedmetak.DAL.DTOs.StandardDocument;
 using Khedmetak.BLL.Services.Interfaces;
@@ -100,7 +100,11 @@ namespace Khedmetak.BLL.Services
         private static async Task<string> SaveFileAsync(IFormFile file, string webRootPath)
         {
             var ext = Path.GetExtension(file.FileName).ToLowerInvariant();
-            var uploadsFolder = Path.Combine(webRootPath, "uploads", "standards");
+            var resolvedWebRoot = string.IsNullOrEmpty(webRootPath) 
+                ? Path.Combine(Directory.GetCurrentDirectory(), "wwwroot") 
+                : webRootPath;
+
+            var uploadsFolder = Path.Combine(resolvedWebRoot, "uploads", "standards");
             Directory.CreateDirectory(uploadsFolder);
 
             var uniqueName = $"{Guid.NewGuid()}{ext}";
@@ -118,7 +122,11 @@ namespace Khedmetak.BLL.Services
         {
             if (string.IsNullOrEmpty(imagePath)) return;
 
-            var fullPath = Path.Combine(webRootPath, imagePath.TrimStart('/'));
+            var resolvedWebRoot = string.IsNullOrEmpty(webRootPath) 
+                ? Path.Combine(Directory.GetCurrentDirectory(), "wwwroot") 
+                : webRootPath;
+
+            var fullPath = Path.Combine(resolvedWebRoot, imagePath.TrimStart('/'));
             if (File.Exists(fullPath))
                 File.Delete(fullPath);
         }
