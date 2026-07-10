@@ -66,7 +66,7 @@ namespace Khedmetak.AI.Services.Implementation
                 return new AIResponseDTO()
                 {
                     CurrentServiceDetails = new CurrentServiceDetailsDTO(),
-                    response = await _generalChatAgent.AnswerAsync(standaloneQuestion, session)
+                    response = await _generalChatAgent.AnswerAsync(standaloneQuestion)
                 };
             }
 

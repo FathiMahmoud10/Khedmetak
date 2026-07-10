@@ -21,7 +21,7 @@ namespace Khedmetak.AI.Agents.Implementaion
             _Tools = tools;
         }
 
-        public async Task<string> AnswerAsync(string standaloneQuestion, ChatSessionDTO session)
+        public async Task<string> AnswerAsync(string standaloneQuestion)
         {
             var systemPrompt = """
 You are Khedmetak AI, the virtual assistant for the Khedmetak platform, which provides Egyptian government services.
@@ -60,16 +60,16 @@ Response style:
             var messages = new List<ChatMessage>();
             messages.Add(new ChatMessage(ChatRole.System, systemPrompt));
 
-            if (session?.ChatSession_ChatHistory != null)
-            {
-                foreach (var msg in session.ChatSession_ChatHistory.TakeLast(10))
-                {
-                    var role = msg.Role.Equals("user", StringComparison.OrdinalIgnoreCase) 
-                        ? ChatRole.User 
-                        : ChatRole.Assistant;
-                    messages.Add(new ChatMessage(role, msg.Content));
-                }
-            }
+            //if (session?.ChatSession_ChatHistory != null)
+            //{
+            //    foreach (var msg in session.ChatSession_ChatHistory.TakeLast(10))
+            //    {
+            //        var role = msg.Role.Equals("user", StringComparison.OrdinalIgnoreCase) 
+            //            ? ChatRole.User 
+            //            : ChatRole.Assistant;
+            //        messages.Add(new ChatMessage(role, msg.Content));
+            //    }
+            //}
 
             messages.Add(new ChatMessage(ChatRole.User, standaloneQuestion));
             var options = new ChatOptions
