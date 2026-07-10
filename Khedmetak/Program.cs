@@ -45,6 +45,13 @@ using System.Text;
 var builder = WebApplication.CreateBuilder(args);
 
 #region Controllers
+/*
+  أي endpoint في الـ API ده
+ هيتمنع الوصول ليه لأي حد مش مسجّل دخول، إلا لو حطيت 
+[AllowAnonymous] صريح فوق 
+الـ Controller أو الـ Action عشان تستثنيه من القاعدة دي.
+ */
+
 builder.Services.AddControllers(options =>
 {
     var policy = new AuthorizationPolicyBuilder()
@@ -68,7 +75,7 @@ builder.Services.AddSwaggerGen(options =>
         Scheme = "bearer",
         BearerFormat = "JWT",
         In = Microsoft.OpenApi.Models.ParameterLocation.Header,
-        Description = "ادخل التوكن هنا مباشرة"
+        Description = ""
     });
 
     options.AddSecurityRequirement(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement
@@ -94,20 +101,26 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 #endregion
 
 #region Identity
+
+/*  الغرض من الجزء ده عو استخدام جداول ال  identity  الجاهزة */
 builder.Services.AddIdentity<User, IdentityRole<int>>(options =>
 {
-    options.Password.RequireDigit = false;
-    options.Password.RequireLowercase = false;
-    options.Password.RequireUppercase = false;
-    options.Password.RequireNonAlphanumeric = false;
-    options.Password.RequiredLength = 6;
+    options.Password.RequireDigit = false;   // مش لازم رقم
+    options.Password.RequireLowercase = false;  // مش لازم حرف صغير
+    options.Password.RequireUppercase = false; // مش لازم حرف كبير
+    options.Password.RequireNonAlphanumeric = false;  // مش لازم رمز زي @ أو # أو $
+    options.Password.RequiredLength = 6; // طول الباسورد لازم يكون 6 حروف على الأقل
 })
-    .AddEntityFrameworkStores<AppDbContext>()
+    .AddEntityFrameworkStores<AppDbContext>() //  بيخزن البيانات بتاعت امستخدم باستخدام الكونكشن المووجود في 
     .AddDefaultTokenProviders();
 #endregion
 
 #region JWT
-var jwt = builder.Configuration.GetSection("JwtSettings");
+// الغرض من الجزء ده عو استخدام ال JWT  في تسجيل الدخول
+
+var jwt = builder.Configuration.GetSection("JwtSettings"); // ده بيقرأ section اسمها "JwtSettings" من ملف appsettings
+
+//استخدم JWT Bearer كطريقة التحقق الافتراضية" لأي request جاي، سواء عشان تتحقق من هوية المستخدم 
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -117,16 +130,18 @@ builder.Services.AddAuthentication(options =>
 {
     options.TokenValidationParameters = new TokenValidationParameters
     {
-        ValidateIssuer = true,
-        ValidateAudience = true,
-        ValidateLifetime = true,
-        ValidateIssuerSigningKey = true,
+        ValidateIssuer = true, //يتأكد إن الـ Token اتولّد من نفس السيرفر بتاعك 
+        ValidateAudience = true, //يتأكد إن الـ Token موجه للجمهور المستهدف (Audience) بتاعك
+        ValidateLifetime = true, //يتأكد إن الـ Token لسه صالح ومش منتهي
+        ValidateIssuerSigningKey = true, //يتأكد إن الـ Token اتوقّع باستخدام المفتاح السري بتاعك
         ValidIssuer = jwt["Issuer"],
         ValidAudience = jwt["Audience"],
         IssuerSigningKey = new SymmetricSecurityKey(
             Encoding.UTF8.GetBytes(jwt["SecretKey"]!))
     };
 
+    // ده بيخلي الـ API يرد برسالة JSON بدل ما يرد بالصفحة الافتراضية
+    // للـ 401 Unauthorized أو 403 Forbidden
     options.Events = new JwtBearerEvents
     {
         OnChallenge = async context =>
@@ -142,6 +157,8 @@ builder.Services.AddAuthentication(options =>
             });
             await context.Response.WriteAsync(json);
         },
+        // ده بيخلي الـ API يرد برسالة JSON بدل ما يرد بالصفحة الافتراضية
+
         OnForbidden = async context =>
         {
             context.Response.StatusCode = StatusCodes.Status403Forbidden;
@@ -159,10 +176,15 @@ builder.Services.AddAuthentication(options =>
 #endregion
 
 #region AutoMapper
+// الغرض من الجزء ده عو استخدام AutoMapper  في تحويل ال DTOs  لل Entities  والعكس
 builder.Services.AddAutoMapper(typeof(KhedmetakProfile));
 #endregion
 
 #region CORS
+
+//الكود ده بيظبط إعدادات CORS (Cross-Origin Resource Sharing) —
+//وهي الآلية اللي بتحدد مين مسموحله يبعت Requests للـ API بتاعك من دومين مختلف
+//(زي لو الـ Frontend شغال على دومين تاني غير الـ Backend).
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", policy =>
@@ -278,6 +300,8 @@ builder.Services.AddSingleton<QdrantClient>(sp =>
 });
 #endregion
 
+#region Dependency Injection
+
 #region Repositories
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<IGovServiceRepository, GovServiceRepository>();
@@ -347,6 +371,8 @@ builder.Services.AddScoped<IGeneralChatAgent, GeneralChatAgent>();
 builder.Services.AddScoped<IChatOrchestrator, ChatOrchestrator>();
 #endregion
 
+#endregion
+
 var app = builder.Build();
 
 app.UseMiddleware<ExceptionHandlingMiddleware>();
@@ -356,10 +382,8 @@ app.UseSwaggerUI();
 
 app.UseHttpsRedirection();
 
-// ✅ Static files عشان الملفات المرفوعة في wwwroot/uploads تكون accessible
 app.UseStaticFiles();
 
-// ✅ CORS لازم يكون قبل Authentication
 app.UseCors("AllowAll");
 
 app.UseAuthentication();

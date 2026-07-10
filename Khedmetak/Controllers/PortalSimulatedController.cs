@@ -99,10 +99,7 @@ namespace Khedmetak.API.Controllers
             return Ok(new { success = true, message = "تم إرسال كود التحقق 123456 بنجاح" });
         }
 
-        // ──────────────────────────────────────────────────────────────
-        // 2. التحقق من OTP وإرجاع بيانات المواطن
-        // POST /api/external/portal/verify-otp
-        // ──────────────────────────────────────────────────────────────
+        // ميثود التحقق من كود OTP (التحقق من صحة الكود المرسل)
         [HttpPost("verify-otp")]
         public IActionResult VerifyOtp([FromBody] PortalVerifyOtpRequest request)
         {
@@ -146,11 +143,7 @@ namespace Khedmetak.API.Controllers
 
             return Ok(new { success = true, data = citizen });
         }
-
-        // ──────────────────────────────────────────────────────────────
-        // 3. جلب مستندات المواطن
-        // GET /api/external/portal/citizen-documents/{nationalId}
-        // ──────────────────────────────────────────────────────────────
+        // مثود تجريبي لاسترجاع المستندات الرسمية للمواطن من بوابة مصر الرقمية
         [HttpGet("citizen-documents/{nationalId}")]
         public IActionResult GetCitizenDocuments(string nationalId)
         {
@@ -212,13 +205,9 @@ namespace Khedmetak.API.Controllers
             return Ok(new { success = true, data = documents });
         }
 
-        // سجل معاملات البوابة الرقمية الصادرة (static → مشتركة طوال دورة حياة التطبيق)
         public static readonly List<PortalTransactionRecord> Transactions = new();
 
-        // ──────────────────────────────────────────────────────────────
-        // 4. إصدار مستند رسمي عند قبول الطلب من الأدمن
-        // POST /api/external/portal/issue-document
-        // ──────────────────────────────────────────────────────────────
+        // ميثود لاصدار مستند رسمي موثق من بوابة مصر الرقمية (محاكاة)
         [HttpPost("issue-document")]
         public IActionResult IssueDocument([FromBody] PortalIssueDocumentRequest request)
         {
@@ -308,10 +297,7 @@ namespace Khedmetak.API.Controllers
             });
         }
 
-        // ──────────────────────────────────────────────────────────────
-        // 5. استرجاع سجل المعاملات للتأكد من وصول الطلبات للبوابة
-        // GET /api/external/portal/transactions
-        // ──────────────────────────────────────────────────────────────
+        // ميثود لاسترجاع سجل المعاملات الصادرة من بوابة مصر الرقمية (محاكاة)
         [HttpGet("transactions")]
         public IActionResult GetTransactions()
         {

@@ -7,15 +7,19 @@ using System.Threading.Tasks;
 
 namespace Khedmetak.DAL.Entities
 {
-    // يمثل صف واحد في جدول "الرسوم والتكاليف" بصفحة الخدمة
-    // (عادية / عاجلة / خاصة / VIP / فورية ... إلخ)
+   
     public class ServiceFeeTier : BaseEntity
     {
-        public string TierName { get; set; } = string.Empty;   // اسم نوع الاستمارة: عادية، عاجلة، خاصة، VIP، فورية
-        public decimal Fees { get; set; }                       // رسوم هذا النوع
-        public string Duration { get; set; } = string.Empty;   // المدة المطلوبة للاستلام لهذا النوع
-        public bool IsRefundable { get; set; }                 // هل الرسوم قابلة للاسترداد
-        public int DisplayOrder { get; set; }                  // ترتيب العرض في الصفحة
+        // اسم نوع الاستمارة: عادية، عاجلة، خاصة، VIP، فورية
+        public string TierName { get; set; } = string.Empty; 
+        // رسوم هذا النوع
+        public decimal Fees { get; set; }                       
+        // المدة المطلوبة للاستلام لهذا النوع
+        public string Duration { get; set; } = string.Empty;  
+        // هل الرسوم قابلة للاسترداد
+        public bool IsRefundable { get; set; }                
+        // ترتيب العرض في الصفحة
+        public int DisplayOrder { get; set; }               
 
         #region Foreign Keys
         public int GovServiceId { get; set; }

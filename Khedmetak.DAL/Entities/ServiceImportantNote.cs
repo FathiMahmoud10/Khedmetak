@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 
 namespace Khedmetak.DAL.Entities
 {
-    // يمثل نقطة واحدة في شريط "معلومات مهمة" أسفل صفحة الخدمة
     public class ServiceImportantNote : BaseEntity
     {
         public string Note { get; set; } = string.Empty;

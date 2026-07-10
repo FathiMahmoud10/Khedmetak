@@ -18,14 +18,17 @@ namespace Khedmetak.DigitalPortal.Services.Implementation
 {
     public class DigitalPortalHttpService : IDigitalPortalService
     {
+        #region Fields & Constructor
+        // الاعتماديات الأساسية: HttpClient للاتصال بالبوابة، UnitOfWork للتعامل مع الداتابيز
+        // ومسار حفظ الملفات (_uploadsRoot) بييجي من الـ config أو مسار افتراضي
         private readonly HttpClient _httpClient;
         private readonly IUnitOfWork _unitOfWork;
         private readonly string _uploadsRoot;
         private readonly IHttpContextAccessor _httpContextAccessor;
 
         public DigitalPortalHttpService(
-            HttpClient httpClient, 
-            IUnitOfWork unitOfWork, 
+            HttpClient httpClient,
+            IUnitOfWork unitOfWork,
             IConfiguration configuration,
             IHttpContextAccessor httpContextAccessor = null)
         {
@@ -35,7 +38,12 @@ namespace Khedmetak.DigitalPortal.Services.Implementation
             _uploadsRoot = configuration["UploadsPath"]
                 ?? Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
         }
+        #endregion
 
+
+        #region Base URI Resolution
+        // بتحدد الـ Base URL اللي هيتبعت عليه أي request للبوابة الرقمية
+        // بتحاول الترتيب ده: BaseAddress بتاع الـ HttpClient -> Host بتاع الـ request الحالي (لو الـ BaseAddress فاضي أو Localhost) -> URL ثابت كـ fallback أخير
         private string GetBaseUri()
         {
             var baseUri = _httpClient.BaseAddress?.ToString();
@@ -55,7 +63,11 @@ namespace Khedmetak.DigitalPortal.Services.Implementation
             if (!baseUri.EndsWith("/")) baseUri += "/";
             return baseUri;
         }
+        #endregion
 
+
+        #region OTP Flow (Send / Verify)
+        // خطوات تسجيل الدخول عبر OTP: إرسال الكود، ثم التحقق منه وجلب بيانات المواطن
         public async Task<bool> SendOtpAsync(DigitalPortalLoginDto dto)
         {
             try
@@ -85,7 +97,12 @@ namespace Khedmetak.DigitalPortal.Services.Implementation
                 return null;
             }
         }
+        #endregion
 
+
+        #region Sync Existing Documents
+        // سحب المستندات الموجودة للمواطن من البوابة الرقمية وتخزينها محليًا
+        // بيتجنب تكرار أي مستند موجود بالفعل عن طريق مقارنة الـ FileName
         public async Task<SyncDocumentsResultDto> SyncCitizenDocumentsAsync(int userId, string nationalId)
         {
             try
@@ -157,7 +174,7 @@ namespace Khedmetak.DigitalPortal.Services.Implementation
                 {
                     Success = true,
                     SyncedCount = syncedCount,
-                    Message = syncedCount > 0 
+                    Message = syncedCount > 0
                         ? $"تم سحب عدد {syncedCount} مستندات رسمية بنجاح عبر الشبكة من بوابة مصر الرقمية"
                         : "جميع المستندات مسحوبة ومحدثة بالفعل"
                 };
@@ -172,6 +189,12 @@ namespace Khedmetak.DigitalPortal.Services.Implementation
                 };
             }
         }
+        #endregion
+
+
+        #region Issue New Document (Submit Request)
+        // تقديم طلب إصدار مستند رسمي جديد للبوابة، واستلام المستند الصادر وتخزينه محليًا
+        // نفس فكرة الـ Sync بس هنا المستند "بيتولد" جديد من البوابة مش موجود مسبقًا
         public async Task<PortalSubmissionResultDto> SubmitAndIssueServiceRequestAsync(
             int userId,
             PortalSubmissionRequestDto dto)
@@ -250,8 +273,12 @@ namespace Khedmetak.DigitalPortal.Services.Implementation
                 };
             }
         }
+        #endregion
     }
 
+
+    #region Supporting DTOs
+    // كلاسات مساعدة بتمثل شكل الرد الجاي من البوابة الرقمية (Wrapper عام + المستند الخارجي)
     public class ApiResponseWrapper<T>
     {
         public bool Success { get; set; }
@@ -265,4 +292,5 @@ namespace Khedmetak.DigitalPortal.Services.Implementation
         public string FileType { get; set; } = string.Empty;
         public string FileBase64 { get; set; } = string.Empty;
     }
+    #endregion
 }

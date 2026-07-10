@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 
 namespace Khedmetak.DAL.Entities
 {
-    // Khedmetak.DAL/Entities/CitizenProfile.cs
     using System;
 
     namespace Khedmetak.DAL.Entities
@@ -27,7 +26,6 @@ namespace Khedmetak.DAL.Entities
             public string PostalCode { get; set; } = string.Empty;
             public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
-            // FK → User
             public int UserId { get; set; }
             public User User { get; set; } = null!;
         }

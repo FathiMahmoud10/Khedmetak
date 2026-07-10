@@ -14,6 +14,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Khedmetak.BLL.DTOS.DigitalPortal;
 
 namespace Khedmetak.API.Controllers
 {
@@ -38,6 +39,18 @@ namespace Khedmetak.API.Controllers
             _context = context;
         }
 
+        /*
+         هنا بعمل العمليات الاساسية اللي بتتعمل ف بوابة مصر الرقمية
+        زي ارسال OTP والتحقق منه، 
+        وبعدين بعمل تسجيل دخول تلقائي للمستخدم لو الرقم القومي متحقق منه،
+        ولو مش موجود ف قاعدة البيانات بعمل تسجيل دخول تلقائي مع انشاء حساب
+        جديد للمستخدم وربطه بالرقم القومي المتحقق منه.
+         
+         
+         By Engineer: Fathi Mahmoud 
+         */
+
+        // Helper method to get the current user's ID from the JWT claims
         private int GetUserId() =>
             int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
 
@@ -56,7 +69,7 @@ namespace Khedmetak.API.Controllers
                 return BadRequest(ApiResponse<string>.Fail("البيانات المدخلة غير صحيحة أو غير مسجلة في بوابة مصر الرقمية"));
             }
 
-            return Ok(ApiResponse<string>.Ok("تم إرسال كود التحقق (123456) إلى هاتفك بنجاح (للتجربة حالياً استخدم 123456)"));
+            return Ok(ApiResponse<string>.Ok("تم إرسال كود التحقق (123456) إلى هاتفك بنجاح"));
         }
 
         [HttpPost("verify-otp-login")]
@@ -74,7 +87,8 @@ namespace Khedmetak.API.Controllers
                 return BadRequest(ApiResponse<string>.Fail("كود التحقق غير صحيح أو غير متطابق"));
             }
 
-            // 1. Check if user already exists via CitizenProfile.NationalId
+
+            //   بتأكد ان المواطن مسجل ف قاعدة البيانات بتاعتنا ولا لأ
             var profile = await _context.CitizenProfiles
                 .Include(c => c.User)
                 .FirstOrDefaultAsync(c => c.NationalId == citizen.NationalId);
@@ -82,6 +96,7 @@ namespace Khedmetak.API.Controllers
             User user;
             if (profile != null)
             {
+                // 1. User exists, proceed to generate JWT
                 user = profile.User;
             }
             else
@@ -156,40 +171,78 @@ namespace Khedmetak.API.Controllers
             var userId = GetUserId();
             var citizenProfile = await _context.CitizenProfiles.FirstOrDefaultAsync(c => c.UserId == userId);
 
-            string nationalId = dto?.NationalId ?? citizenProfile?.NationalId;
-            if (string.IsNullOrWhiteSpace(nationalId))
-            {
-                return BadRequest(ApiResponse<string>.Fail("يرجى توفير الرقم القومي لإتمام سحب المستندات"));
-            }
+            // لو عنده رقم قومي محفوظ ومتحقق منه بالفعل، بنستخدمه دايمًا
+            // وبنتجاهل أي رقم قومي جاي من الـ request عشان نمنع الـ override / تبديل الهوية
+            string nationalId;
 
-            // If user has profile but no National ID linked, update it
-            if (citizenProfile != null)
+            if (citizenProfile != null && !string.IsNullOrWhiteSpace(citizenProfile.NationalId) && citizenProfile.IsVerifiedViaDigitalPortal)
             {
-                if (string.IsNullOrWhiteSpace(citizenProfile.NationalId))
-                {
-                    citizenProfile.NationalId = nationalId;
-                    citizenProfile.IsVerifiedViaDigitalPortal = true;
-                    _context.Update(citizenProfile);
-                    await _context.SaveChangesAsync();
-                }
+                nationalId = citizenProfile.NationalId;
             }
             else
             {
-                // Create profile if none exists
-                var newProfile = new CitizenProfile
+                // مفيش رقم قومي متحقق منه محفوظ لسه -> لازم تحقق OTP قبل الربط
+                if (string.IsNullOrWhiteSpace(dto?.NationalId) )
                 {
-                    UserId = userId,
-                    NationalId = nationalId,
-                    IsVerifiedViaDigitalPortal = true,
-                    FullName = User.Identity?.Name ?? "مواطن رقمي",
-                    DateOfBirth = DateTime.UtcNow.AddYears(-25), // Mock age
-                    CreatedAt = DateTime.UtcNow
-                };
-                _context.CitizenProfiles.Add(newProfile);
+                    return BadRequest(ApiResponse<string>.Fail("يجب التحقق من الرقم القومي عن طريق كود التحقق قبل سحب المستندات"));
+                }
+
+                DigitalPortalCitizenDto verifiedCitizen;
+                try
+                {
+                    verifiedCitizen = await _portalService.VerifyOtpAndGetCitizenAsync(new DigitalPortalOtpDto
+                    {
+                        NationalId = dto.NationalId,
+                    });
+                }
+                catch (Exception)
+                {
+                    return BadRequest(ApiResponse<string>.Fail("تعذر التحقق من كود التحقق حاليًا، برجاء المحاولة لاحقًا"));
+                }
+
+                if (verifiedCitizen == null)
+                {
+                    return BadRequest(ApiResponse<string>.Fail("كود التحقق غير صحيح أو غير متطابق"));
+                }
+
+                nationalId = verifiedCitizen.NationalId;
+
+                if (citizenProfile != null)
+                {
+                    // بروفايل موجود بس من غير رقم قومي متحقق -> نكمّله ببيانات حقيقية من البوابة
+                    citizenProfile.NationalId = nationalId;
+                    citizenProfile.IsVerifiedViaDigitalPortal = true;
+                    citizenProfile.FullName = verifiedCitizen.FullName ?? citizenProfile.FullName;
+                    citizenProfile.DateOfBirth = verifiedCitizen.DateOfBirth;
+                    _context.Update(citizenProfile);
+                }
+                else
+                {
+                    citizenProfile = new CitizenProfile
+                    {
+                        UserId = userId,
+                        NationalId = nationalId,
+                        IsVerifiedViaDigitalPortal = true,
+                        FullName = verifiedCitizen.FullName ?? (User.Identity?.Name ?? "مواطن رقمي"),
+                        DateOfBirth = verifiedCitizen.DateOfBirth, // بيانات حقيقية من البوابة،  
+                        CreatedAt = DateTime.UtcNow
+                    };
+                    _context.CitizenProfiles.Add(citizenProfile);
+                }
+
                 await _context.SaveChangesAsync();
             }
 
-            var syncResult = await _portalService.SyncCitizenDocumentsAsync(userId, nationalId);
+            SyncDocumentsResultDto syncResult;
+            try
+            {
+                syncResult = await _portalService.SyncCitizenDocumentsAsync(userId, nationalId);
+            }
+            catch (Exception)
+            {
+                return BadRequest(ApiResponse<string>.Fail("حدث خطأ أثناء الاتصال بالبوابة الرقمية، برجاء المحاولة لاحقًا"));
+            }
+
             if (!syncResult.Success)
             {
                 return BadRequest(ApiResponse<string>.Fail(syncResult.Message));
@@ -199,8 +252,5 @@ namespace Khedmetak.API.Controllers
         }
     }
 
-    public class SyncDocsRequestDto
-    {
-        public string? NationalId { get; set; }
-    }
+ 
 }

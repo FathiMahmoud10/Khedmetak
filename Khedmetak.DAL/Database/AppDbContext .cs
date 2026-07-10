@@ -38,12 +38,7 @@ public class AppDbContext : IdentityDbContext<User, IdentityRole<int>, int>
     {
         base.OnModelCreating(modelBuilder);
 
-        // User
-        modelBuilder.Entity<User>(e =>
-        {
-            e.Property(u => u.Name).IsRequired().HasMaxLength(100);
-            e.Property(u => u.Role).IsRequired().HasMaxLength(50);
-        });
+     
 
         #region SeedData
         // Seed Roles
@@ -139,7 +134,6 @@ public class AppDbContext : IdentityDbContext<User, IdentityRole<int>, int>
 
         modelBuilder.Entity<User>().HasData(fathi, aya, naglaa, rahma, admin);
 
-        // Seed User Roles
         modelBuilder.Entity<IdentityUserRole<int>>().HasData(
             new IdentityUserRole<int> { UserId = 1, RoleId = roleId },
             new IdentityUserRole<int> { UserId = 2, RoleId = roleId },
@@ -201,6 +195,14 @@ public class AppDbContext : IdentityDbContext<User, IdentityRole<int>, int>
         );
         #endregion
 
+        #region Relations
+
+        // User
+        modelBuilder.Entity<User>(e =>
+        {
+            e.Property(u => u.Name).IsRequired().HasMaxLength(100);
+            e.Property(u => u.Role).IsRequired().HasMaxLength(50);
+        });
 
         // ChatSession
         modelBuilder.Entity<ChatSession>(e =>
@@ -417,6 +419,7 @@ public class AppDbContext : IdentityDbContext<User, IdentityRole<int>, int>
                 .HasForeignKey(r => r.GovServiceId)
                 .OnDelete(DeleteBehavior.Cascade);
         });
+        #endregion
 
 
     }

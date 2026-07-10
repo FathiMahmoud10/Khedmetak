@@ -5,13 +5,13 @@ namespace Khedmetak.DAL.Entities
 {
     public class ConditionalRule : BaseEntity
     {
-        public string TargetType { get; set; } = string.Empty; // e.g., FormField, RequiredDocument, FeeTier, Step, ImportantNote, Option
+        public string TargetType { get; set; } = string.Empty; 
         public int TargetId { get; set; }
-        public string DependentOnType { get; set; } = string.Empty; // e.g., FormField, ServiceOption
+        public string DependentOnType { get; set; } = string.Empty;
         public int DependentOnId { get; set; }
-        public string Operator { get; set; } = string.Empty; // e.g., Equals, NotEquals, GreaterThan, Contains
+        public string Operator { get; set; } = string.Empty; 
         public string Value { get; set; } = string.Empty;
-        public string Action { get; set; } = string.Empty; // e.g., Show, Hide, Require
+        public string Action { get; set; } = string.Empty; 
 
         #region Foreign Keys
         public int GovServiceId { get; set; }
