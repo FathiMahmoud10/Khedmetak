@@ -76,9 +76,9 @@ User:
 {{userMessage}}
 """;
 
-            Console.WriteLine("Before Request");
+            //Console.WriteLine("Before Request");
             var response = await _chat.CompleteChatAsync(prompt);
-            Console.WriteLine("After Request");
+            //Console.WriteLine("After Request");
 
             var content = response.Value.Content[0].Text.Trim();
 

@@ -156,6 +156,37 @@ namespace Khedmetak.API.Controllers
             }, message));
         }
 
+        /// <summary>
+        /// جلب جميع المدفوعات المستلمة للوحة تحكم الأدمن.
+        /// GET /api/Admin/Payments
+        /// </summary>
+        [HttpGet("Payments")]
+        public async Task<IActionResult> GetAllPayments()
+        {
+            var payments = await _context.Payments
+                .Include(p => p.User)
+                .OrderByDescending(p => p.CreatedAt)
+                .ToListAsync();
+
+            var result = payments.Select(p => new AdminPaymentDto
+            {
+                Id = p.Id,
+                MerchantRefNum = p.MerchantRefNum,
+                FawryRefNumber = p.FawryRefNumber,
+                PaymentUrl = p.PaymentUrl,
+                PaymentMethod = p.PaymentMethod,
+                Amount = p.Amount,
+                Status = p.Status,
+                CreatedAt = p.CreatedAt,
+                PaidAt = p.PaidAt,
+                UserId = p.UserId,
+                UserEmail = p.User != null ? p.User.Email : string.Empty,
+                UserName = p.User != null ? p.User.Name : string.Empty
+            }).ToList();
+
+            return Ok(ApiResponse<List<AdminPaymentDto>>.Ok(result));
+        }
+
         // ─── helpers ───────────────────────────────────────────────
         private static string GetStatusLabel(RequestStatus s) => s switch
         {
@@ -198,5 +229,21 @@ namespace Khedmetak.API.Controllers
     {
         /// <summary>Pending | InProgress | Completed | Rejected</summary>
         public string Status { get; set; } = string.Empty;
+    }
+
+    public class AdminPaymentDto
+    {
+        public int Id { get; set; }
+        public string MerchantRefNum { get; set; } = string.Empty;
+        public string? FawryRefNumber { get; set; }
+        public string? PaymentUrl { get; set; }
+        public string PaymentMethod { get; set; } = string.Empty;
+        public decimal Amount { get; set; }
+        public string Status { get; set; } = string.Empty;
+        public DateTime CreatedAt { get; set; }
+        public DateTime? PaidAt { get; set; }
+        public int UserId { get; set; }
+        public string UserName { get; set; } = string.Empty;
+        public string UserEmail { get; set; } = string.Empty;
     }
 }

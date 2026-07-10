@@ -56,14 +56,17 @@ namespace Khedmetak.AI.Services.Implementation
 
             // 2. Detect service intent
             var intent = await _intentAgent.DetectIntentAsync(standaloneQuestion);
-
+            Console.WriteLine("================= StandAlone ==========");
+            Console.WriteLine(standaloneQuestion);
+            Console.WriteLine("================= Intent ==========");
+            Console.WriteLine(intent);
             // 3. If intent is NOT a service request, call general AI chat agent
             if (!intent.IsServiceRequest)
             {
                 return new AIResponseDTO()
                 {
                     CurrentServiceDetails = new CurrentServiceDetailsDTO(),
-                    response = await _generalChatAgent.AnswerAsync(standaloneQuestion, session)
+                    response = await _generalChatAgent.AnswerAsync(standaloneQuestion)
                 };
             }
 
@@ -78,7 +81,7 @@ namespace Khedmetak.AI.Services.Implementation
                 {
                     CurrentServiceDetails = new CurrentServiceDetailsDTO()
                     {
-                        ServiceName = "خدمة ليست متوفرة"
+                        ServiceName = "خدمة ليست متوفرة خالص"
                     },
                     response = "هذه الخدمة لبست متوفرة حاليا"
 
@@ -90,7 +93,7 @@ namespace Khedmetak.AI.Services.Implementation
             if (!isRelevant)
                 return new AIResponseDTO()
                 {
-                    CurrentServiceDetails = new CurrentServiceDetailsDTO() { ServiceName = "خدمة ليست متوفرة" },
+                    CurrentServiceDetails = new CurrentServiceDetailsDTO() { ServiceName = "طلبك ليس متوفر لهذه الخدمة" },
                      response = await _aiResponseAgent.GenerateResponseAsync(standaloneQuestion, serviceInfo)
                     
                 };

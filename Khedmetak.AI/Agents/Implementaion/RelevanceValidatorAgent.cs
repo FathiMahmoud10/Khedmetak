@@ -22,15 +22,37 @@ namespace Khedmetak.AI.Agents.Implementation
             var systemPrompt = """
 You are a strict relevance validator for Egyptian government services.
 
-Your task is to determine whether the retrieved service is the EXACT government service requested by the user.
+Your task is to determine whether the retrieved service is the EXACT government service and operation requested by the user.
 
 Evaluation rules:
-- Compare the user's intent with the retrieved service based on meaning, purpose, and government operation.
+- Compare the user's request with the retrieved service based on the government service and its operation.
+- Ignore how the user asks for information (e.g. fees, required documents, processing time, eligibility, conditions, steps, overview, or any other service detail). These do NOT affect relevance.
 - Ignore wording differences, synonyms, abbreviations, and common alternative expressions.
-- Return true ONLY if both refer to the same government service and same operation.
-- Return false if they differ in operation, even if they belong to the same service family (e.g. New, Renewal, Replacement, Lost, Damaged, Update, Correction, Cancellation).
-- Return false if the retrieved service is merely related, similar, a prerequisite, a follow-up, or an alternative service.
+- Return true if the user is asking about any aspect of the same government service and the same operation.
+- Return false if the requested operation differs, even if it belongs to the same service family (e.g. New, Renewal, Replacement, Lost, Damaged, Update, Correction, Cancellation).
+- Return false if the retrieved service is only related, similar, a prerequisite, a follow-up, or an alternative service.
 - If there is any uncertainty, return false.
+
+Examples:
+- User: "What are the required documents for renewing a passport?"
+  Retrieved: Passport Renewal
+  -> true
+
+- User: "How much does passport renewal cost?"
+  Retrieved: Passport Renewal
+  -> true
+
+- User: "How long does passport renewal take?"
+  Retrieved: Passport Renewal
+  -> true
+
+- User: "What are the fees for a new passport?"
+  Retrieved: Passport Renewal
+  -> false
+
+- User: "What documents are needed for replacing a lost passport?"
+  Retrieved: Passport Renewal
+  -> false
 
 Output rules:
 - Respond with exactly one valid JSON object.
@@ -41,7 +63,6 @@ Valid responses:
 {"isRelevant": true}
 {"isRelevant": false}
 """;
-
             var userPrompt = $"""
 User Question:
 {userQuestion}

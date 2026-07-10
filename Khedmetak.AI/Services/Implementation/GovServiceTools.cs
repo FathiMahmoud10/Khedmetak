@@ -84,13 +84,13 @@ namespace Khedmetak.AI.Services.Implementation
             return service?.SrvTime;
         }
 
-        [Description("Get options or alternatives available for the government service.")]
-        public async Task<List<ServiceOptionDto>?> GetServiceOptions(
-            [Description("The ID of the government service.")] int serviceId)
-        {
-            var service = await _govServiceService.GetServiceDetailsAsync(serviceId);
-            return service?.Options;
-        }
+        //[Description("Get options or alternatives available for the government service.")]
+        //public async Task<List<ServiceOptionDto>?> GetServiceOptions(
+        //    [Description("The ID of the government service.")] int serviceId)
+        //{
+        //    var service = await _govServiceService.GetServiceDetailsAsync(serviceId);
+        //    return service?.Options;
+        //}
 
         // [Description("Get general documents or reference material for the government service.")]
         // public async Task<List<ServiceGeneralDocDto>?> GetGeneralDocuments(
