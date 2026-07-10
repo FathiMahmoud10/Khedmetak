@@ -193,7 +193,28 @@ namespace Khedmetak.DAL.Migrations
                     );
                 END
             ");
+            // لو ChatSessions كان موجود بالفعل من الـ Init من غير الأعمدة الجديدة دي، نضيفهم يدوي
+            migrationBuilder.Sql(@"
+    IF NOT EXISTS (SELECT * FROM sys.columns WHERE Name = N'CategoryId' AND object_id = OBJECT_ID(N'ChatSessions'))
+        ALTER TABLE [ChatSessions] ADD [CategoryId] int NULL;
+");
 
+            migrationBuilder.Sql(@"
+    IF NOT EXISTS (SELECT * FROM sys.columns WHERE Name = N'GovServiceId' AND object_id = OBJECT_ID(N'ChatSessions'))
+        ALTER TABLE [ChatSessions] ADD [GovServiceId] int NULL;
+");
+
+            migrationBuilder.Sql(@"
+    IF NOT EXISTS (SELECT * FROM sys.foreign_keys WHERE name = 'FK_ChatSessions_Categories_CategoryId')
+        ALTER TABLE [ChatSessions] ADD CONSTRAINT [FK_ChatSessions_Categories_CategoryId]
+            FOREIGN KEY ([CategoryId]) REFERENCES [Categories] ([Id]) ON DELETE SET NULL;
+");
+
+            migrationBuilder.Sql(@"
+    IF NOT EXISTS (SELECT * FROM sys.foreign_keys WHERE name = 'FK_ChatSessions_GovServices_GovServiceId')
+        ALTER TABLE [ChatSessions] ADD CONSTRAINT [FK_ChatSessions_GovServices_GovServiceId]
+            FOREIGN KEY ([GovServiceId]) REFERENCES [GovServices] ([Id]) ON DELETE SET NULL;
+");
             migrationBuilder.Sql(@"
                 IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'RequiredDocuments')
                 BEGIN
