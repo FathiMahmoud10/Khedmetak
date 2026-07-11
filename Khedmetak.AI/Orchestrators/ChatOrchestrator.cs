@@ -1,14 +1,13 @@
-using Khedmetak.AI.Agents.Abstraction;
+using Khedmetak.AI.Agents.Abstraction.Chat;
 using Khedmetak.AI.DTOs.ChatSessionDTO;
 using Khedmetak.AI.RAG;
-using Khedmetak.AI.Services.Abstraction;
 using Khedmetak.BLL.DTOS.GovService;
 using Khedmetak.BLL.Services.Abstraction;
 
 using System;
 using System.Threading.Tasks;
 
-namespace Khedmetak.AI.Services.Implementation
+namespace Khedmetak.AI.Orchestrators
 {
 
     public class AIResponseDTO

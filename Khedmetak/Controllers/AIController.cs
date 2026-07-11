@@ -1,6 +1,7 @@
 using Khedmetak.AI.DTOs.ChatMessagesDTO;
 using Khedmetak.AI.DTOs.ChatSessionDTO;
 using Khedmetak.AI.DTOs.UserAIChatDataDto;
+using Khedmetak.AI.Orchestrators;
 using Khedmetak.AI.RAG;
 using Khedmetak.AI.Services.Abstraction;
 using Khedmetak.AI.Services.Implementation;
@@ -138,78 +139,12 @@ namespace Khedmetak.Controllers
             return Ok(ApiResponse<object>.Ok(results, "تم رفع الملفات بنجاح"));
         }
 
-        #region MyRegion
+        
 
-        // ================= Embedding Controller ================
-        //[HttpPost("embedding")]
-        //public async Task<IActionResult> GenerateEmbedding([FromBody]string text)
-        //{
-        //    var vector = await embeddingService.GenerateEmbeddingAsync(text);
+      
+       
 
-        //    return Ok(vector);
-        //}
 
-        //[HttpGet("ServiceChunks/{serviceId}")]
-        //public async Task<ActionResult<List<ServiceChunkDTO>>> GetServiceChunks(int serviceId)
-        //{
-        //    var chunks = await _serviceChunkService.GenerateChunksAsync(serviceId);
-
-        //    if (chunks == null || !chunks.Any())
-        //        return NotFound($"Service with id {serviceId} was not found.");
-
-        //    return Ok(chunks);
-        //}
-
-        //[HttpPost("rag")]
-        //public async Task<IActionResult> Rag([FromBody] UserMessageDTO userMessageDTO)
-        //{
-        //    //          --------- if user not write anything in the message 
-        //    if (userMessageDTO == null || string.IsNullOrWhiteSpace(userMessageDTO.Message))
-        //    {
-        //        return BadRequest(ApiResponse<string>.Fail("Message is required."));
-        //    }
-
-        //    //          ----------- if the sessionGuidId is null 
-
-        //    if (userMessageDTO.SessionGuidId == null)
-        //    {
-        //        return BadRequest(ApiResponse<string>.Fail("Not Available to send message without sessionId"));
-
-        //    }
-
-        //    //      ------------ (1) get all messages of session by session Guid id ----------
-        //    var sessionDTO = await sessionService.GetSessionLast15Messages(userMessageDTO.SessionGuidId);
-
-        //    //              --------- if session is not exist ----> return not found
-
-        //    if (sessionDTO == null)
-        //    {
-        //        return NotFound(ApiResponse<string>.Fail("Invalid SessionId"));
-        //    }
-        //    //              ---------  session exist and message exist 
-        //    //          ----------- (2) then send the message to AI and wait for response
-        //    var context = await ragService.GenerateContextFromQuestionAsync(userMessageDTO.Message);
-        //    var aiResponse = await aiService.AskWithContextAsync(userMessageDTO.Message, context,sessionDTO);
-
-        //    //  ------- (3) save user message and AI response to database
-        //    AddMsgAndReplyTOSessionDTO msgAndReply = new()
-        //    {
-        //        SessionGuidId = userMessageDTO.SessionGuidId,
-        //        UserMessage = userMessageDTO.Message,
-        //        AIResponse = aiResponse
-        //    };
-        //    await messageService.AddUserMessageAndResponseAsync(msgAndReply);
-
-        //    // ----------- (4) send AI response to the session of user
-        //    ChatResponseDTO response = new ChatResponseDTO()
-        //    {
-        //        Message = aiResponse,
-        //        SessionGuidId = userMessageDTO.SessionGuidId
-        //    };
-        //    return Ok(response.Message);
-        //}
-
-        #endregion
 
     }
 }

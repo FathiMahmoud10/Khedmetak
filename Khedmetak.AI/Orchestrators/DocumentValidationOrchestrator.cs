@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Khedmetak.AI.Agents.Abstraction;
+using Khedmetak.AI.Agents.Abstraction.DocumentValidation;
 using Khedmetak.AI.DTOs.DocumentValidationDTO;
 
 namespace Khedmetak.AI.Orchestrators;

@@ -1,6 +1,7 @@
-using Khedmetak.AI.Agents.Abstraction;
-using Khedmetak.AI.Agents.Implementaion;
-using Khedmetak.AI.Agents.Implementation;
+using Khedmetak.AI.Agents.Abstraction.Chat;
+using Khedmetak.AI.Agents.Abstraction.DocumentValidation;
+using Khedmetak.AI.Agents.Implementaion.Chat;
+using Khedmetak.AI.Agents.Implementaion.DocumentValidation;
 using Khedmetak.AI.Configuration;
 using Khedmetak.AI.Orchestrators;
 using Khedmetak.AI.RAG;
@@ -236,25 +237,18 @@ var apiKey = builder.Configuration.GetSection("AI")["ApiKey"];
     builder.Services.AddKeyedSingleton<IChatClient>("DocValidation", (sp, _) =>
     {
         var client = new OpenAIClient(
-            new ApiKeyCredential(builder.Configuration["AIValidation:Llama:ApiKey"]!),
+            new ApiKeyCredential(builder.Configuration["AIValidation:gpt:ApiKey"]!),
             new OpenAIClientOptions
             {
                 Endpoint = new Uri("https://models.github.ai/inference")
             });
 
         return new ChatClientBuilder(
-            client.GetChatClient(builder.Configuration["AIValidation:Llama:DocumentModel"]!)
+            client.GetChatClient(builder.Configuration["AIValidation:gpt:DocumentModel"]!)
                 .AsIChatClient())
             //.UseFunctionInvocation()
             .Build();
     });
-
-
-
-    //builder.Services.AddSingleton<IChatClient>(sp =>
-    //    new ChatClientBuilder(openAIClient.GetChatClient(
-    //        builder.Configuration["AI:Model"]).
-    //        AsIChatClient()).UseFunctionInvocation().Build());
 
 
     //----------- Embedding Client for Jina API -----------
@@ -266,20 +260,6 @@ var apiKey = builder.Configuration.GetSection("AI")["ApiKey"];
                 "Bearer",
                 builder.Configuration["AI:EmbeddingAPIKey"]);
     });
-
-    // ------------- Embedding for image --------------
-    //builder.Services.AddSingleton<IClipImageEmbeddingService>(sp =>
-    //{
-    //    var env = sp.GetRequiredService<IHostEnvironment>();
-
-    //    var modelPath = Path.Combine(
-    //        env.ContentRootPath,
-    //        "AIModels",
-    //        "Clip",
-    //        "image_encode.onnx");
-
-    //    return new ClipImageEmbeddingService(modelPath);
-    //});
 
 #endregion
 

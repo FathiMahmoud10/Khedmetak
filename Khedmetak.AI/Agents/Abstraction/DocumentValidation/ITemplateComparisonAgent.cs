@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Khedmetak.AI.DTOs;
 
-namespace Khedmetak.AI.Agents.Abstraction;
+namespace Khedmetak.AI.Agents.Abstraction.DocumentValidation;
 
 /// <summary>
 /// Validates the uploaded document image against an optional template and a list of image rules.

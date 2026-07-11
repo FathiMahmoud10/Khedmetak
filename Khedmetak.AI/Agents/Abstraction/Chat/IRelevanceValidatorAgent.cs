@@ -3,7 +3,7 @@
 using Shard.DTOS;
 using Khedmetak.AI.RAG;
 
-namespace Khedmetak.AI.Agents.Abstraction
+namespace Khedmetak.AI.Agents.Abstraction.Chat
 {
     public interface IRelevanceValidatorAgent
     {

@@ -6,14 +6,14 @@ using System.Net.Http;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
-using Khedmetak.AI.Agents.Abstraction;
+using Khedmetak.AI.Agents.Abstraction.DocumentValidation;
 using Khedmetak.AI.DTOs;
 using Khedmetak.AI.Shared;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Khedmetak.AI.Agents.Implementation;
+namespace Khedmetak.AI.Agents.Implementaion.DocumentValidation;
 
 public class OCRAgent : IOCRAgent
 {
@@ -172,7 +172,7 @@ Please extract all fields and values from this text.
         if (string.IsNullOrWhiteSpace(input))
             return string.Empty;
 
-        // Convert Arabic-Indic digits to Western digits
+        // Convert Arabic digits to English digits
         var sb = new StringBuilder(input.Length);
         foreach (var c in input)
         {

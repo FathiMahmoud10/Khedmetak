@@ -2,13 +2,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Khedmetak.AI.Agents.Abstraction;
+using Khedmetak.AI.Agents.Abstraction.DocumentValidation;
 using Khedmetak.AI.DTOs;
 using Khedmetak.AI.Shared;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Khedmetak.AI.Agents.Implementation;
+namespace Khedmetak.AI.Agents.Implementaion.DocumentValidation;
 
 /// <summary>
 /// Validates document images by combining template layout comparison,
@@ -77,14 +77,10 @@ The uploaded image must contain ONE complete document.
 
 Reject the document if any of the following is detected:
 - Any edge or corner is outside the image.
-- Any part of the document is cropped, cut off, or missing.
-- The top, bottom, left, or right side is not fully visible.
-- The document extends beyond the camera frame.
-- Only a zoomed-in section of the document is shown.
-- The document is folded, bent, or curled, hiding information.
-- Fingers, hands, shadows, or objects cover any part of the document.
-- Multiple documents appear in the same image.
-- The document occupies too little of the image to inspect reliably.
+- Any part of the document is cropped, missing, folded, or hidden.
+- Hands, fingers, shadows, reflections, or other objects cover any document content.
+- Multiple documents appear in the image.
+- The document is too small to inspect reliably.
 
 The entire document, including all four corners and all edges, must be clearly visible inside the image.
 
@@ -94,15 +90,12 @@ If the complete document is not visible, immediately set "IsValid" to false.
 The image must be clear enough for reliable inspection.
 
 Reject the document if any of the following is detected:
-- Blur or out-of-focus image.
-- Motion blur.
+ Blur or motion blur.
 - Low resolution.
-- Heavy compression artifacts or excessive noise.
-- Too dark or overexposed.
-- Strong glare or reflections.
-- Heavy shadows hiding important areas.
-- Perspective distortion preventing reliable inspection.
-- Rotated, upside-down, or severely tilted image.
+- Excessive compression artifacts or noise.
+- Poor lighting, overexposure, glare, or heavy shadows.
+- Severe perspective distortion.
+- Upside-down or excessively rotated image.
 
 If image quality prevents reliable validation, immediately set "IsValid" to false.
 

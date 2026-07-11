@@ -1,4 +1,4 @@
-using Khedmetak.AI.Agents.Abstraction;
+using Khedmetak.AI.Agents.Abstraction.Chat;
 using Khedmetak.AI.DTOs.ChatSessionDTO;
 using Khedmetak.AI.Services.Abstraction;
 using Microsoft.Extensions.AI;
@@ -8,7 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Khedmetak.AI.Agents.Implementaion
+namespace Khedmetak.AI.Agents.Implementaion.Chat
 {
     public class GeneralChatAgent : IGeneralChatAgent
     {
@@ -59,17 +59,6 @@ Response style:
 """;
             var messages = new List<ChatMessage>();
             messages.Add(new ChatMessage(ChatRole.System, systemPrompt));
-
-            //if (session?.ChatSession_ChatHistory != null)
-            //{
-            //    foreach (var msg in session.ChatSession_ChatHistory.TakeLast(10))
-            //    {
-            //        var role = msg.Role.Equals("user", StringComparison.OrdinalIgnoreCase) 
-            //            ? ChatRole.User 
-            //            : ChatRole.Assistant;
-            //        messages.Add(new ChatMessage(role, msg.Content));
-            //    }
-            //}
 
             messages.Add(new ChatMessage(ChatRole.User, standaloneQuestion));
             var options = new ChatOptions

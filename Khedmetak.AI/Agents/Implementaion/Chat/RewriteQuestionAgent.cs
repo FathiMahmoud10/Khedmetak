@@ -1,4 +1,4 @@
-using Khedmetak.AI.Agents.Abstraction;
+using Khedmetak.AI.Agents.Abstraction.Chat;
 using Khedmetak.AI.Configuration;
 using Khedmetak.AI.DTOs.ChatSessionDTO;
 using Microsoft.Extensions.DependencyInjection;
@@ -11,7 +11,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Khedmetak.AI.Agents.Implementaion
+namespace Khedmetak.AI.Agents.Implementaion.Chat
 {
     public class RewriteQuestionAgent : IRewriteQuestionAgent
     {

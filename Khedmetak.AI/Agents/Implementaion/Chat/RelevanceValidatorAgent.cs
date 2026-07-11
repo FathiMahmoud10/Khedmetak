@@ -1,12 +1,12 @@
-﻿using Khedmetak.AI.Agents.Abstraction;
-//using Khedmetak.AI.DTOs.RagDTOs;
+﻿//using Khedmetak.AI.DTOs.RagDTOs;
 using Shard.DTOS;
 using Khedmetak.AI.RAG;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.DependencyInjection;
 using System.Text.Json;
+using Khedmetak.AI.Agents.Abstraction.Chat;
 
-namespace Khedmetak.AI.Agents.Implementation
+namespace Khedmetak.AI.Agents.Implementaion.Chat
 {
     public class RelevanceValidatorAgent : IRelevanceValidatorAgent
     {

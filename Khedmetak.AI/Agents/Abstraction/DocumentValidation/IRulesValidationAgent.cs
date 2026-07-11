@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Khedmetak.AI.DTOs;
 
-namespace Khedmetak.AI.Agents.Abstraction;
+namespace Khedmetak.AI.Agents.Abstraction.DocumentValidation;
 
 public interface IRulesValidationAgent
 {

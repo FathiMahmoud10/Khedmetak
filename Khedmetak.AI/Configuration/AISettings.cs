@@ -10,7 +10,7 @@ namespace Khedmetak.AI.Configuration
     {
         public string Provider { get; set; } = "GitHubModels";
         public string Model { get; set; } = "openai/gpt-4o";
-        public string DocumentModel { get; set; } = "openai/gpt-4.1";//"meta/Llama-4-Scout-17B-16E-Instruct";
+        public string DocumentModel { get; set; } = "openai/gpt-4.1";
         public string EmbeddingModel { get; set; } = "jina-embeddings-v5-text-small";
         public string ApiKey { get; set; } = string.Empty;
         public int MaxToken { get; set; } = 500;

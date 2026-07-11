@@ -1,4 +1,4 @@
-﻿using Khedmetak.AI.Agents.Abstraction;
+﻿using Khedmetak.AI.Agents.Abstraction.Chat;
 using Khedmetak.AI.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
@@ -11,7 +11,7 @@ using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 
-namespace Khedmetak.AI.Agents.Implementaion
+namespace Khedmetak.AI.Agents.Implementaion.Chat
 {
     public class ServiceIntentResult
     {

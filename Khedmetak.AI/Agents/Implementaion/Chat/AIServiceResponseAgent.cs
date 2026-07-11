@@ -1,4 +1,4 @@
-﻿using Khedmetak.AI.Agents.Abstraction;
+﻿using Khedmetak.AI.Agents.Abstraction.Chat;
 using Khedmetak.AI.DTOs.ChatSessionDTO;
 //using Khedmetak.AI.DTOs.RagDTOs;
 using Khedmetak.AI.Services.Abstraction;
@@ -7,7 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Shard.DTOS;
 
 
-namespace Khedmetak.AI.Agents.Implementaion
+namespace Khedmetak.AI.Agents.Implementaion.Chat
 {
     public class AIServiceResponseAgent : IAIServiceResponseAgent
     {
@@ -84,17 +84,6 @@ namespace Khedmetak.AI.Agents.Implementaion
             var messages = new List<ChatMessage>();
             messages.Add(new ChatMessage(ChatRole.System, systemPrompt));
 
-            //if (session?.ChatSession_ChatHistory != null)
-            //{
-            //    foreach (var msg in session.ChatSession_ChatHistory.TakeLast(10))
-            //    {
-            //        var role = msg.Role.Equals("user", StringComparison.OrdinalIgnoreCase) 
-            //            ? ChatRole.User 
-            //            : ChatRole.Assistant;
-            //        messages.Add(new ChatMessage(role, msg.Content));
-            //    }
-            //}
-
             messages.Add(new ChatMessage(ChatRole.User, standaloneQuestion));
 
             var options = new ChatOptions
@@ -106,8 +95,6 @@ namespace Khedmetak.AI.Agents.Implementaion
                     AIFunctionFactory.Create(_govServiceTools.GetServiceSteps),
                     AIFunctionFactory.Create(_govServiceTools.GetServiceFees),
                     AIFunctionFactory.Create(_govServiceTools.GetServiceEstimatedTime)
-                    //AIFunctionFactory.Create(_govServiceTools.GetServiceOptions, "GetServiceOptions"),
-                    //AIFunctionFactory.Create(_govServiceTools.GetGeneralDocuments, "GetGeneralDocuments")
                 ]
             };
 

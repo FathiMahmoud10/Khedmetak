@@ -1,12 +1,11 @@
 ﻿using Khedmetak.AI.DTOs.ChatSessionDTO;
-using Khedmetak.AI.Services.Implementation;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Khedmetak.AI.Services.Abstraction
+namespace Khedmetak.AI.Orchestrators
 {
     public interface IChatOrchestrator
     {

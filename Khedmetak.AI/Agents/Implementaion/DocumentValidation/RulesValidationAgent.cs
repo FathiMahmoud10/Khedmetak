@@ -3,13 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
-using Khedmetak.AI.Agents.Abstraction;
+using Khedmetak.AI.Agents.Abstraction.DocumentValidation;
 using Khedmetak.AI.DTOs;
 using Khedmetak.AI.Shared;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Khedmetak.AI.Agents.Implementation;
+namespace Khedmetak.AI.Agents.Implementaion.DocumentValidation;
 
 public class RulesValidationAgent : IRulesValidationAgent
 {
