@@ -20,13 +20,11 @@ using Khedmetak.DAL.Entities;
 namespace Khedmetak.Controllers
 {
     [Route("api/[controller]")]
-    //[Authorize]
     [ApiController]
     [AllowAnonymous]
     public class AIController : ControllerBase
     {
         private readonly IChatOrchestrator chatOrchestrator;
-        //private readonly IAIChatService _aIChatService;
         private readonly IChatSessionService sessionService;
         private readonly IChatMessageService messageService;
         private readonly IDocumentService documentService;
@@ -39,24 +37,7 @@ namespace Khedmetak.Controllers
             this.chatOrchestrator = Orchestrator;
             this.documentService = _documentService;
             this.userManager = _userManager;
-            //_aIChatService = aIChatService;
         }
-
-        //                       ============= Just for insure that model is work ===============
-
-        //[HttpPost("chat1")]
-        //public async Task<IActionResult> Chat1([FromBody] string message)
-        //{
-        //    if (message == null || string.IsNullOrWhiteSpace(message))
-        //    {
-        //        return BadRequest("Message is required.");
-        //    }
-
-
-        //    var aiResponse = await _aIChatService.AskAsync(message);
-
-        //    return Ok(aiResponse);
-        //}
 
 
         //           =============== To Send new message from user to AI model and return the Response from AI ===================
@@ -77,6 +58,8 @@ namespace Khedmetak.Controllers
                 return BadRequest("Not Available to send message without sessionId");
 
             }
+
+            // ------------- check if user has paid or not and if he has sent more than 5 messages without payment, return 403 Forbidden ----------------
 
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (userIdClaim != null)
@@ -117,14 +100,10 @@ namespace Khedmetak.Controllers
             };
             await messageService.AddUserMessageAndResponseAsync(msgAndReply);
 
-            // ----------- (4) send AI response to the session of user
-            //ChatResponseDTO response = new ChatResponseDTO()
-            //{
-            //    Message = aiResponse,
-            //    SessionGuidId = userMessageDTO.SessionGuidId
-            //};
             return Ok(aiResponse);
         }
+
+
 
         [HttpPost("upload-documents")]
         public async Task<IActionResult> UploadDocuments(

@@ -55,10 +55,7 @@ namespace Khedmetak.AI.Orchestrators
 
             // 2. Detect service intent
             var intent = await _intentAgent.DetectIntentAsync(standaloneQuestion);
-            Console.WriteLine("================= StandAlone ==========");
-            Console.WriteLine(standaloneQuestion);
-            Console.WriteLine("================= Intent ==========");
-            Console.WriteLine(intent);
+
             // 3. If intent is NOT a service request, call general AI chat agent
             if (!intent.IsServiceRequest)
             {
@@ -87,7 +84,7 @@ namespace Khedmetak.AI.Orchestrators
 
                 };
             }
-            // ✅ NEW: Validate that retrieved service actually matches the question
+            //  --------- Validate that retrieved service actually matches the question
             var isRelevant = await _relevanceValidatorAgent.IsRelevantAsync(standaloneQuestion, serviceInfo);
             if (!isRelevant)
                 return new AIResponseDTO()

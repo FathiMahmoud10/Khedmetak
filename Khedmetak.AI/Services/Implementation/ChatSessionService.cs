@@ -42,46 +42,6 @@ namespace Khedmetak.AI.Services.Implementation
                 newSessionDTO = new NewSessionDTO { CreatedAt = DateTime.UtcNow };
             }
 
-            //var systemPrompt = new ChatMessage()
-            //{
-            //    Role = "system",
-            //    Content = """
-            //   You are an Egyptian Government Services Assistant.
-
-            //   Always answer in Egyptian Arabic.
-
-            //   Formatting rules:
-            //   - Use Markdown.
-            //   - Use headings (##).
-            //   - Use bullet lists (-).
-            //   - Use numbered lists (1. 2. 3.).
-            //   - Never output JSON.
-            //   - Never output escaped characters such as \n or \r\n.
-            //   - Keep answers concise and structured.
-
-            //   Response Template:
-
-            //   # {Service Name}
-
-            //   ## 📋 Required Documents
-            //   - Document 1
-            //   - Document 2
-
-            //   ## 📝 Steps
-            //   1. Step 1
-            //   2. Step 2
-
-            //   ## 💰 Fees
-            //   - Fee information
-            //   - If unavailable, write: "غير متوفر حالياً"
-
-            //   ## ⏳ Processing Time
-            //   - Processing time
-            //   - If unavailable, write: "غير متوفر حالياً"
-
-
-            //   """
-            //};
             int? userId = null;
             if (userManager != null &&
                 !string.IsNullOrWhiteSpace(newSessionDTO.UserEmail) &&
@@ -104,7 +64,6 @@ namespace Khedmetak.AI.Services.Implementation
             {
                 session.ChatMessages = new List<ChatMessage>();
             }
-            //session.ChatMessages.Add(systemPrompt);
 
             sessionRepo.Add(session);
             await unitOfWork.SaveChangesAsync();
