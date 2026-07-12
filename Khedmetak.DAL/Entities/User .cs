@@ -1,4 +1,4 @@
-﻿using Khedmetak.DAL.Entities.Base;
+using Khedmetak.DAL.Entities.Base;
 using Khedmetak.DAL.Entities.Khedmetak.DAL.Entities;
 using Microsoft.AspNetCore.Identity;
 using System;
@@ -16,6 +16,9 @@ namespace Khedmetak.DAL.Entities
         public string Password { get; set; } = string.Empty;
         public string Role { get; set; } = string.Empty;
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
+        public int ChatMessagesCount { get; set; } = 0;
+        public bool HasPaidForChat { get; set; } = false;
 
         #region Relations
         public ICollection<ChatSession> ChatSessions { get; set; } = new List<ChatSession>();

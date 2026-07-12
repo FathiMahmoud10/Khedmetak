@@ -1,4 +1,4 @@
-﻿using Khedmetak.BLL.ApiResponse;
+using Khedmetak.BLL.ApiResponse;
 using Khedmetak.BLL.DTOS.Profile;
 using Khedmetak.DAL.Entities;
 using Microsoft.AspNetCore.Authorization;
@@ -105,6 +105,26 @@ namespace Khedmetak.Controllers
             }
 
             return Ok(ApiResponse<string>.Ok("تم التحديث", "تم حفظ بياناتك بنجاح"));
+        }
+
+        // GET api/Profile/chat-status
+        [HttpGet("chat-status")]
+        public async Task<IActionResult> GetChatStatus()
+        {
+            var userId = GetCurrentUserId();
+            if (userId == null)
+                return Unauthorized(ApiResponse<string>.Fail("غير مصرح لك، يرجى تسجيل الدخول أولاً"));
+
+            var user = await _userManager.Users.FirstOrDefaultAsync(u => u.Id == userId.Value);
+            if (user == null)
+                return NotFound(ApiResponse<string>.Fail("المستخدم غير موجود"));
+
+            return Ok(ApiResponse<object>.Ok(new
+            {
+                messagesUsed = user.ChatMessagesCount,
+                hasPaidForChat = user.HasPaidForChat,
+                maxFreeMessages = 5
+            }));
         }
 
         private int? GetCurrentUserId()

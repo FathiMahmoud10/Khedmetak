@@ -14,6 +14,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Qdrant.Client.Grpc;
 using System.Security.Claims;
+using Microsoft.AspNetCore.Identity;
+using Khedmetak.DAL.Entities;
 
 namespace Khedmetak.Controllers
 {
@@ -28,13 +30,15 @@ namespace Khedmetak.Controllers
         private readonly IChatSessionService sessionService;
         private readonly IChatMessageService messageService;
         private readonly IDocumentService documentService;
+        private readonly UserManager<User> userManager;
 
-        public AIController(IChatOrchestrator Orchestrator, IDocumentService _documentService, IChatSessionService sessionService, IChatMessageService messageService)
+        public AIController(IChatOrchestrator Orchestrator, IDocumentService _documentService, IChatSessionService sessionService, IChatMessageService messageService, UserManager<User> _userManager)
         {
             this.sessionService = sessionService;
             this.messageService = messageService;
             this.chatOrchestrator = Orchestrator;
             this.documentService = _documentService;
+            this.userManager = _userManager;
             //_aIChatService = aIChatService;
         }
 
@@ -72,6 +76,22 @@ namespace Khedmetak.Controllers
             {
                 return BadRequest("Not Available to send message without sessionId");
 
+            }
+
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (userIdClaim != null)
+            {
+                var user = await userManager.FindByIdAsync(userIdClaim);
+                if (user != null)
+                {
+                    if (!user.HasPaidForChat && user.ChatMessagesCount >= 5)
+                    {
+                        return StatusCode(403, new { message = "لقد استنفدت الحد الأقصى للرسائل المجانية (5 رسائل). يرجى الدفع للاستمرار." });
+                    }
+
+                    user.ChatMessagesCount++;
+                    await userManager.UpdateAsync(user);
+                }
             }
 
             //      ------------ (1) get all messages of session by session Guid id ----------

@@ -1,10 +1,12 @@
-﻿using Khedmetak.BLL.DTOS.Fawry;
+using Khedmetak.BLL.DTOS.Fawry;
 using Khedmetak.BLL.Services.Abstraction.Fawry;
 using Khedmetak.DAL.Repo;
 using Khedmetak.DAL.Repositories.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
+using Microsoft.AspNetCore.Identity;
+using Khedmetak.DAL.Entities;
 
 [ApiController]
 [Route("api/[controller]")]
@@ -12,11 +14,13 @@ public class PaymentController : ControllerBase
 {
     private readonly IFawryService _fawry;
     private readonly IPaymentRepository _paymentRepo;
+    private readonly UserManager<User> _userManager;
 
-    public PaymentController(IFawryService fawry, IPaymentRepository paymentRepo)
+    public PaymentController(IFawryService fawry, IPaymentRepository paymentRepo, UserManager<User> userManager)
     {
         _fawry = fawry;
         _paymentRepo = paymentRepo;
+        _userManager = userManager;
     }
 
     // ✅ إنشاء طلب دفع
@@ -58,5 +62,21 @@ public class PaymentController : ControllerBase
     {
         var result = await _fawry.GetPaymentStatusAsync(merchantRefNum);
         return Ok(result);
+    }
+
+    // ✅ دفع المحادثة (Chat Payment)
+    [HttpPost("chat-payment")]
+    public async Task<IActionResult> ChatPayment()
+    {
+        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (userIdClaim == null) return Unauthorized();
+
+        var user = await _userManager.FindByIdAsync(userIdClaim);
+        if (user == null) return NotFound();
+
+        user.HasPaidForChat = true;
+        await _userManager.UpdateAsync(user);
+
+        return Ok(new { success = true, message = "تم تفعيل المحادثة غير المحدودة بنجاح." });
     }
 }

@@ -180,8 +180,8 @@ namespace Khedmetak.API.Controllers
                 CreatedAt = p.CreatedAt,
                 PaidAt = p.PaidAt,
                 UserId = p.UserId,
-                UserEmail = p.User != null ? p.User.Email : string.Empty,
-                UserName = p.User != null ? p.User.Name : string.Empty
+                UserEmail = p.User != null && p.User.Email != null ? p.User.Email : string.Empty,
+                UserName = p.User != null && p.User.Name != null ? p.User.Name : string.Empty
             }).ToList();
 
             return Ok(ApiResponse<List<AdminPaymentDto>>.Ok(result));
